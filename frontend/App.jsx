@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import "./App.css";
 import Advisor from "./Advisor";
@@ -17,28 +17,39 @@ function ScrollToTop() {
 }
 
 function App() {
+  const [loginLang, setLoginLang] = useState("");
   const [showAlert, setShowAlert] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
-  const [sunlight, setSunlight] = useState(false); 
+  const [sunlight, setSunlight] = useState(false);
 
   const [name, setName] = useState(localStorage.getItem("farmerName") || "");
   const [inputName, setInputName] = useState("");
   const [preferredLang, setPreferredLang] = useState(
-    localStorage.getItem("preferredLanguage") || "en"
+    localStorage.getItem("preferredLanguage") || ""
   );
-
-  const videoRef = useRef(null);
 
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (inputName.trim() && preferredLang) {
-      localStorage.setItem("farmerName", inputName);
-      localStorage.setItem("preferredLanguage", preferredLang);
-      setName(inputName);
-      setInputName("");
-      window.location.href = "/";
+
+    if (!inputName.trim()) {
+      alert("Name is required");
+      return;
     }
+
+    if (!loginLang) {
+      alert("Please select a language");
+      return;
+    }
+
+    localStorage.setItem("farmerName", inputName);
+    localStorage.setItem("preferredLanguage", loginLang);
+
+    setName(inputName);
+    setPreferredLang(loginLang);
+
+    setInputName("");
+    window.location.href = "/";
   };
 
   const handleLogout = () => {
@@ -55,6 +66,7 @@ function App() {
       <div className={sunlight ? "app sunlight" : "app"}>
 
         {/* Navbar */}
+        {/* NAVBAR */}
         <nav className="navbar">
           <div className="nav-left">
             <FaLeaf className="icon" />
@@ -82,16 +94,15 @@ function App() {
           </ul>
 
           <div className="nav-right">
-            {}
             <button
               onClick={() => setSunlight(!sunlight)}
               className="sunlight-toggle"
-              aria-label="Toggle High Contrast Sunlight Mode"
             >
               {sunlight ? "👁️ Normal View" : "☀️ Sunlight Mode"}
             </button>
 
             {/* Language Dropdown */}
+            {/* LANGUAGE SELECT */}
             <select
               className="lang-select"
               value={preferredLang}
@@ -101,6 +112,7 @@ function App() {
                 localStorage.setItem("preferredLanguage", lang);
               }}
             >
+              <option value="">Select Language</option>
               <option value="en">🌍 English</option>
               <option value="hi">🇮🇳 हिंदी</option>
               <option value="mr">🇮🇳 मराठी</option>
@@ -114,6 +126,7 @@ function App() {
               <option value="or">🇮🇳 ଓଡ଼ିଆ</option>
             </select>
 
+            {/* USER */}
             <div className="nav-user">
               {name ? (
                 <>
@@ -135,6 +148,7 @@ function App() {
           </button>
         </nav>
 
+        {/* ALERT */}
         {showAlert && (
           <div className="alert-bar">
             🌧️ Weather Alert: Heavy rainfall expected in parts of Maharashtra this evening.
@@ -144,6 +158,7 @@ function App() {
           </div>
         )}
 
+        {/* ROUTES */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/advisor" element={<Advisor />} />
@@ -155,29 +170,27 @@ function App() {
               <div className="login-page">
                 <div className="login-card">
                   <h2>👨‍🌾 Farmer Login</h2>
-                  <p>Welcome! Please provide your details to continue.</p>
+
                   <form onSubmit={handleLogin}>
                     <input
                       type="text"
                       placeholder="Enter your name"
                       value={inputName}
                       onChange={(e) => setInputName(e.target.value)}
-                      required
                     />
+
                     <select
-                      value={preferredLang}
-                      onChange={(e) => setPreferredLang(e.target.value)}
-                      required
+                      value={loginLang}
+                      onChange={(e) => setLoginLang(e.target.value)}
                     >
+                      <option value="">Select Language</option>
                       <option value="en">English</option>
                       <option value="hi">Hindi</option>
                       <option value="mr">Marathi</option>
                     </select>
+
                     <button type="submit">Login</button>
                   </form>
-                  <p className="login-note">
-                    Your preferences will be saved for future visits.
-                  </p>
                 </div>
               </div>
             }
