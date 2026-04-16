@@ -78,7 +78,7 @@ function SoilChatbot({ onClose }) {
         });
       }
 
-      const API_KEY = "AIzaSyAIln8dU_r7WADwQH4HCI57t6AGH7M_psA";
+      const API_KEY = import.meta.env.VITE_API_KEY;
 
       if (!API_KEY) {
         setIsLoading(false);
