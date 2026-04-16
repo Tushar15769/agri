@@ -257,3 +257,4 @@ function SoilChatbot({ onClose }) {
 }
 
 export default SoilChatbot;
+

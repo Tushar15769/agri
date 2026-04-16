@@ -18,7 +18,6 @@ function ScrollToTop() {
 
 function App() {
   const [showAlert, setShowAlert] = useState(true);
-  const [isMuted, setIsMuted] = useState(true);
   const [isOpen, setIsOpen] = useState(false);
   const [sunlight, setSunlight] = useState(false); 
 
@@ -54,7 +53,6 @@ function App() {
     <Router>
       <ScrollToTop />
       <div className={sunlight ? "app sunlight" : "app"}>
-        
 
         {/* Navbar */}
         <nav className="navbar">
@@ -137,7 +135,6 @@ function App() {
           </button>
         </nav>
 
-        {/* Alert */}
         {showAlert && (
           <div className="alert-bar">
             🌧️ Weather Alert: Heavy rainfall expected in parts of Maharashtra this evening.
@@ -147,7 +144,6 @@ function App() {
           </div>
         )}
 
-        {/* Routes */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/advisor" element={<Advisor />} />

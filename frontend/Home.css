@@ -48,7 +48,6 @@
   overflow-x: hidden;
 }
 
-/* Hero Section */
 .hero-section {
   min-height: 100vh;
   display: flex;
@@ -212,7 +211,6 @@
   color: var(--gray-500);
 }
 
-/* Hero Visual */
 .hero-visual {
   flex: 1;
   position: relative;
@@ -282,7 +280,6 @@
   color: var(--dark);
 }
 
-/* Features Section */
 .features-section {
   padding: 100px 5%;
   background: var(--white);
@@ -354,7 +351,6 @@
   line-height: 1.6;
 }
 
-/* How It Works */
 .how-section {
   padding: 100px 5%;
   background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
@@ -417,7 +413,6 @@
   }
 }
 
-/* Testimonials */
 .testimonials-section {
   padding: 100px 5%;
   background: var(--white);
@@ -486,7 +481,6 @@
   color: var(--gray-500);
 }
 
-/* CTA Section */
 .cta-section {
   padding: 100px 5%;
   background: var(--gradient);
@@ -516,7 +510,6 @@
   color: var(--dark);
 }
 
-/* Footer */
 .home-footer {
   padding: 60px 5%;
   background: var(--dark);
@@ -564,19 +557,37 @@
   margin-top: 20px;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .hero-section {
     padding: 100px 5% 60px;
     text-align: center;
   }
 
+  .hero-title {
+    font-size: 32px;
+  }
+
+  .hero-subtitle {
+    font-size: 15px;
+  }
+
   .hero-buttons {
     justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .btn-primary, .btn-secondary {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
   }
 
   .hero-stats {
     justify-content: center;
+    flex-wrap: wrap;
+    gap: 20px;
   }
 
   .section-header h2 {
