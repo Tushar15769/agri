@@ -4,14 +4,17 @@ import "./App.css";
 import Advisor from "./Advisor";
 import How from "./How";
 import Home from "./Home";
-import {
-  FaHome,
-  FaComments,
-  FaInfoCircle,
-  FaLeaf,
-  FaBars,
-  FaTimes,
-} from "react-icons/fa";
+import { FaHome, FaComments, FaInfoCircle, FaLeaf, FaBars, FaTimes } from "react-icons/fa";
+import { useLocation } from "react-router-dom";
+
+// 🔹 ScrollToTop component to fix navigation positioning
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
 function App() {
   const [showAlert, setShowAlert] = useState(true);
@@ -49,7 +52,7 @@ function App() {
 
   return (
     <Router>
-      {}
+      <ScrollToTop />
       <div className={sunlight ? "app sunlight" : "app"}>
         
 

@@ -93,7 +93,7 @@ export default function Advisor() {
         </p>
         <button
           className="get-started shine"
-          onClick={() => setShowComingSoon(true)}
+          onClick={() => setShowSoilChatbot(true)}
         >
           🚀 Get Started
         </button>
@@ -183,7 +183,11 @@ export default function Advisor() {
           </div>
 
           {/* Crop Disease Detection */}
-          <div className="card reveal" onClick={() => setShowComingSoon(true)}>
+          <div
+            className="card reveal"
+            style={{ cursor: "pointer" }}
+            onClick={() => setShowSoilChatbot(true)}
+          >
             <div className="icon">🌿</div>
             <h3>Crop Disease Detection</h3>
             <p>Upload plant images to detect diseases and get remedies.</p>
@@ -230,7 +234,7 @@ export default function Advisor() {
       {/* Soil Chatbot popup */}
       {showSoilChatbot && (
         <div className="weather-overlay">
-          <div className="weather-popup">
+          <div className="chatbot-popup">
             <SoilChatbot onClose={() => setShowSoilChatbot(false)} />
           </div>
         </div>
@@ -366,7 +370,7 @@ export default function Advisor() {
                     <option value="Seed Drilling">Seed Drilling</option>
                   </select>
                 </div>
-<div className="form-group">
+                <div className="form-group">
                   <label>Irrigation Type</label>
                   <select
                     value={yieldForm.IrriType}
