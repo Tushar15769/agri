@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Link, NavLink, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { doc, onSnapshot } from "firebase/firestore";
 import { 
   FaHome, 
   FaComments, 
@@ -27,7 +27,7 @@ import { auth, db } from "./lib/firebase";
 
 import "./App.css";
 
-/* ---------------- LANGUAGE ---------------- */
+/* ---------------- LANGUAGE options ---------------- */
 
 const LANGUAGE_OPTIONS = [
   { value: "en", label: "🌍 English", englishName: "english" },
@@ -67,7 +67,7 @@ const syncLanguage = (lang, setLang) => {
   applyGoogleTranslate(lang);
 };
 
-/* ---------------- APP ---------------- */
+/* ---------------- APP MAIN ---------------- */
 
 function App() {
   const [preferredLang, setPreferredLang] = useState(getInitialLanguage);
@@ -82,13 +82,13 @@ function App() {
 
   useNotifications();
 
-  /* ---------------- THEME ---------------- */
+  /* ---------------- THEME SYSTEM ---------------- */
   useEffect(() => {
     document.documentElement.classList.toggle("theme-dark", theme === "dark");
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  /* ---------------- LANGUAGE AUTO APPLY ---------------- */
+  /* ---------------- LANGUAGE AUTO-TRANS ---------------- */
   useEffect(() => {
     if (applyGoogleTranslate(preferredLang)) return;
     const id = setInterval(() => {
@@ -97,7 +97,7 @@ function App() {
     return () => clearInterval(id);
   }, [preferredLang]);
 
-  /* ---------------- AUTH SESSION ---------------- */
+  /* ---------------- AUTH & FIRESTORE SYNC ---------------- */
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -113,7 +113,7 @@ function App() {
           }
           setLoading(false);
         }, (error) => {
-          console.error("Firestore listener error:", error);
+          console.error("Firestore sync error:", error);
           setLoading(false);
         });
         return () => unsubscribeDoc();
@@ -131,7 +131,7 @@ function App() {
       await signOut(auth);
       window.location.href = "/";
     } catch (error) {
-      console.error("Error signing out: ", error);
+      console.error("Sign out error:", error);
     }
   };
 
@@ -141,7 +141,7 @@ function App() {
 
   return (
     <div className={`app ${theme === "dark" ? "theme-dark" : ""}`}>
-      {/* NAVBAR */}
+      {/* PROFESSIONAL NAVBAR */}
       <nav className="navbar">
         <div className="nav-left">
           <FaLeaf className="icon" />
@@ -157,7 +157,7 @@ function App() {
         </ul>
 
         <div className="nav-right">
-          <button onClick={handleThemeToggle} className="theme-toggle">
+          <button onClick={handleThemeToggle} className="theme-toggle" aria-label="Toggle Theme">
             {theme === "dark" ? "☀️" : "🌙"}
           </button>
 
@@ -169,11 +169,11 @@ function App() {
 
           <div className="nav-user" onClick={() => setShowScorecard(!showScorecard)}>
             {loading ? (
-              <span>Loading...</span>
+              <span className="loading-text">Loading...</span>
             ) : user ? (
               <div className="user-profile-trigger">
                 <div className="profile-main">
-                  <span className="profile-name">👋 {userData?.displayName || user.email.split('@')[0]}</span>
+                  <span className="profile-name">👋 {userData?.displayName || user.email?.split('@')[0]}</span>
                   <FaChevronDown className={`chevron ${showScorecard ? 'open' : ''}`} />
                 </div>
 
@@ -208,12 +208,12 @@ function App() {
           </div>
         </div>
 
-        <button className="hamburger" onClick={() => setIsOpen(!isOpen)}>
+        <button className="hamburger" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle Menu">
           {isOpen ? <FaTimes /> : <FaBars />}
         </button>
       </nav>
 
-      {/* AUTH GUARDS */}
+      {/* VERIFICATION GUARD */}
       {!loading && user && !user.emailVerified && !showScorecard && location.pathname !== "/login" && (
         <div className="verification-overlay">
           <div className="verification-card">
@@ -233,11 +233,12 @@ function App() {
         </div>
       )}
 
+      {/* PROFILE COMPLETION GUARD */}
       {!loading && user && user.emailVerified && !profileCompleted && location.pathname !== "/profile-setup" && (
         <Navigate to="/profile-setup" />
       )}
 
-      {/* ROUTES */}
+      {/* APP ROUTES */}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/advisor" element={<Advisor />} />
@@ -248,7 +249,7 @@ function App() {
         <Route path="/profile-setup" element={<ProfileSetup />} />
       </Routes>
 
-      <ToastContainer />
+      <ToastContainer position="bottom-right" />
     </div>
   );
 }
