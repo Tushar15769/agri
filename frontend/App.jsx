@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link } from "react-router-dom";
 
 import Advisor from "./Advisor";
 import Home from "./Home";
@@ -12,9 +12,15 @@ import {
   FaLeaf,
   FaBars,
   FaTimes,
+  FaChevronDown,
 } from "react-icons/fa";
 import How from "./How";
-import { NavLink } from "react-router-dom";
+import Auth from "./Auth";
+import ProfileSetup from "./ProfileSetup";
+import { auth, db } from "./lib/firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { NavLink, Navigate, useLocation } from "react-router-dom";
 
 import "./App.css";
 
@@ -73,8 +79,12 @@ function App() {
     return localStorage.getItem("theme") || "light";
   });
 
-  const [name, setName] = useState(localStorage.getItem("farmerName") || "");
-  const [inputName, setInputName] = useState("");
+  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [profileCompleted, setProfileCompleted] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [showScorecard, setShowScorecard] = useState(false);
+  const location = useLocation();
 
   /* ---------------- THEME ---------------- */
   useEffect(() => {
@@ -96,25 +106,46 @@ function App() {
     return () => clearInterval(id);
   }, [preferredLang]);
 
-  /* ---------------- LOGIN ---------------- */
-  const handleLogin = (e) => {
-    e.preventDefault();
+  /* ---------------- AUTH SESSION ---------------- */
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      
+      if (currentUser) {
+        // Real-time listener for user data
+        const unsubscribeDoc = onSnapshot(doc(db, "users", currentUser.uid), (userDoc) => {
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            setUserData(data);
+            setProfileCompleted(data.profileCompleted === true);
+          } else {
+            setUserData(null);
+            setProfileCompleted(false);
+          }
+          setLoading(false);
+        }, (error) => {
+          console.error("Firestore listener error:", error);
+          setLoading(false);
+        });
+        
+        return () => unsubscribeDoc();
+      } else {
+        setUserData(null);
+        setProfileCompleted(true);
+        setLoading(false);
+      }
+    });
+    
+    return () => unsubscribeAuth();
+  }, []);
 
-    if (!inputName.trim()) {
-      alert("Name is required");
-      return;
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Error signing out: ", error);
     }
-
-    localStorage.setItem("farmerName", inputName);
-    setName(inputName);
-    setInputName("");
-    window.location.href = "/";
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem("farmerName");
-    setName("");
-    window.location.href = "/";
   };
 
   const handleThemeToggle = () => {
@@ -124,8 +155,7 @@ function App() {
   /* ---------------- UI ---------------- */
 
   return (
-    <Router>
-      <div className={`app ${theme === "dark" ? "theme-dark" : ""}`}>
+    <div className={`app ${theme === "dark" ? "theme-dark" : ""}`}>
 
         {/* NAVBAR */}
         <nav className="navbar">
@@ -178,14 +208,47 @@ function App() {
               ))}
             </select>
 
-            <div className="nav-user">
-              {name ? (
-                <>
-                  👋 {name}
-                  <button onClick={handleLogout}>Change User</button>
-                </>
+            <div className="nav-user" onClick={() => setShowScorecard(!showScorecard)}>
+              {loading ? (
+                <span>Loading...</span>
+              ) : user ? (
+                <div className="user-profile-trigger">
+                  <div className="profile-main">
+                    <span className="profile-name">👋 {userData?.displayName || user.email.split('@')[0]}</span>
+                    <FaChevronDown className={`chevron ${showScorecard ? 'open' : ''}`} />
+                  </div>
+
+                  {showScorecard && userData && (
+                    <div className="profile-scorecard" onClick={(e) => e.stopPropagation()}>
+                      <div className="scorecard-header">
+                        <div className="scorecard-avatar">
+                          {userData.displayName?.[0] || 'F'}
+                        </div>
+                        <h3>{userData.displayName}</h3>
+                        <p>{userData.email}</p>
+                      </div>
+                      <div className="scorecard-body">
+                        <div className="score-item">
+                          <label>🌾 Primary Crop</label>
+                          <span>{userData.cropType}</span>
+                        </div>
+                        <div className="score-item">
+                          <label>🌐 Language</label>
+                          <span>{LANGUAGE_OPTIONS.find(l => l.value === userData.language)?.label || userData.language}</span>
+                        </div>
+                        <div className="score-item">
+                          <label>📍 Location</label>
+                          <span>{userData.address || "Fetching..."}</span>
+                        </div>
+                      </div>
+                      <div className="scorecard-footer">
+                        <button onClick={handleLogout} className="btn-logout-alt">Sign Out</button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ) : (
-                <Link to="/login">Get Started</Link>
+                <Link to="/login" className="btn-get-started">Get Started</Link>
               )}
             </div>
           </div>
@@ -198,36 +261,41 @@ function App() {
           </button>
         </nav>
 
+        {/* AUTH GUARDS */}
+        {!loading && user && !user.emailVerified && !showScorecard && location.pathname !== "/login" && (
+          <div className="verification-overlay">
+            <div className="verification-card">
+              <div className="verify-icon">✉️</div>
+              <h2>Verify Your Email</h2>
+              <p>We've sent a link to <b>{user.email}</b>.<br/> Please verify your email to unlock all features.</p>
+              <button 
+                onClick={() => {
+                  auth.currentUser.reload().then(() => {
+                    window.location.reload();
+                  });
+                }} 
+                className="btn-refresh"
+              >
+                I've Verified My Email
+              </button>
+              <button onClick={handleLogout} className="btn-logout-simple">Sign Out</button>
+            </div>
+          </div>
+        )}
+
+        {!loading && user && user.emailVerified && !profileCompleted && location.pathname !== "/profile-setup" && (
+          <Navigate to="/profile-setup" />
+        )}
+
         {/* ROUTES */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/advisor" element={<Advisor />} />
           <Route path="/how-it-works" element={<How />} />
-
-          <Route
-            path="/login"
-            element={
-              <div className="login-page">
-                <div className="login-card">
-                  <h2>👨‍🌾 Farmer Login</h2>
-
-                  <form onSubmit={handleLogin}>
-                    <input
-                      type="text"
-                      placeholder="Enter your name"
-                      value={inputName}
-                      onChange={(e) => setInputName(e.target.value)}
-                    />
-
-                    <button type="submit">Login</button>
-                  </form>
-                </div>
-              </div>
-            }
-          />
+          <Route path="/login" element={<Auth />} />
+          <Route path="/profile-setup" element={<ProfileSetup />} />
         </Routes>
       </div>
-    </Router>
   );
 }
 
