@@ -55,8 +55,7 @@ export default function Advisor() {
       if (l < 10) setLanguages((l += 1));
     }, 50);
     return () => clearInterval(interval);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setCarmers, setCrops, setLanguages]);
 
   return (
     <section className="advisor">
