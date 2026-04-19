@@ -139,8 +139,34 @@ function App() {
     setTheme((t) => (t === "dark" ? "light" : "dark"));
   };
 
+  /* ---------------- OFFLINE STATUS ---------------- */
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleNetworkChange = () => setIsOffline(!navigator.onLine);
+
+    window.addEventListener("online", handleNetworkChange);
+    window.addEventListener("offline", handleNetworkChange);
+    
+    // Polling fallback to detect DevTools offline toggling where the event might be suppressed
+    const interval = setInterval(handleNetworkChange, 1000);
+
+    return () => {
+      window.removeEventListener("online", handleNetworkChange);
+      window.removeEventListener("offline", handleNetworkChange);
+      clearInterval(interval);
+    };
+  }, []);
+
   return (
     <div className={`app ${theme === "dark" ? "theme-dark" : ""}`}>
+      {/* OFFLINE INDICATOR */}
+      {isOffline && (
+        <div className="offline-banner">
+          ⚠️ You are currently offline. Running in offline mode using local data.
+        </div>
+      )}
+
       {/* PROFESSIONAL NAVBAR */}
       <nav className="navbar">
         <div className="nav-left">

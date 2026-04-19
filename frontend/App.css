@@ -1033,3 +1033,18 @@ iframe.goog-te-banner-frame.skiptranslate {
   background: #1b5e20;
   outline: 2px solid #66bb6a;
 }
+
+/* Offline Banner */
+.offline-banner {
+  background: #ff9800;
+  color: white;
+  text-align: center;
+  padding: 10px;
+  font-weight: bold;
+  z-index: 10000;
+  position: relative;
+}
+
+.theme-dark .offline-banner {
+  background: #f57c00;
+}
