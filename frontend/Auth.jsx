@@ -7,10 +7,10 @@ import {
   sendEmailVerification,
   signOut
 } from "firebase/auth";
-import { auth, db } from "./lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { FaGoogle, FaEnvelope, FaLock, FaUser, FaArrowRight, FaLeaf } from "react-icons/fa";
+import { auth, db, isFirebaseConfigured } from "./lib/firebase";
 import "./Auth.css";
 
 const Auth = () => {
@@ -22,6 +22,23 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+
+  if (!isFirebaseConfigured()) {
+    return (
+      <div className="auth-container">
+        <div className="auth-card">
+          <div className="auth-logo">
+            <FaLeaf className="leaf-icon" />
+            <h1>Fasal Saathi</h1>
+          </div>
+          <p className="auth-subtitle">Firebase credentials not configured</p>
+          <div className="auth-message">
+            <p>Please configure Firebase credentials in your .env file to enable authentication.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const handleAuth = async (e) => {
     e.preventDefault();

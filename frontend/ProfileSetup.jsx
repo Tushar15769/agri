@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { auth, db } from "./lib/firebase";
+import { auth, db, isFirebaseConfigured } from "./lib/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaGlobe, FaMapMarkerAlt, FaSeedling, FaArrowRight } from "react-icons/fa";
@@ -12,6 +12,7 @@ const LANGUAGE_OPTIONS = [
   { value: "bn", label: "🇮🇳 বাংলা" },
   { value: "ta", label: "🇮🇳 தமிழ்" },
   { value: "te", label: "🇮🇳 తెలుగు" },
+  { value: "te", label: "🇮🇳 তেলুগు" },
   { value: "gu", label: "🇮🇳 ગુજરાતી" },
   { value: "pa", label: "🇮🇳 ਪੰਜਾਬੀ" },
   { value: "kn", label: "🇮🇳 ಕನ್ನಡ" },
@@ -32,21 +33,26 @@ const ProfileSetup = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Request location as soon as page opens
+    if (!isFirebaseConfigured()) {
+      navigate("/auth");
+      return;
+    }
     requestLocation();
     
-    // Check if user already has data
     const checkExistingData = async () => {
-      if (auth.currentUser) {
-        const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
-        if (userDoc.exists() && userDoc.data().profileCompleted) {
-          navigate("/");
+      if (auth?.currentUser) {
+        try {
+          const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+          if (userDoc.exists() && userDoc.data().profileCompleted) {
+            navigate("/");
+          }
+        } catch (err) {
+          console.error(err);
         }
       }
     };
     checkExistingData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [navigate]);
 
   const requestLocation = () => {
     if ("geolocation" in navigator) {
@@ -105,7 +111,7 @@ const ProfileSetup = () => {
     }
     setLoading(true);
     try {
-      const user = auth.currentUser;
+      const user = auth?.currentUser;
       if (user) {
         await updateDoc(doc(db, "users", user.uid), {
           displayName: name,
@@ -115,12 +121,11 @@ const ProfileSetup = () => {
           address: address,
           profileCompleted: true,
           updatedAt: new Date().toISOString()
-        });
+        }, { merge: true });
         navigate("/");
       }
     } catch (err) {
-      console.error(err);
-      setError("Failed to save profile. Try again.");
+      setError(err.message || "Failed to save profile");
     } finally {
       setLoading(false);
     }
@@ -133,6 +138,9 @@ const ProfileSetup = () => {
           <FaSeedling className="setup-logo" />
           <h1>Complete Your Profile</h1>
           <p>Help us personalize your Fasal Saathi experience</p>
+          <div className="setup-logo">🌱</div>
+          <h1>Welcome to Fasal Saathi</h1>
+          <p>Help us serve you better</p>
         </div>
 
         {error && <div className="setup-error">{error}</div>}
@@ -140,6 +148,9 @@ const ProfileSetup = () => {
         <form onSubmit={handleSubmit} className="setup-form">
           <div className="setup-group">
             <label>Farmer Name</label>
+            <label>
+              <FaUser /> Your Name
+            </label>
             <div className="setup-input">
               <FaUser className="setup-icon" />
               <input
@@ -147,6 +158,10 @@ const ProfileSetup = () => {
                 placeholder="Full Name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your full name"
+                className="setup-input"
                 required
               />
             </div>
@@ -156,9 +171,15 @@ const ProfileSetup = () => {
             <label>Preferred Language</label>
             <div className="setup-input">
               <FaGlobe className="setup-icon" />
-              <select value={language} onChange={(e) => setLanguage(e.target.value)}>
-                {LANGUAGE_OPTIONS.map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="setup-input"
+              >
+                {LANGUAGE_OPTIONS.map((lang) => (
+                  <option key={lang.value} value={lang.value}>
+                    {lang.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -168,13 +189,26 @@ const ProfileSetup = () => {
             <label>Primary Crop Type</label>
             <div className="setup-input">
               <FaSeedling className="setup-icon" />
-              <input
-                type="text"
-                placeholder="e.g. Rice, Wheat, Cotton"
+              <select
                 value={cropType}
                 onChange={(e) => setCropType(e.target.value)}
+                className="setup-input"
                 required
-              />
+              >
+                <option value="">Select your primary crop</option>
+                <option value="rice">🌾 Rice</option>
+                <option value="wheat">🌾 Wheat</option>
+                <option value="cotton">🌿 Cotton</option>
+                <option value="sugarcane">🎋 Sugarcane</option>
+                <option value="maize">🌽 Maize</option>
+                <option value="soybean">🫘 Soybean</option>
+                <option value="potato">🥔 Potato</option>
+                <option value="onion">🧅 Onion</option>
+                <option value="tomato">🍅 Tomato</option>
+                <option value="vegetables">🥬 Vegetables</option>
+                <option value="fruits">🍎 Fruits</option>
+                <option value="other">🌱 Other</option>
+              </select>
             </div>
           </div>
 
@@ -193,9 +227,44 @@ const ProfileSetup = () => {
             </div>
           </div>
 
+          <div className="setup-group">
+            <label>Farm Location</label>
+            <div className={`loc-box ${address ? 'success' : locLoading ? 'pending' : ''}`}>
+              {locLoading ? (
+                <>
+                  <span>📍 Getting your location...</span>
+                  <span className="loading-spinner"></span>
+                </>
+              ) : address ? (
+                <>
+                  <span>✅ {address}</span>
+                  <button type="button" onClick={requestLocation} className="loc-btn">
+                    Update
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span>Click to get your location</span>
+                  <button type="button" onClick={requestLocation} className="loc-btn">
+                    Get Location
+                  </button>
+                </>
+              )}
+            </div>
+            <input
+              type="hidden"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
+            <input
+              type="hidden"
+              value={location ? JSON.stringify(location) : ""}
+            />
+          </div>
+
           <button type="submit" className="setup-submit" disabled={loading || !address}>
-            {loading ? "Saving..." : "Start Journey"}
-            <FaArrowRight />
+            {loading ? "Saving..." : "Complete Setup"}
+            {!loading && <FaArrowRight />}
           </button>
         </form>
       </div>

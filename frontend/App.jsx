@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
+import { onAuthStateChanged, signOut } from "firebase/auth";
+import { doc, onSnapshot } from "firebase/firestore";
 import { 
   FaHome, 
   FaComments, 
@@ -21,7 +23,7 @@ import ProfileSetup from "./ProfileSetup";
 import LanguageDropdown from "./LanguageDropdown";
 import useNotifications from "./Notifications";
 
-import { auth, db, onSnapshot, doc, isFirebaseConfigured } from "./lib/firebase";
+import { auth, db, isFirebaseConfigured } from "./lib/firebase";
 
 import "./App.css";
 import "./themes/sunlight.css";
@@ -98,6 +100,44 @@ function App() {
 
   /* ---------------- AUTH & FIRESTORE SYNC ---------------- */
   useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        const unsubscribeDoc = onSnapshot(doc(db, "users", currentUser.uid), (userDoc) => {
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            setUserData(data);
+            setProfileCompleted(data.profileCompleted === true);
+          } else {
+            setUserData(null);
+            setProfileCompleted(false);
+          }
+          setLoading(false);
+        }, (error) => {
+          console.error("Firestore sync error:", error);
+          setLoading(false);
+        });
+        return () => unsubscribeDoc();
+      } else {
+        setUserData(null);
+        setProfileCompleted(true);
+        setLoading(false);
+      }
+    });
+    return () => unsubscribeAuth();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
+  };
+
+  /* ---------------- AUTH STATE LISTENER ---------------- */
+  useEffect(() => {
     if (!isFirebaseConfigured()) {
       setLoading(false);
       return;
@@ -128,17 +168,6 @@ function App() {
     }) : () => {};
     return () => unsubscribeAuth();
   }, []);
-
-  const handleLogout = async () => {
-    if (auth) {
-      try {
-        await auth.signOut();
-        window.location.href = "/";
-      } catch (error) {
-        console.error("Sign out error:", error);
-      }
-    }
-  };
 
   const handleThemeToggle = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -186,6 +215,7 @@ function App() {
           <li><Link to="/crop-guide" onClick={() => setIsOpen(false)}><FaLeaf className="icon" /> Crop Guide</Link></li>
           <li><Link to="/resources" onClick={() => setIsOpen(false)}>Resources</Link></li>
         </ul>
+
         <div className="nav-right">
           <button onClick={handleThemeToggle} className="theme-toggle" aria-label="Toggle Theme">
             {theme === "dark" ? "☀️" : "🌙"}
