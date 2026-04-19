@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import "./Advisor.css";
 import WeatherCard from "./weather/WeatherCard";
 import SoilChatbot from "./SoilChatbot";
+import IrrigationGuidance from "./IrrigationGuidance";
 import {
   Sun,
   Droplets,
@@ -27,6 +28,8 @@ export default function Advisor() {
     setShowSoilChatbot,
     showComingSoon,
     setShowComingSoon,
+    showIrrigation,
+    setShowIrrigation,
   } = useAdvisorStore();
 
   const {
@@ -123,7 +126,7 @@ export default function Advisor() {
               Connect, share tips, and learn from other farmers in your region.
             </p>
           </div>
-          <div className="card reveal" onClick={() => setShowComingSoon(true)}>
+          <div className="card reveal" onClick={() => setShowIrrigation(true)}>
             <div className="icon">
               <Droplets size={32} strokeWidth={2} />
             </div>
@@ -202,6 +205,13 @@ export default function Advisor() {
           </div>
         </div>
       )}
+      
+      {showIrrigation && (
+        <div className="weather-overlay" style={{ alignItems: 'center', justifyContent: 'center' }}>
+          <IrrigationGuidance onClose={() => setShowIrrigation(false)} />
+        </div>
+      )}
+
       {showYieldPopup && (
         <div className="weather-overlay">
           <div className="yield-popup">
