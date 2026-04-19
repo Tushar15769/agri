@@ -121,6 +121,7 @@ export default function Home() {
 
     rafId = requestAnimationFrame(animateStats);
     return () => cancelAnimationFrame(rafId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const testimonials = [
