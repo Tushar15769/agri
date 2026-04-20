@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { auth, db, isFirebaseConfigured } from "./lib/firebase";
-import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaGlobe, FaMapMarkerAlt, FaSeedling, FaArrowRight } from "react-icons/fa";
 import "./ProfileSetup.css";
@@ -12,7 +12,6 @@ const LANGUAGE_OPTIONS = [
   { value: "bn", label: "🇮🇳 বাংলা" },
   { value: "ta", label: "🇮🇳 தமிழ்" },
   { value: "te", label: "🇮🇳 తెలుగు" },
-  { value: "te", label: "🇮🇳 তেলুগు" },
   { value: "gu", label: "🇮🇳 ગુજરાતી" },
   { value: "pa", label: "🇮🇳 ਪੰਜਾਬੀ" },
   { value: "kn", label: "🇮🇳 ಕನ್ನಡ" },
@@ -34,35 +33,39 @@ const ProfileSetup = () => {
 
   useEffect(() => {
     if (!isFirebaseConfigured()) {
-      navigate("/auth");
+      navigate("/login");
       return;
     }
-    requestLocation();
-    
+
     const checkExistingData = async () => {
-      if (auth?.currentUser) {
+      const user = auth.currentUser;
+      if (user) {
         try {
-          const userDoc = await getDoc(doc(db, "users", auth.currentUser.uid));
+          const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists() && userDoc.data().profileCompleted) {
             navigate("/");
           }
         } catch (err) {
-          console.error(err);
+          console.error("Error checking profile status:", err);
         }
+      } else {
+        navigate("/login");
       }
     };
+
     checkExistingData();
+    requestLocation();
   }, [navigate]);
 
   const requestLocation = () => {
     if ("geolocation" in navigator) {
       setLocLoading(true);
+      setError("");
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
           setLocation({ lat: latitude, lng: longitude });
 
-          // Reverse Geocoding via BigDataCloud (More reliable for client-side)
           try {
             const response = await fetch(
               `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`
@@ -105,15 +108,18 @@ const ProfileSetup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+
     if (!name || !cropType) {
       setError("Please fill in all details.");
       return;
     }
+
     setLoading(true);
     try {
-      const user = auth?.currentUser;
+      const user = auth.currentUser;
       if (user) {
-        await updateDoc(doc(db, "users", user.uid), {
+        await setDoc(doc(db, "users", user.uid), {
           displayName: name,
           language: language,
           cropType: cropType,
@@ -122,10 +128,14 @@ const ProfileSetup = () => {
           profileCompleted: true,
           updatedAt: new Date().toISOString()
         }, { merge: true });
+        
         navigate("/");
+      } else {
+        navigate("/login");
       }
     } catch (err) {
-      setError(err.message || "Failed to save profile");
+      console.error("Save profile error:", err);
+      setError("Failed to save profile. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -135,46 +145,35 @@ const ProfileSetup = () => {
     <div className="setup-container">
       <div className="setup-card">
         <div className="setup-header">
-          <FaSeedling className="setup-logo" />
+          <FaSeedling className="setup-logo-icon" />
           <h1>Complete Your Profile</h1>
           <p>Help us personalize your Fasal Saathi experience</p>
-          <div className="setup-logo">🌱</div>
-          <h1>Welcome to Fasal Saathi</h1>
-          <p>Help us serve you better</p>
         </div>
 
         {error && <div className="setup-error">{error}</div>}
 
         <form onSubmit={handleSubmit} className="setup-form">
           <div className="setup-group">
-            <label>Farmer Name</label>
-            <label>
-              <FaUser /> Your Name
-            </label>
-            <div className="setup-input">
+            <label><FaUser /> Farmer Name</label>
+            <div className="setup-input-wrapper">
               <FaUser className="setup-icon" />
               <input
                 type="text"
-                placeholder="Full Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
                 placeholder="Enter your full name"
-                className="setup-input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 required
               />
             </div>
           </div>
 
           <div className="setup-group">
-            <label>Preferred Language</label>
-            <div className="setup-input">
+            <label><FaGlobe /> Preferred Language</label>
+            <div className="setup-input-wrapper">
               <FaGlobe className="setup-icon" />
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="setup-input"
               >
                 {LANGUAGE_OPTIONS.map((lang) => (
                   <option key={lang.value} value={lang.value}>
@@ -186,13 +185,12 @@ const ProfileSetup = () => {
           </div>
 
           <div className="setup-group">
-            <label>Primary Crop Type</label>
-            <div className="setup-input">
+            <label><FaSeedling /> Primary Crop Type</label>
+            <div className="setup-input-wrapper">
               <FaSeedling className="setup-icon" />
               <select
                 value={cropType}
                 onChange={(e) => setCropType(e.target.value)}
-                className="setup-input"
                 required
               >
                 <option value="">Select your primary crop</option>
@@ -213,57 +211,33 @@ const ProfileSetup = () => {
           </div>
 
           <div className="setup-group">
-            <label>Farm Location</label>
-            <div className={`loc-box ${address ? 'success' : 'pending'}`}>
-              <FaMapMarkerAlt />
-              <span>
-                {locLoading ? "Detecting location..." : 
-                 address ? `Location: ${address}` : 
-                 "Location not found"}
-              </span>
-              {!address && !locLoading && (
-                <button type="button" onClick={requestLocation}>Retry</button>
-              )}
-            </div>
-          </div>
-
-          <div className="setup-group">
-            <label>Farm Location</label>
+            <label><FaMapMarkerAlt /> Farm Location</label>
             <div className={`loc-box ${address ? 'success' : locLoading ? 'pending' : ''}`}>
               {locLoading ? (
                 <>
-                  <span>📍 Getting your location...</span>
-                  <span className="loading-spinner"></span>
+                  <span className="loc-status">📍 Getting your location...</span>
+                  <div className="small-spinner"></div>
                 </>
               ) : address ? (
                 <>
-                  <span>✅ {address}</span>
+                  <span className="loc-status">✅ {address}</span>
                   <button type="button" onClick={requestLocation} className="loc-btn">
                     Update
                   </button>
                 </>
               ) : (
                 <>
-                  <span>Click to get your location</span>
+                  <span className="loc-status">Click to get your location</span>
                   <button type="button" onClick={requestLocation} className="loc-btn">
                     Get Location
                   </button>
                 </>
               )}
             </div>
-            <input
-              type="hidden"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
-            <input
-              type="hidden"
-              value={location ? JSON.stringify(location) : ""}
-            />
           </div>
 
-          <button type="submit" className="setup-submit" disabled={loading || !address}>
-            {loading ? "Saving..." : "Complete Setup"}
+          <button type="submit" className="setup-submit" disabled={loading}>
+            {loading ? "Saving..." : "Start Journey"}
             {!loading && <FaArrowRight />}
           </button>
         </form>

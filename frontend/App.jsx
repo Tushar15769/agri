@@ -86,7 +86,6 @@ const syncLanguage = (lang, setLang) => {
 
 function App() {
   const [preferredLang, setPreferredLang] = useState(getInitialLanguage);
-
   const [isOpen, setIsOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "light");
   const [user, setUser] = useState(null);
@@ -106,28 +105,15 @@ function App() {
 
   /* ---------------- LANGUAGE AUTO-TRANS ---------------- */
   useEffect(() => {
-    if (applyGoogleTranslate(preferredLang)) return;
-    const id = setInterval(() => {
-      if (applyGoogleTranslate(preferredLang)) clearInterval(id);
-    }, 300);
-    return () => clearInterval(id);
-  }, [preferredLang]);
-
-  useEffect(() => {
     setGoogleTranslateCookie(preferredLang);
-
     if (applyGoogleTranslate(preferredLang)) return;
-
     const id = setInterval(() => {
       if (applyGoogleTranslate(preferredLang)) clearInterval(id);
-    }, 300);
-
+    }, 500);
     return () => clearInterval(id);
   }, [preferredLang]);
 
   /* ---------------- TRANSLATION TOOLBAR DETECTION ---------------- */
-  // Detects when Chrome's translation toolbar is present and adjusts layout accordingly
-  // This prevents UI layout breaks when browser translation is enabled
   useEffect(() => {
     const cleanupGoogleTranslate = () => {
       const selectors = [
@@ -154,89 +140,31 @@ function App() {
 
     const detectTranslationToolbar = () => {
       cleanupGoogleTranslate();
-      // Multiple detection methods for translation toolbar
       const hasTranslationToolbar =
-        // Check for Google Translate banner/frame
         document.querySelector('.goog-te-banner-frame') ||
         document.querySelector('.goog-te-gadget') ||
-        document.querySelector('[data-ogpc]') || // Google Translate attribute
-        // Check if body has translation-related transforms
+        document.querySelector('[data-ogpc]') ||
         (document.body.style.transform && document.body.style.transform.includes('translateY')) ||
-        (document.body.style.marginTop && parseInt(document.body.style.marginTop) > 0) ||
-        // Check for translation meta tags
-        document.querySelector('meta[name="google-translate-customization"]') ||
-        // Check if the page height has changed significantly (toolbar pushes content down)
-        (window.innerHeight < window.screen.height * 0.9 && document.documentElement.scrollHeight > window.innerHeight);
+        (document.body.style.marginTop && parseInt(document.body.style.marginTop) > 0);
 
       document.documentElement.classList.toggle('has-translation-toolbar', hasTranslationToolbar);
     };
 
-    // Initial check
     detectTranslationToolbar();
-
-    // Run cleanup immediately then check periodically
-    cleanupGoogleTranslate();
     const interval = setInterval(() => {
       cleanupGoogleTranslate();
       detectTranslationToolbar();
-    }, 500);
+    }, 1000);
 
-    // Check on various events that might indicate translation
-    const handleVisibilityChange = () => setTimeout(detectTranslationToolbar, 500);
-    const handleFocus = () => setTimeout(detectTranslationToolbar, 200);
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-    window.addEventListener('resize', detectTranslationToolbar);
-
-    // Also run cleanup on any user interaction that might trigger translate
-    const handleClick = () => cleanupGoogleTranslate();
-    const handleScroll = () => cleanupGoogleTranslate();
-    document.addEventListener('click', handleClick, true);
-    document.addEventListener('scroll', handleScroll, true);
-
-    // Check for DOM changes that might indicate translation
-    const observer = new MutationObserver((mutations) => {
-      let shouldCheck = false;
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-          Array.from(mutation.addedNodes).forEach((node) => {
-            if (node.nodeType === Node.ELEMENT_NODE &&
-              (node.classList?.contains('goog-te') ||
-                node.id?.includes('google_translate') ||
-                node.tagName === 'IFRAME')) {
-              shouldCheck = true;
-            }
-          });
-        }
-        if (mutation.type === 'attributes' &&
-          (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
-          shouldCheck = true;
-        }
-      });
-      if (shouldCheck) detectTranslationToolbar();
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['style', 'class', 'id']
-    });
-
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      document.removeEventListener('focus', handleFocus);
-      document.removeEventListener('resize', detectTranslationToolbar);
-      document.removeEventListener('click', handleClick, true);
-      document.removeEventListener('scroll', handleScroll, true);
-      observer.disconnect();
-    };
+    return () => clearInterval(interval);
   }, []);
 
   /* ---------------- AUTH & FIRESTORE SYNC ---------------- */
   useEffect(() => {
+    if (!isFirebaseConfigured()) {
+      setLoading(false);
+      return;
+    }
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
@@ -265,6 +193,10 @@ function App() {
   }, []);
 
   const handleLogout = async () => {
+    if (!isFirebaseConfigured() || !auth) {
+      window.location.href = "/";
+      return;
+    }
     try {
       await signOut(auth);
       window.location.href = "/";
@@ -272,39 +204,6 @@ function App() {
       console.error("Sign out error:", error);
     }
   };
-
-  /* ---------------- AUTH STATE LISTENER ---------------- */
-  useEffect(() => {
-    if (!isFirebaseConfigured()) {
-      setLoading(false);
-      return;
-    }
-    const unsubscribeAuth = auth?.onAuthStateChanged ? auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        const unsubscribeDoc = db && onSnapshot(doc(db, "users", currentUser.uid), (userDoc) => {
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            setUserData(data);
-            setProfileCompleted(data.profileCompleted === true);
-          } else {
-            setUserData(null);
-            setProfileCompleted(false);
-          }
-          setLoading(false);
-        }, (error) => {
-          console.error("Firestore sync error:", error);
-          setLoading(false);
-        });
-        return () => unsubscribeDoc?.();
-      } else {
-        setUserData(null);
-        setProfileCompleted(true);
-        setLoading(false);
-      }
-    }) : () => { };
-    return () => unsubscribeAuth();
-  }, []);
 
   const handleThemeToggle = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -315,17 +214,11 @@ function App() {
 
   useEffect(() => {
     const handleNetworkChange = () => setIsOffline(!navigator.onLine);
-
     window.addEventListener("online", handleNetworkChange);
     window.addEventListener("offline", handleNetworkChange);
-
-    // Polling fallback to detect DevTools offline toggling where the event might be suppressed
-    const interval = setInterval(handleNetworkChange, 1000);
-
     return () => {
       window.removeEventListener("online", handleNetworkChange);
       window.removeEventListener("offline", handleNetworkChange);
-      clearInterval(interval);
     };
   }, []);
 
@@ -417,10 +310,10 @@ function App() {
             <div className="verify-icon">✉️</div>
             <h2>Verify Your Email</h2>
             <p>We've sent a link to <b>{user.email}</b>.<br /> Please verify your email to unlock all features.</p>
-            <button
+            <button 
               onClick={() => {
                 auth.currentUser.reload().then(() => window.location.reload());
-              }}
+              }} 
               className="btn-refresh"
             >
               I've Verified My Email
