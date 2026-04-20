@@ -23,6 +23,7 @@ import ProfileSetup from "./ProfileSetup";
 import LanguageDropdown from "./LanguageDropdown";
 import useNotifications from "./Notifications";
 import Schemes from "./GovernmentSchemes";
+import Calendar from "./FarmingCalendar";
 
 import { auth, db, isFirebaseConfigured } from "./lib/firebase";
 
@@ -38,12 +39,12 @@ const LANGUAGE_OPTIONS = [
   { value: "bn", label: "🇮🇳 বাংলা", englishName: "bengali" },
   { value: "ta", label: "🇮🇳 தமிழ்", englishName: "tamil" },
   { value: "te", label: "🇮🇳 తెలుగు", englishName: "telugu" },
-  { value: "gu", label: "🇮🇳 ગુજરાતી", englishName: "gujarati" },
+  { value: "gu", label: "🇮🇳 ગુજરાତି", englishName: "gujarati" },
   { value: "pa", label: "🇮🇳 ਪੰਜਾਬੀ", englishName: "punjabi" },
   { value: "kn", label: "🇮🇳 ಕನ್ನಡ", englishName: "kannada" },
   { value: "ml", label: "🇮🇳 മലയാളം", englishName: "malayalam" },
   { value: "or", label: "🇮🇳 ଓଡ଼ିଆ", englishName: "odia" },
-  { value: "as", label: "🇮🇳 অসমীয়া", englishName: "assamese" },
+  { value: "as", label: "🇮🇳 অসমୀয়া", englishName: "assamese" },
 ];
 
 const getInitialLanguage = () => {
@@ -338,6 +339,7 @@ function App() {
         <Route path="/resources" element={<Resources />} />
         <Route path="/login" element={<Auth />} />
         <Route path="/profile-setup" element={<ProfileSetup />} />
+        <Route path="/calendar" element={<Calendar />} />
       </Routes>
 
       <ToastContainer position="bottom-right" />

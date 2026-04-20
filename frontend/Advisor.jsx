@@ -11,6 +11,7 @@ import {
   Languages,
   WifiOff,
   Landmark,
+  Calendar,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAdvisorStore } from "./stores/advisorStore";
@@ -197,6 +198,14 @@ export default function Advisor() {
             </div>
             <h3>Govt Schemes</h3>
             <p>Direct subsidies, insurance, and financial benefits for farmers.</p>
+          </div>
+
+          <div className="card reveal" onClick={() => navigate("/calendar")}>
+            <div className="icon">
+              <Calendar size={32} strokeWidth={2} />
+            </div>
+            <h3>Activity Calendar</h3>
+            <p>Schedule sowing, watering, and harvesting with reminders.</p>
           </div>
         </div>
       </div>
