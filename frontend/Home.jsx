@@ -13,6 +13,8 @@ import {
   FaLock,
   FaGlobe,
   FaLandmark,
+  FaCommentDots,
+  FaCalendarAlt,
 } from "react-icons/fa";
 import WeatherAlertBar from "./weather/WeatherAlertBar";
 import WeatherQuickWidget from "./weather/WeatherQuickWidget";
@@ -62,6 +64,18 @@ const features = [
     title: "Government Schemes",
     desc: "Stay updated with latest subsidies, insurance, and financial schemes",
     category: "Benefits",
+  },
+  {
+    icon: <FaCalendarAlt />,
+    title: "Activity Calendar",
+    desc: "Plan sowing, irrigation, and harvest schedules with reminders",
+    category: "Planning",
+  },
+  {
+    icon: <FaCommentDots />,
+    title: "Farmer Feedback",
+    desc: "Share your experience and help us improve the platform",
+    category: "Community",
   },
   {
     icon: <FaLock />,
@@ -298,7 +312,8 @@ export default function Home() {
               <Link to="/advisor">Advisor</Link>
               <Link to="/how-it-works">How It Works</Link>
               <Link to="/schemes">Govt Schemes</Link>
-              <Link to="/dashboard">Dashboard</Link>
+              <Link to="/calendar">Activity Calendar</Link>
+              <Link to="/feedback">Share Feedback</Link>
             </div>
 
             <div className="footer-section">

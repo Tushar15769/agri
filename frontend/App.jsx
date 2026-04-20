@@ -24,6 +24,8 @@ import LanguageDropdown from "./LanguageDropdown";
 import useNotifications from "./Notifications";
 import Schemes from "./GovernmentSchemes";
 import Calendar from "./FarmingCalendar";
+import Feedback from "./Feedback";
+import AdminFeedback from "./AdminFeedback";
 
 import { auth, db, isFirebaseConfigured } from "./lib/firebase";
 
@@ -340,6 +342,8 @@ function App() {
         <Route path="/login" element={<Auth />} />
         <Route path="/profile-setup" element={<ProfileSetup />} />
         <Route path="/calendar" element={<Calendar />} />
+        <Route path="/feedback" element={<Feedback />} />
+        <Route path="/admin/feedback" element={<AdminFeedback />} />
       </Routes>
 
       <ToastContainer position="bottom-right" />

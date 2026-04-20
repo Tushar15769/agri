@@ -12,6 +12,7 @@ import {
   WifiOff,
   Landmark,
   Calendar,
+  MessageSquare,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAdvisorStore } from "./stores/advisorStore";
@@ -206,6 +207,14 @@ export default function Advisor() {
             </div>
             <h3>Activity Calendar</h3>
             <p>Schedule sowing, watering, and harvesting with reminders.</p>
+          </div>
+
+          <div className="card reveal" onClick={() => navigate("/feedback")}>
+            <div className="icon">
+              <MessageSquare size={32} strokeWidth={2} />
+            </div>
+            <h3>Share Feedback</h3>
+            <p>Rate your experience and suggest improvements for the platform.</p>
           </div>
         </div>
       </div>
