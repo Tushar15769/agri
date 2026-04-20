@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
-import { 
-  FaHome, 
-  FaComments, 
-  FaInfoCircle, 
-  FaLeaf, 
-  FaBars, 
-  FaTimes, 
-  FaChevronDown 
+import {
+  FaHome,
+  FaComments,
+  FaInfoCircle,
+  FaLeaf,
+  FaBars,
+  FaTimes,
+  FaChevronDown
 } from "react-icons/fa";
 import { ToastContainer } from "react-toastify";
 
@@ -22,6 +22,7 @@ import Auth from "./Auth";
 import ProfileSetup from "./ProfileSetup";
 import LanguageDropdown from "./LanguageDropdown";
 import useNotifications from "./Notifications";
+import Schemes from "./GovernmentSchemes";
 
 import { auth, db, isFirebaseConfigured } from "./lib/firebase";
 
@@ -112,7 +113,7 @@ function App() {
     return () => clearInterval(id);
   }, [preferredLang]);
 
-   useEffect(() => {
+  useEffect(() => {
     setGoogleTranslateCookie(preferredLang);
 
     if (applyGoogleTranslate(preferredLang)) return;
@@ -131,7 +132,7 @@ function App() {
     const cleanupGoogleTranslate = () => {
       const selectors = [
         '.goog-te-banner-frame',
-        '.goog-te-balloon-frame', 
+        '.goog-te-balloon-frame',
         '#goog-gt-tt',
         'iframe[src*="translate.google"]',
         '.VIpgJd-ZVi9od-ORHb-OEVgZj'
@@ -201,15 +202,15 @@ function App() {
         if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
           Array.from(mutation.addedNodes).forEach((node) => {
             if (node.nodeType === Node.ELEMENT_NODE &&
-                (node.classList?.contains('goog-te') ||
-                 node.id?.includes('google_translate') ||
-                 node.tagName === 'IFRAME')) {
+              (node.classList?.contains('goog-te') ||
+                node.id?.includes('google_translate') ||
+                node.tagName === 'IFRAME')) {
               shouldCheck = true;
             }
           });
         }
         if (mutation.type === 'attributes' &&
-            (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+          (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
           shouldCheck = true;
         }
       });
@@ -223,7 +224,7 @@ function App() {
       attributeFilter: ['style', 'class', 'id']
     });
 
-return () => {
+    return () => {
       clearInterval(interval);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('focus', handleFocus);
@@ -301,7 +302,7 @@ return () => {
         setProfileCompleted(true);
         setLoading(false);
       }
-    }) : () => {};
+    }) : () => { };
     return () => unsubscribeAuth();
   }, []);
 
@@ -317,7 +318,7 @@ return () => {
 
     window.addEventListener("online", handleNetworkChange);
     window.addEventListener("offline", handleNetworkChange);
-    
+
     // Polling fallback to detect DevTools offline toggling where the event might be suppressed
     const interval = setInterval(handleNetworkChange, 1000);
 
@@ -416,10 +417,10 @@ return () => {
             <div className="verify-icon">✉️</div>
             <h2>Verify Your Email</h2>
             <p>We've sent a link to <b>{user.email}</b>.<br /> Please verify your email to unlock all features.</p>
-            <button 
+            <button
               onClick={() => {
                 auth.currentUser.reload().then(() => window.location.reload());
-              }} 
+              }}
               className="btn-refresh"
             >
               I've Verified My Email
@@ -440,6 +441,7 @@ return () => {
         <Route path="/advisor" element={<Advisor />} />
         <Route path="/how-it-works" element={<How />} />
         <Route path="/crop-guide" element={<CropGuide />} />
+        <Route path="/schemes" element={<Schemes />} />
         <Route path="/resources" element={<Resources />} />
         <Route path="/login" element={<Auth />} />
         <Route path="/profile-setup" element={<ProfileSetup />} />

@@ -12,6 +12,7 @@ import {
   FaLeaf,
   FaLock,
   FaGlobe,
+  FaLandmark,
 } from "react-icons/fa";
 import WeatherAlertBar from "./weather/WeatherAlertBar";
 import WeatherQuickWidget from "./weather/WeatherQuickWidget";
@@ -57,10 +58,10 @@ const features = [
     category: "Recommendations",
   },
   {
-    icon: <FaChartLine />,
-    title: "Fertilizer Guidance",
-    desc: "Personalized fertilizer and pesticide recommendations",
-    category: "Recommendations",
+    icon: <FaLandmark />,
+    title: "Government Schemes",
+    desc: "Stay updated with latest subsidies, insurance, and financial schemes",
+    category: "Benefits",
   },
   {
     icon: <FaLock />,
@@ -296,6 +297,7 @@ export default function Home() {
               <Link to="/">Home</Link>
               <Link to="/advisor">Advisor</Link>
               <Link to="/how-it-works">How It Works</Link>
+              <Link to="/schemes">Govt Schemes</Link>
               <Link to="/dashboard">Dashboard</Link>
             </div>
 
