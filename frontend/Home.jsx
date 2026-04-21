@@ -61,6 +61,12 @@ const features = [
     category: "Recommendations",
   },
   {
+    icon: <FaChartLine />,
+    title: "Fertilizer Guidance",
+    desc: "Personalized fertilizer and pesticide recommendations",
+    category: "Recommendations",
+  },
+  {
     icon: <FaLandmark />,
     title: "Government Schemes",
     desc: "Stay updated with latest subsidies, insurance, and financial schemes",
@@ -371,6 +377,8 @@ export default function Home({ user }) {
               <Link to="/how-it-works">How It Works</Link>
               <Link to="/schemes">Govt Schemes</Link>
               <Link to="/dashboard">Dashboard</Link>
+              <Link to="/calendar">Activity Calendar</Link>
+              <Link to="/feedback">Share Feedback</Link>
             </div>
             <div className="footer-section">
               <h4>Resources</h4>

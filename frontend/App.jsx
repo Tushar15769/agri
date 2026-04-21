@@ -41,12 +41,12 @@ const LANGUAGE_OPTIONS = [
   { value: "bn", label: "🇮🇳 বাংলা", englishName: "bengali" },
   { value: "ta", label: "🇮🇳 தமிழ்", englishName: "tamil" },
   { value: "te", label: "🇮🇳 తెలుగు", englishName: "telugu" },
-  { value: "gu", label: "🇮🇳 ગુજરાતી", englishName: "gujarati" },
+  { value: "gu", label: "🇮🇳 ગુજરાତି", englishName: "gujarati" },
   { value: "pa", label: "🇮🇳 ਪੰਜਾਬੀ", englishName: "punjabi" },
   { value: "kn", label: "🇮🇳 ಕನ್ನಡ", englishName: "kannada" },
   { value: "ml", label: "🇮🇳 മലയാളം", englishName: "malayalam" },
   { value: "or", label: "🇮🇳 ଓଡ଼ିଆ", englishName: "odia" },
-  { value: "as", label: "🇮🇳 অসমୀया", englishName: "assamese" },
+b  { value: "as", label: "🇮🇳 অসমୀया", englishName: "assamese" },
 ];
 
 const getInitialLanguage = () => {
