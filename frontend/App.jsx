@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
-import { 
-  FaHome, 
-  FaComments, 
-  FaInfoCircle, 
-  FaLeaf, 
-  FaBars, 
-  FaTimes, 
-  FaChevronDown 
+import {
+  FaHome,
+  FaComments,
+  FaInfoCircle,
+  FaLeaf,
+  FaBars,
+  FaTimes,
+  FaChevronDown
 } from "react-icons/fa";
 import { ToastContainer } from "react-toastify";
 
@@ -22,6 +22,10 @@ import Auth from "./Auth";
 import ProfileSetup from "./ProfileSetup";
 import LanguageDropdown from "./LanguageDropdown";
 import useNotifications from "./Notifications";
+import Schemes from "./GovernmentSchemes";
+import Calendar from "./FarmingCalendar";
+import Feedback from "./Feedback";
+import AdminFeedback from "./AdminFeedback";
 
 import { auth, db, isFirebaseConfigured } from "./lib/firebase";
 
@@ -37,12 +41,12 @@ const LANGUAGE_OPTIONS = [
   { value: "bn", label: "🇮🇳 বাংলা", englishName: "bengali" },
   { value: "ta", label: "🇮🇳 தமிழ்", englishName: "tamil" },
   { value: "te", label: "🇮🇳 తెలుగు", englishName: "telugu" },
-  { value: "gu", label: "🇮🇳 ગુજરાતી", englishName: "gujarati" },
+  { value: "gu", label: "🇮🇳 ગુજરાତି", englishName: "gujarati" },
   { value: "pa", label: "🇮🇳 ਪੰਜਾਬੀ", englishName: "punjabi" },
   { value: "kn", label: "🇮🇳 ಕನ್ನಡ", englishName: "kannada" },
   { value: "ml", label: "🇮🇳 മലയാളം", englishName: "malayalam" },
   { value: "or", label: "🇮🇳 ଓଡ଼ିଆ", englishName: "odia" },
-  { value: "as", label: "🇮🇳 অসমীয়া", englishName: "assamese" },
+  { value: "as", label: "🇮🇳 অসমୀয়া", englishName: "assamese" },
 ];
 
 const getInitialLanguage = () => {
@@ -117,33 +121,20 @@ function App() {
 
   /* ---------------- LANGUAGE AUTO-TRANS ---------------- */
   useEffect(() => {
-    if (applyGoogleTranslate(preferredLang)) return;
-    const id = setInterval(() => {
-      if (applyGoogleTranslate(preferredLang)) clearInterval(id);
-    }, 300);
-    return () => clearInterval(id);
-  }, [preferredLang]);
-
-   useEffect(() => {
     setGoogleTranslateCookie(preferredLang);
-
     if (applyGoogleTranslate(preferredLang)) return;
-
     const id = setInterval(() => {
       if (applyGoogleTranslate(preferredLang)) clearInterval(id);
-    }, 300);
-
+    }, 500);
     return () => clearInterval(id);
   }, [preferredLang]);
 
   /* ---------------- TRANSLATION TOOLBAR DETECTION ---------------- */
-  // Detects when Chrome's translation toolbar is present and adjusts layout accordingly
-  // This prevents UI layout breaks when browser translation is enabled
   useEffect(() => {
     const cleanupGoogleTranslate = () => {
       const selectors = [
         '.goog-te-banner-frame',
-        '.goog-te-balloon-frame', 
+        '.goog-te-balloon-frame',
         '#goog-gt-tt',
         'iframe[src*="translate.google"]',
         '.VIpgJd-ZVi9od-ORHb-OEVgZj'
@@ -165,85 +156,56 @@ function App() {
 
     const detectTranslationToolbar = () => {
       cleanupGoogleTranslate();
-      // Multiple detection methods for translation toolbar
       const hasTranslationToolbar =
-        // Check for Google Translate banner/frame
         document.querySelector('.goog-te-banner-frame') ||
         document.querySelector('.goog-te-gadget') ||
-        document.querySelector('[data-ogpc]') || // Google Translate attribute
-        // Check if body has translation-related transforms
+        document.querySelector('[data-ogpc]') ||
         (document.body.style.transform && document.body.style.transform.includes('translateY')) ||
-        (document.body.style.marginTop && parseInt(document.body.style.marginTop) > 0) ||
-        // Check for translation meta tags
-        document.querySelector('meta[name="google-translate-customization"]') ||
-        // Check if the page height has changed significantly (toolbar pushes content down)
-        (window.innerHeight < window.screen.height * 0.9 && document.documentElement.scrollHeight > window.innerHeight);
+        (document.body.style.marginTop && parseInt(document.body.style.marginTop) > 0);
 
       document.documentElement.classList.toggle('has-translation-toolbar', hasTranslationToolbar);
     };
 
-    // Initial check
     detectTranslationToolbar();
-
-    // Run cleanup immediately then check periodically
-    cleanupGoogleTranslate();
     const interval = setInterval(() => {
       cleanupGoogleTranslate();
       detectTranslationToolbar();
-    }, 500);
+    }, 1000);
 
-    // Check on various events that might indicate translation
-    const handleVisibilityChange = () => setTimeout(detectTranslationToolbar, 500);
-    const handleFocus = () => setTimeout(detectTranslationToolbar, 200);
+    return () => clearInterval(interval);
+  }, []);
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-    window.addEventListener('resize', detectTranslationToolbar);
-
-    // Also run cleanup on any user interaction that might trigger translate
-    const handleClick = () => cleanupGoogleTranslate();
-    const handleScroll = () => cleanupGoogleTranslate();
-    document.addEventListener('click', handleClick, true);
-    document.addEventListener('scroll', handleScroll, true);
-
-    // Check for DOM changes that might indicate translation
-    const observer = new MutationObserver((mutations) => {
-      let shouldCheck = false;
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-          Array.from(mutation.addedNodes).forEach((node) => {
-            if (node.nodeType === Node.ELEMENT_NODE &&
-                (node.classList?.contains('goog-te') ||
-                 node.id?.includes('google_translate') ||
-                 node.tagName === 'IFRAME')) {
-              shouldCheck = true;
-            }
-          });
-        }
-        if (mutation.type === 'attributes' &&
-            (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
-          shouldCheck = true;
-        }
-      });
-      if (shouldCheck) detectTranslationToolbar();
+  /* ---------------- AUTH & FIRESTORE SYNC ---------------- */
+  useEffect(() => {
+    if (!isFirebaseConfigured()) {
+      setLoading(false);
+      return;
+    }
+    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        const unsubscribeDoc = onSnapshot(doc(db, "users", currentUser.uid), (userDoc) => {
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            setUserData(data);
+            setProfileCompleted(data.profileCompleted === true);
+          } else {
+            setUserData(null);
+            setProfileCompleted(false);
+          }
+          setLoading(false);
+        }, (error) => {
+          console.error("Firestore sync error:", error);
+          setLoading(false);
+        });
+        return () => unsubscribeDoc();
+      } else {
+        setUserData(null);
+        setProfileCompleted(true);
+        setLoading(false);
+      }
     });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['style', 'class', 'id']
-    });
-
-return () => {
-      clearInterval(interval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      document.removeEventListener('focus', handleFocus);
-      document.removeEventListener('resize', detectTranslationToolbar);
-      document.removeEventListener('click', handleClick, true);
-      document.removeEventListener('scroll', handleScroll, true);
-      observer.disconnect();
-    };
+    return () => unsubscribeAuth();
   }, []);
 
   const handleLogout = async () => {
@@ -259,38 +221,9 @@ return () => {
     }
   };
 
+
   /* ---------------- AUTH STATE LISTENER ---------------- */
-  useEffect(() => {
-    if (!isFirebaseConfigured()) {
-      setLoading(false);
-      return;
-    }
-    const unsubscribeAuth = auth?.onAuthStateChanged ? auth.onAuthStateChanged((currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        const unsubscribeDoc = db && onSnapshot(doc(db, "users", currentUser.uid), (userDoc) => {
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            setUserData(data);
-            setProfileCompleted(data.profileCompleted === true);
-          } else {
-            setUserData(null);
-            setProfileCompleted(false);
-          }
-          setLoading(false);
-        }, (error) => {
-          console.error("Firestore sync error:", error);
-          setLoading(false);
-        });
-        return () => unsubscribeDoc?.();
-      } else {
-        setUserData(null);
-        setProfileCompleted(true);
-        setLoading(false);
-      }
-    }) : () => {};
-    return () => unsubscribeAuth();
-  }, []);
+
 
 
   /* ---------------- OFFLINE STATUS ---------------- */
@@ -298,17 +231,11 @@ return () => {
 
   useEffect(() => {
     const handleNetworkChange = () => setIsOffline(!navigator.onLine);
-
     window.addEventListener("online", handleNetworkChange);
     window.addEventListener("offline", handleNetworkChange);
-    
-    // Polling fallback to detect DevTools offline toggling where the event might be suppressed
-    const interval = setInterval(handleNetworkChange, 1000);
-
     return () => {
       window.removeEventListener("online", handleNetworkChange);
       window.removeEventListener("offline", handleNetworkChange);
-      clearInterval(interval);
     };
   }, []);
 
@@ -420,13 +347,17 @@ return () => {
 
       {/* APP ROUTES */}
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home user={user} />} />
         <Route path="/advisor" element={<Advisor />} />
         <Route path="/how-it-works" element={<How />} />
         <Route path="/crop-guide" element={<CropGuide />} />
+        <Route path="/schemes" element={<Schemes />} />
         <Route path="/resources" element={<Resources />} />
         <Route path="/login" element={<Auth />} />
-        <Route path="/profile-setup" element={<ProfileSetup />} />
+        <Route path="/profile-setup" element={<ProfileSetup user={user} profileCompleted={profileCompleted} />} />
+        <Route path="/calendar" element={<Calendar />} />
+        <Route path="/admin/feedback" element={<AdminFeedback />} />
+        <Route path="/share-feedback" element={<Feedback />} />
       </Routes>
 
       <ToastContainer position="bottom-right" />
