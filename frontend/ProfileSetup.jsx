@@ -20,7 +20,7 @@ const LANGUAGE_OPTIONS = [
   { value: "as", label: "🇮🇳 অসমীয়া" },
 ];
 
-const ProfileSetup = () => {
+const ProfileSetup = ({ user, profileCompleted }) => {
   const [name, setName] = useState("");
   const [language, setLanguage] = useState("en");
   const [cropType, setCropType] = useState("");
@@ -32,30 +32,21 @@ const ProfileSetup = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isFirebaseConfigured()) {
+    // If auth state is resolved and user is not logged in, go to login
+    if (user === null && !loading) {
       navigate("/login");
       return;
     }
+    
+    // If profile is already completed, go home
+    if (user && profileCompleted) {
+      navigate("/");
+    }
+  }, [user, profileCompleted, navigate]);
 
-    const checkExistingData = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        try {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists() && userDoc.data().profileCompleted) {
-            navigate("/");
-          }
-        } catch (err) {
-          console.error("Error checking profile status:", err);
-        }
-      } else {
-        navigate("/login");
-      }
-    };
-
-    checkExistingData();
+  useEffect(() => {
     requestLocation();
-  }, [navigate]);
+  }, []);
 
   const requestLocation = () => {
     if ("geolocation" in navigator) {
@@ -117,7 +108,6 @@ const ProfileSetup = () => {
 
     setLoading(true);
     try {
-      const user = auth.currentUser;
       if (user) {
         await setDoc(doc(db, "users", user.uid), {
           displayName: name,
