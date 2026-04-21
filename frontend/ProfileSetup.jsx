@@ -20,7 +20,7 @@ const LANGUAGE_OPTIONS = [
   { value: "as", label: "🇮🇳 অসমীয়া" },
 ];
 
-const ProfileSetup = () => {
+const ProfileSetup = ({ user, profileCompleted }) => {
   const [name, setName] = useState("");
   const [language, setLanguage] = useState("en");
   const [cropType, setCropType] = useState("");
@@ -37,25 +37,17 @@ const ProfileSetup = () => {
       return;
     }
 
-    const checkExistingData = async () => {
-      const user = auth.currentUser;
-      if (user) {
-        try {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists() && userDoc.data().profileCompleted) {
-            navigate("/");
-          }
-        } catch (err) {
-          console.error("Error checking profile status:", err);
-        }
-      } else {
-        navigate("/login");
-      }
-    };
+    if (user && profileCompleted) {
+      navigate("/");
+    } else if (!user && !localStorage.getItem("isLoggingIn")) {
+      // Small delay to allow App.jsx state to stabilize? 
+      // Actually, if user is null in App.jsx, then we are not logged in.
+      // But avoid immediate redirect if we just clicked login
+      // navigate("/login");
+    }
 
-    checkExistingData();
     requestLocation();
-  }, [navigate]);
+  }, [user, profileCompleted, navigate]);
 
   const requestLocation = () => {
     if ("geolocation" in navigator) {

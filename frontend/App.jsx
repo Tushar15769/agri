@@ -90,7 +90,6 @@ const syncLanguage = (lang, setLang) => {
 function App() {
   const [preferredLang, setPreferredLang] = useState(getInitialLanguage);
   const [isOpen, setIsOpen] = useState(false);
-  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "light");
   const [user, setUser] = useState(null);
   const [userData, setUserData] = useState(null);
   const [profileCompleted, setProfileCompleted] = useState(true);
@@ -101,10 +100,24 @@ function App() {
   useNotifications();
 
   /* ---------------- THEME SYSTEM ---------------- */
+  const [isDarkTheme, setIsDarkTheme] = useState(() => {
+    try {
+      return (localStorage.getItem("theme") || "light") === "dark";
+    } catch {
+      return false;
+    }
+  });
+
   useEffect(() => {
-    document.documentElement.classList.toggle("theme-dark", theme === "dark");
-    localStorage.setItem("theme", theme);
-  }, [theme]);
+    document.documentElement.classList.toggle("theme-dark", isDarkTheme);
+    try {
+      localStorage.setItem("theme", isDarkTheme ? "dark" : "light");
+    } catch {
+      // ignore
+    }
+  }, [isDarkTheme]);
+
+  const handleThemeToggle = () => setIsDarkTheme((prev) => !prev);
 
   /* ---------------- LANGUAGE AUTO-TRANS ---------------- */
   useEffect(() => {
@@ -208,9 +221,10 @@ function App() {
     }
   };
 
-  const handleThemeToggle = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
+
+  /* ---------------- AUTH STATE LISTENER ---------------- */
+
+
 
   /* ---------------- OFFLINE STATUS ---------------- */
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
@@ -226,7 +240,7 @@ function App() {
   }, []);
 
   return (
-    <div className={`app ${theme === "dark" ? "theme-dark" : ""}`}>
+    <div className="app">
       {/* OFFLINE INDICATOR */}
       {isOffline && (
         <div className="offline-banner">
@@ -251,7 +265,7 @@ function App() {
 
         <div className="nav-right">
           <button onClick={handleThemeToggle} className="theme-toggle" aria-label="Toggle Theme">
-            {theme === "dark" ? "☀️" : "🌙"}
+            {isDarkTheme ? "☀️" : "🌙"}
           </button>
 
           <LanguageDropdown
@@ -333,17 +347,17 @@ function App() {
 
       {/* APP ROUTES */}
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<Home user={user} />} />
         <Route path="/advisor" element={<Advisor />} />
         <Route path="/how-it-works" element={<How />} />
         <Route path="/crop-guide" element={<CropGuide />} />
         <Route path="/schemes" element={<Schemes />} />
         <Route path="/resources" element={<Resources />} />
         <Route path="/login" element={<Auth />} />
-        <Route path="/profile-setup" element={<ProfileSetup />} />
+        <Route path="/profile-setup" element={<ProfileSetup user={user} profileCompleted={profileCompleted} />} />
         <Route path="/calendar" element={<Calendar />} />
-        <Route path="/feedback" element={<Feedback />} />
         <Route path="/admin/feedback" element={<AdminFeedback />} />
+        <Route path="/share-feedback" element={<Feedback />} />
       </Routes>
 
       <ToastContainer position="bottom-right" />
