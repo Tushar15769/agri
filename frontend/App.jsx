@@ -46,8 +46,7 @@ const LANGUAGE_OPTIONS = [
   { value: "kn", label: "🇮🇳 ಕನ್ನಡ", englishName: "kannada" },
   { value: "ml", label: "🇮🇳 മലയാളം", englishName: "malayalam" },
   { value: "or", label: "🇮🇳 ଓଡ଼ିଆ", englishName: "odia" },
-  { value: "as", label: "🇮🇳 অসমୀया", englishName: "assamese" },
-  { value: "as", label: "🇮🇳 অসমୀয়া", englishName: "assamese" },
+  { value: "as", label: "🇮🇳 অসমীয়া", englishName: "assamese" },
 ];
 
 const getInitialLanguage = () => {
@@ -221,10 +220,6 @@ function App() {
       console.error("Sign out error:", error);
     }
   };
-
-
-  /* ---------------- AUTH STATE LISTENER ---------------- */
-
 
 
   /* ---------------- OFFLINE STATUS ---------------- */

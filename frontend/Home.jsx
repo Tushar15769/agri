@@ -14,7 +14,7 @@ import {
   FaGlobe,
   FaLandmark,
   FaCalendarAlt,
-  FaCommentDots,
+  FaCommentDots
 } from "react-icons/fa";
 import WeatherAlertBar from "./weather/WeatherAlertBar";
 import WeatherQuickWidget from "./weather/WeatherQuickWidget";
