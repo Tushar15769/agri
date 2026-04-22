@@ -26,6 +26,7 @@ import Schemes from "./GovernmentSchemes";
 import Feedback from "./Feedback";
 import AdminFeedback from "./AdminFeedback";
 import Calendar from "./FarmingCalendar";
+import MarketPrices from "./MarketPrices";
 
 import { auth, db, isFirebaseConfigured } from "./lib/firebase";
 
@@ -354,6 +355,7 @@ function App() {
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/share-feedback" element={<Feedback />} />
         <Route path="/admin/feedback" element={<AdminFeedback />} />
+        <Route path="/market-prices" element={<MarketPrices />} />
       </Routes>
 
       <ToastContainer position="bottom-right" />

@@ -378,7 +378,8 @@ export default function Home({ user }) {
               <Link to="/schemes">Govt Schemes</Link>
               <Link to="/dashboard">Dashboard</Link>
               <Link to="/calendar">Activity Calendar</Link>
-              <Link to="/feedback">Share Feedback</Link>
+              <Link to="/market-prices">Market Prices</Link>
+              <Link to="/share-feedback">Share Feedback</Link>
             </div>
             <div className="footer-section">
               <h4>Resources</h4>
