@@ -14,7 +14,7 @@ import {
   FaGlobe,
   FaLandmark,
   FaCalendarAlt,
-  FaCommentDots
+  FaCommentDots,
 } from "react-icons/fa";
 import WeatherAlertBar from "./weather/WeatherAlertBar";
 import WeatherQuickWidget from "./weather/WeatherQuickWidget";
@@ -58,6 +58,12 @@ const features = [
     icon: <FaLeaf />,
     title: "Crop Recommendations",
     desc: "Get crop suggestions based on soil profile and regional climate",
+    category: "Recommendations",
+  },
+  {
+    icon: <FaChartLine />,
+    title: "Fertilizer Guidance",
+    desc: "Personalized fertilizer and pesticide recommendations",
     category: "Recommendations",
   },
   {
@@ -371,6 +377,8 @@ export default function Home({ user }) {
               <Link to="/how-it-works">How It Works</Link>
               <Link to="/schemes">Govt Schemes</Link>
               <Link to="/dashboard">Dashboard</Link>
+              <Link to="/calendar">Activity Calendar</Link>
+              <Link to="/feedback">Share Feedback</Link>
             </div>
             <div className="footer-section">
               <h4>Resources</h4>

@@ -108,6 +108,7 @@ const ProfileSetup = ({ user, profileCompleted }) => {
 
     setLoading(true);
     try {
+      const user = auth.currentUser;
       if (user) {
         await setDoc(doc(db, "users", user.uid), {
           displayName: name,
