@@ -45,6 +45,19 @@ const ProfileSetup = ({ user, profileCompleted }) => {
   }, [user, profileCompleted, navigate]);
 
   useEffect(() => {
+    if (!isFirebaseConfigured()) {
+      navigate("/login");
+      return;
+    }
+    
+    // If profile is already completed, go home
+    if (user && profileCompleted) {
+      navigate("/");
+    } else if (!user && !localStorage.getItem("isLoggingIn")) {
+    }
+  }, [user, profileCompleted, navigate]);
+
+  useEffect(() => {
     requestLocation();
   }, []);
 

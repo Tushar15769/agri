@@ -28,7 +28,7 @@ export const fetchMarketPrices = async (filters = {}) => {
     const response = await fetch(url);
     const data = await response.json();
     
-    if (data && data.records) {
+    if (data && data.records && data.records.length > 0) {
       let records = data.records.map((r, index) => ({
         id: index,
         commodity: r.commodity,
@@ -56,7 +56,9 @@ export const fetchMarketPrices = async (filters = {}) => {
           item.district.toLowerCase().includes(s)
         );
       }
-      return records;
+
+      // Only return if we actually have filtered records from the API
+      if (records.length > 0) return records;
     }
   } catch (error) {
     console.error("Error fetching real market data, falling back to mock:", error);

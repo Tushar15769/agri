@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { doc, onSnapshot } from "firebase/firestore";
@@ -9,7 +9,8 @@ import {
   FaLeaf,
   FaBars,
   FaTimes,
-  FaChevronDown
+  FaTachometerAlt,
+  FaChevronDown,
 } from "react-icons/fa";
 import { ToastContainer } from "react-toastify";
 
@@ -18,6 +19,7 @@ import Home from "./Home";
 import Resources from "./Resources";
 import CropGuide from "./CropGuide";
 import How from "./How";
+import Dashboard from "./Dashboard";
 import Auth from "./Auth";
 import ProfileSetup from "./ProfileSetup";
 import LanguageDropdown from "./LanguageDropdown";
@@ -32,8 +34,6 @@ import { auth, db, isFirebaseConfigured } from "./lib/firebase";
 
 import "./App.css";
 import "./themes/sunlight.css";
-
-/* ---------------- LANGUAGE options ---------------- */
 
 const LANGUAGE_OPTIONS = [
   { value: "en", label: "🌍 English", englishName: "english" },
@@ -73,11 +73,8 @@ const setGoogleTranslateCookie = (lang) => {
 };
 
 const applyGoogleTranslate = (lang) => {
-  const el = document.querySelector(".goog-te-combo");
-  if (!el) return false;
-  el.value = lang;
-  el.dispatchEvent(new Event("change"));
-  return true;
+  document.cookie = `googtrans=/en/${lang}; path=/`;
+  window.location.reload();
 };
 
 const syncLanguage = (lang, setLang) => {
@@ -85,8 +82,6 @@ const syncLanguage = (lang, setLang) => {
   localStorage.setItem("preferredLanguage", lang);
   applyGoogleTranslate(lang);
 };
-
-/* ---------------- APP MAIN ---------------- */
 
 function App() {
   const [preferredLang, setPreferredLang] = useState(getInitialLanguage);
@@ -100,37 +95,29 @@ function App() {
 
   useNotifications();
 
-  /* ---------------- THEME SYSTEM ---------------- */
-  const [isDarkTheme, setIsDarkTheme] = useState(() => {
-    try {
-      return (localStorage.getItem("theme") || "light") === "dark";
-    } catch {
-      return false;
-    }
-  });
+   /* ---------------- THEME SYSTEM ---------------- */
+   const [isDarkTheme, setIsDarkTheme] = useState(() => {
+     try {
+       return (localStorage.getItem("theme") || "light") === "dark";
+     } catch {
+       return false;
+     }
+   });
 
-  useEffect(() => {
-    document.documentElement.classList.toggle("theme-dark", isDarkTheme);
-    try {
-      localStorage.setItem("theme", isDarkTheme ? "dark" : "light");
-    } catch {
-      // ignore
-    }
-  }, [isDarkTheme]);
+   useEffect(() => {
+     document.documentElement.classList.toggle("theme-dark", isDarkTheme);
+     localStorage.setItem("theme", isDarkTheme ? "dark" : "light");
+   }, [isDarkTheme]);
 
-  const handleThemeToggle = () => setIsDarkTheme((prev) => !prev);
+   const handleThemeToggle = () => {
+     setIsDarkTheme(!isDarkTheme);
+   };
 
-  /* ---------------- LANGUAGE AUTO-TRANS ---------------- */
-  useEffect(() => {
-    setGoogleTranslateCookie(preferredLang);
-    if (applyGoogleTranslate(preferredLang)) return;
-    const id = setInterval(() => {
-      if (applyGoogleTranslate(preferredLang)) clearInterval(id);
-    }, 500);
-    return () => clearInterval(id);
-  }, [preferredLang]);
 
-  /* ---------------- TRANSLATION TOOLBAR DETECTION ---------------- */
+   useEffect(() => {
+     setGoogleTranslateCookie(preferredLang);
+   }, [preferredLang]);
+
   useEffect(() => {
     const cleanupGoogleTranslate = () => {
       const selectors = [
@@ -162,21 +149,85 @@ function App() {
         document.querySelector('.goog-te-gadget') ||
         document.querySelector('[data-ogpc]') ||
         (document.body.style.transform && document.body.style.transform.includes('translateY')) ||
-        (document.body.style.marginTop && parseInt(document.body.style.marginTop) > 0);
+        (document.body.style.marginTop && parseInt(document.body.style.marginTop) > 0) ||
+        document.querySelector('meta[name="google-translate-customization"]') ||
+        (window.innerHeight < window.screen.height * 0.9 && document.documentElement.scrollHeight > window.innerHeight);
 
       document.documentElement.classList.toggle('has-translation-toolbar', hasTranslationToolbar);
     };
 
     detectTranslationToolbar();
+
+    cleanupGoogleTranslate();
     const interval = setInterval(() => {
       cleanupGoogleTranslate();
       detectTranslationToolbar();
-    }, 1000);
+    }, 500);
 
-    return () => clearInterval(interval);
+    const handleVisibilityChange = () => setTimeout(detectTranslationToolbar, 500);
+    const handleFocus = () => setTimeout(detectTranslationToolbar, 200);
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('resize', detectTranslationToolbar);
+
+    const handleClick = () => cleanupGoogleTranslate();
+    const handleScroll = () => cleanupGoogleTranslate();
+    document.addEventListener('click', handleClick, true);
+    document.addEventListener('scroll', handleScroll, true);
+
+    const observer = new MutationObserver((mutations) => {
+      let shouldCheck = false;
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+          Array.from(mutation.addedNodes).forEach((node) => {
+            if (node.nodeType === Node.ELEMENT_NODE &&
+              (node.classList?.contains('goog-te') ||
+                node.id?.includes('google_translate') ||
+                node.tagName === 'IFRAME')) {
+              shouldCheck = true;
+            }
+          });
+        }
+        if (mutation.type === 'attributes' &&
+          (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
+          shouldCheck = true;
+        }
+      });
+      if (shouldCheck) detectTranslationToolbar();
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class', 'id']
+    });
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('focus', handleFocus);
+      document.removeEventListener('resize', detectTranslationToolbar);
+      document.removeEventListener('click', handleClick, true);
+      document.removeEventListener('scroll', handleScroll, true);
+      observer.disconnect();
+    };
   }, []);
 
-  /* ---------------- AUTH & FIRESTORE SYNC ---------------- */
+  const handleLogout = async () => {
+    if (!isFirebaseConfigured() || !auth) {
+      window.location.href = "/";
+      return;
+    }
+    try {
+      await signOut(auth);
+      window.location.href = "/";
+    } catch (error) {
+      console.error("Sign out error:", error);
+    }
+  };
+
   useEffect(() => {
     if (!isFirebaseConfigured()) {
       setLoading(false);
@@ -209,43 +260,36 @@ function App() {
     return () => unsubscribeAuth();
   }, []);
 
-  const handleLogout = async () => {
-    if (!isFirebaseConfigured() || !auth) {
-      window.location.href = "/";
-      return;
-    }
-    try {
-      await signOut(auth);
-      window.location.href = "/";
-    } catch (error) {
-      console.error("Sign out error:", error);
-    }
-  };
-
 
   /* ---------------- OFFLINE STATUS ---------------- */
+  /* ---------------- AUTH STATE LISTENER ---------------- */
+
+
+
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
-  useEffect(() => {
-    const handleNetworkChange = () => setIsOffline(!navigator.onLine);
-    window.addEventListener("online", handleNetworkChange);
-    window.addEventListener("offline", handleNetworkChange);
-    return () => {
-      window.removeEventListener("online", handleNetworkChange);
-      window.removeEventListener("offline", handleNetworkChange);
-    };
-  }, []);
+   useEffect(() => {
+     const handleNetworkChange = () => setIsOffline(!navigator.onLine);
+     window.addEventListener("online", handleNetworkChange);
+     window.addEventListener("offline", handleNetworkChange);
+
+     const interval = setInterval(handleNetworkChange, 1000);
+
+     return () => {
+       window.removeEventListener("online", handleNetworkChange);
+       window.removeEventListener("offline", handleNetworkChange);
+       clearInterval(interval);
+     };
+   }, []);
 
   return (
-    <div className="app">
-      {/* OFFLINE INDICATOR */}
+    <div className={`app ${isDarkTheme ? "theme-dark" : ""}`}>
       {isOffline && (
         <div className="offline-banner">
-          ⚠️ You are currently offline. Running in offline mode using local data.
+          You are currently offline. Running in offline mode using local data.
         </div>
       )}
 
-      {/* PROFESSIONAL NAVBAR */}
       <nav className="navbar">
         <div className="nav-left">
           <FaLeaf className="icon" />
@@ -258,6 +302,8 @@ function App() {
           <li><Link to="/how-it-works" onClick={() => setIsOpen(false)}><FaInfoCircle /> How It Works</Link></li>
           <li><Link to="/crop-guide" onClick={() => setIsOpen(false)}><FaLeaf className="icon" /> Crop Guide</Link></li>
           <li><Link to="/resources" onClick={() => setIsOpen(false)}>Resources</Link></li>
+          <li><Link to="/dashboard" onClick={() => setIsOpen(false)}><FaTachometerAlt /> Dashboard</Link></li>
+
         </ul>
 
         <div className="nav-right">
@@ -277,7 +323,7 @@ function App() {
             ) : user ? (
               <div className="user-profile-trigger">
                 <div className="profile-main">
-                  <span className="profile-name">👋 {userData?.displayName || user.email?.split('@')[0]}</span>
+                  <span className="profile-name">{userData?.displayName || user.email?.split('@')[0]}</span>
                   <FaChevronDown className={`chevron ${showScorecard ? 'open' : ''}`} />
                 </div>
 
@@ -290,9 +336,9 @@ function App() {
                     </div>
                     <div className="scorecard-body">
                       {[
-                        { label: "🌾 Primary Crop", value: userData.cropType },
-                        { label: "🌐 Language", value: LANGUAGE_OPTIONS.find(l => l.value === userData.language)?.label || userData.language },
-                        { label: "📍 Location", value: userData.address || "Fetching..." }
+                        { label: "Primary Crop", value: userData.cropType },
+                        { label: "Language", value: LANGUAGE_OPTIONS.find(l => l.value === userData.language)?.label || userData.language },
+                        { label: "Location", value: userData.address || "Fetching..." }
                       ].map((item, i) => (
                         <div key={i} className="score-item">
                           <label>{item.label}</label>
@@ -317,17 +363,16 @@ function App() {
         </button>
       </nav>
 
-      {/* VERIFICATION GUARD */}
       {!loading && user && !user.emailVerified && !showScorecard && location.pathname !== "/login" && (
         <div className="verification-overlay">
           <div className="verification-card">
             <div className="verify-icon">✉️</div>
             <h2>Verify Your Email</h2>
             <p>We've sent a link to <b>{user.email}</b>.<br /> Please verify your email to unlock all features.</p>
-            <button 
+            <button
               onClick={() => {
                 auth.currentUser.reload().then(() => window.location.reload());
-              }} 
+              }}
               className="btn-refresh"
             >
               I've Verified My Email
@@ -337,16 +382,15 @@ function App() {
         </div>
       )}
 
-      {/* PROFILE COMPLETION GUARD */}
       {!loading && user && user.emailVerified && !profileCompleted && location.pathname !== "/profile-setup" && (
         <Navigate to="/profile-setup" />
       )}
 
-      {/* APP ROUTES */}
       <Routes>
         <Route path="/" element={<Home user={user} />} />
         <Route path="/advisor" element={<Advisor />} />
         <Route path="/how-it-works" element={<How />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/crop-guide" element={<CropGuide />} />
         <Route path="/schemes" element={<Schemes />} />
         <Route path="/resources" element={<Resources />} />
