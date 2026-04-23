@@ -29,6 +29,7 @@ import Feedback from "./Feedback";
 import AdminFeedback from "./AdminFeedback";
 import Calendar from "./FarmingCalendar";
 import MarketPrices from "./MarketPrices";
+import Loader from "./Loader";
 
 import { auth, db, isFirebaseConfigured } from "./lib/firebase";
 
@@ -284,6 +285,7 @@ function App() {
 
   return (
     <div className={`app ${isDarkTheme ? "theme-dark" : ""}`}>
+      {loading && <Loader fullPage={true} message="Initializing Fasal Saathi..." />}
       {isOffline && (
         <div className="offline-banner">
           You are currently offline. Running in offline mode using local data.
@@ -319,7 +321,7 @@ function App() {
 
           <div className="nav-user" onClick={() => setShowScorecard(!showScorecard)}>
             {loading ? (
-              <span className="loading-text">Loading...</span>
+              <div className="nav-loader-mini"></div>
             ) : user ? (
               <div className="user-profile-trigger">
                 <div className="profile-main">

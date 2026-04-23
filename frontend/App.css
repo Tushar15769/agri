@@ -1035,3 +1035,16 @@ html body {
 .theme-dark .offline-banner {
   background: #f57c00;
 }
+
+.nav-loader-mini {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: nav-spin 0.8s linear infinite;
+}
+
+@keyframes nav-spin {
+  to { transform: rotate(360deg); }
+}
