@@ -13,6 +13,7 @@ import {
   FaCalculator,
   FaMap,
   FaTachometerAlt,
+  FaChevronDown,
 } from "react-icons/fa";
 
 import Advisor from "./Advisor";
@@ -33,6 +34,7 @@ import MarketPrices from "./MarketPrices";
 import Loader from "./Loader";
 import FarmingMap from "./FarmingMap";
 import CropProfitCalculator from "./CropProfitCalculator";
+import Community from "./Community";
 
 import { auth, db, isFirebaseConfigured, doc, onSnapshot } from "./lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
@@ -97,10 +99,8 @@ function App() {
   const [userData, setUserData] = useState(null);
   const [profileCompleted, setProfileCompleted] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [showScorecard] = useState(false);
+  const [showScorecard, setShowScorecard] = useState(false);
   const location = useLocation();
-
-  const farmerName = userData?.name || user?.displayName || "";
 
   const handleLangChange = (e) => {
     syncLanguage(e.target.value, setPreferredLang);
@@ -178,21 +178,13 @@ function App() {
     return () => unsubscribeAuth();
   }, []);
 
-
-  /* ---------------- OFFLINE STATUS ---------------- */
-  /* ---------------- AUTH STATE LISTENER ---------------- */
-
-
-
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
    useEffect(() => {
      const handleNetworkChange = () => setIsOffline(!navigator.onLine);
      window.addEventListener("online", handleNetworkChange);
      window.addEventListener("offline", handleNetworkChange);
-
      const interval = setInterval(handleNetworkChange, 1000);
-
      return () => {
        window.removeEventListener("online", handleNetworkChange);
        window.removeEventListener("offline", handleNetworkChange);
@@ -221,8 +213,8 @@ function App() {
           <li><Link to="/how-it-works" onClick={() => setIsOpen(false)}><FaInfoCircle /> How It Works</Link></li>
           <li><Link to="/crop-guide" onClick={() => setIsOpen(false)}><FaLeaf className="icon" /> Crop Guide</Link></li>
           <li><Link to="/resources" onClick={() => setIsOpen(false)}>Resources</Link></li>
+          <li><Link to="/community" onClick={() => setIsOpen(false)}><FaComments /> Community</Link></li>
           <li><Link to="/dashboard" onClick={() => setIsOpen(false)}><FaTachometerAlt /> Dashboard</Link></li>
-
         </ul>
 
         <div className="nav-right">
@@ -230,17 +222,17 @@ function App() {
             {isDarkTheme ? "☀️" : "🌙"}
           </button>
 
-            <select
-              className="lang-select notranslate"
-              value={preferredLang}
-              onChange={handleLangChange}
-            >
-              {LANGUAGE_OPTIONS.map((l) => (
-                <option key={l.value} value={l.value}>
-                  {l.label}
-                </option>
-              ))}
-            </select>
+          <select
+            className="lang-select notranslate"
+            value={preferredLang}
+            onChange={handleLangChange}
+          >
+            {LANGUAGE_OPTIONS.map((l) => (
+              <option key={l.value} value={l.value}>
+                {l.label}
+              </option>
+            ))}
+          </select>
 
           <div className="nav-user" onClick={() => setShowScorecard(!showScorecard)}>
             {loading ? (
@@ -248,7 +240,7 @@ function App() {
             ) : user ? (
               <div className="user-profile-trigger">
                 <div className="profile-main">
-                  <span className="profile-name">{userData?.displayName || user.email?.split('@')[0]}</span>
+                  <span className="profile-name">{userData?.displayName || user.email?.split('@')?.[0] || "Farmer"}</span>
                   <FaChevronDown className={`chevron ${showScorecard ? 'open' : ''}`} />
                 </div>
 
@@ -281,14 +273,15 @@ function App() {
               <Link to="/login" className="btn-get-started">Get Started</Link>
             )}
           </div>
+        </div>
 
-          <button
-            className="hamburger"
-            onClick={handleNavToggle}
-          >
-            {isOpen ? <FaTimes /> : <FaBars />}
-          </button>
-        </nav>
+        <button
+          className="hamburger"
+          onClick={handleNavToggle}
+        >
+          {isOpen ? <FaTimes /> : <FaBars />}
+        </button>
+      </nav>
 
 
 
@@ -331,6 +324,7 @@ function App() {
         <Route path="/market-prices" element={<MarketPrices />} />
         <Route path="/farming-map" element={<FarmingMap />} />
         <Route path="/profit-calculator" element={<CropProfitCalculator />} />
+        <Route path="/community" element={<Community />} />
       </Routes>
 
       <ToastContainer position="bottom-right" />
