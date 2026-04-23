@@ -36,8 +36,9 @@ import FarmingMap from "./FarmingMap";
 import CropProfitCalculator from "./CropProfitCalculator";
 import Community from "./Community";
 
-import { auth, db, isFirebaseConfigured, doc, onSnapshot } from "./lib/firebase";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+ import { syncOfflineRequests } from "./lib/syncOfflineRequests";
+ import { auth, db, isFirebaseConfigured, doc, onSnapshot } from "./lib/firebase";
+ import { onAuthStateChanged, signOut } from "firebase/auth";
 
 import "./App.css";
 import "./themes/sunlight.css";
@@ -181,7 +182,13 @@ function App() {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
    useEffect(() => {
-     const handleNetworkChange = () => setIsOffline(!navigator.onLine);
+     const handleNetworkChange = () => {
+       const offline = !navigator.onLine;
+       setIsOffline(offline);
+       if (!offline) {
+         syncOfflineRequests();
+       }
+     };
      window.addEventListener("online", handleNetworkChange);
      window.addEventListener("offline", handleNetworkChange);
      const interval = setInterval(handleNetworkChange, 1000);
@@ -217,10 +224,10 @@ function App() {
           <li><Link to="/dashboard" onClick={() => setIsOpen(false)}><FaTachometerAlt /> Dashboard</Link></li>
         </ul>
 
-        <div className="nav-right">
-          <button onClick={handleThemeToggle} className="theme-toggle" aria-label="Toggle Theme">
-            {isDarkTheme ? "☀️" : "🌙"}
-          </button>
+         <div className="nav-right">
+           <button onClick={handleThemeToggle} className="theme-toggle" aria-label="Toggle Theme">
+             {isDarkTheme ? "☀️" : "🌙"}
+           </button>
 
           <select
             className="lang-select notranslate"
