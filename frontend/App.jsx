@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, onSnapshot } from "firebase/firestore";
+
+import { ToastContainer } from "react-toastify";
+
 import {
   FaHome,
   FaComments,
@@ -9,10 +10,10 @@ import {
   FaLeaf,
   FaBars,
   FaTimes,
+  FaCalculator,
+  FaMap,
   FaTachometerAlt,
-  FaChevronDown,
 } from "react-icons/fa";
-import { ToastContainer } from "react-toastify";
 
 import Advisor from "./Advisor";
 import Home from "./Home";
@@ -30,11 +31,16 @@ import AdminFeedback from "./AdminFeedback";
 import Calendar from "./FarmingCalendar";
 import MarketPrices from "./MarketPrices";
 import Loader from "./Loader";
+import FarmingMap from "./FarmingMap";
+import CropProfitCalculator from "./CropProfitCalculator";
 
-import { auth, db, isFirebaseConfigured } from "./lib/firebase";
+import { auth, db, isFirebaseConfigured, doc, onSnapshot } from "./lib/firebase";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 
 import "./App.css";
 import "./themes/sunlight.css";
+
+/* ---------------- LANGUAGE ---------------- */
 
 const LANGUAGE_OPTIONS = [
   { value: "en", label: "🌍 English", englishName: "english" },
@@ -91,8 +97,29 @@ function App() {
   const [userData, setUserData] = useState(null);
   const [profileCompleted, setProfileCompleted] = useState(true);
   const [loading, setLoading] = useState(true);
-  const [showScorecard, setShowScorecard] = useState(false);
+  const [showScorecard] = useState(false);
   const location = useLocation();
+
+  const farmerName = userData?.name || user?.displayName || "";
+
+  const handleLangChange = (e) => {
+    syncLanguage(e.target.value, setPreferredLang);
+  };
+
+  const handleNavToggle = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setUser(null);
+      setUserData(null);
+      setProfileCompleted(true);
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
 
   useNotifications();
 
@@ -117,119 +144,9 @@ function App() {
 
    useEffect(() => {
      setGoogleTranslateCookie(preferredLang);
-   }, [preferredLang]);
+    }, [preferredLang]);
 
-  useEffect(() => {
-    const cleanupGoogleTranslate = () => {
-      const selectors = [
-        '.goog-te-banner-frame',
-        '.goog-te-balloon-frame',
-        '#goog-gt-tt',
-        'iframe[src*="translate.google"]',
-        '.VIpgJd-ZVi9od-ORHb-OEVgZj'
-      ];
-      selectors.forEach(sel => {
-        document.querySelectorAll(sel).forEach(el => {
-          el.style.display = 'none';
-          el.style.visibility = 'hidden';
-          el.style.height = '0';
-          el.style.width = '0';
-          el.style.position = 'absolute';
-          el.style.pointerEvents = 'none';
-        });
-      });
-      document.body.style.marginTop = '0';
-      document.body.style.paddingTop = '0';
-      document.body.style.transform = 'none';
-    };
-
-    const detectTranslationToolbar = () => {
-      cleanupGoogleTranslate();
-      const hasTranslationToolbar =
-        document.querySelector('.goog-te-banner-frame') ||
-        document.querySelector('.goog-te-gadget') ||
-        document.querySelector('[data-ogpc]') ||
-        (document.body.style.transform && document.body.style.transform.includes('translateY')) ||
-        (document.body.style.marginTop && parseInt(document.body.style.marginTop) > 0) ||
-        document.querySelector('meta[name="google-translate-customization"]') ||
-        (window.innerHeight < window.screen.height * 0.9 && document.documentElement.scrollHeight > window.innerHeight);
-
-      document.documentElement.classList.toggle('has-translation-toolbar', hasTranslationToolbar);
-    };
-
-    detectTranslationToolbar();
-
-    cleanupGoogleTranslate();
-    const interval = setInterval(() => {
-      cleanupGoogleTranslate();
-      detectTranslationToolbar();
-    }, 500);
-
-    const handleVisibilityChange = () => setTimeout(detectTranslationToolbar, 500);
-    const handleFocus = () => setTimeout(detectTranslationToolbar, 200);
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('focus', handleFocus);
-    window.addEventListener('resize', detectTranslationToolbar);
-
-    const handleClick = () => cleanupGoogleTranslate();
-    const handleScroll = () => cleanupGoogleTranslate();
-    document.addEventListener('click', handleClick, true);
-    document.addEventListener('scroll', handleScroll, true);
-
-    const observer = new MutationObserver((mutations) => {
-      let shouldCheck = false;
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-          Array.from(mutation.addedNodes).forEach((node) => {
-            if (node.nodeType === Node.ELEMENT_NODE &&
-              (node.classList?.contains('goog-te') ||
-                node.id?.includes('google_translate') ||
-                node.tagName === 'IFRAME')) {
-              shouldCheck = true;
-            }
-          });
-        }
-        if (mutation.type === 'attributes' &&
-          (mutation.attributeName === 'style' || mutation.attributeName === 'class')) {
-          shouldCheck = true;
-        }
-      });
-      if (shouldCheck) detectTranslationToolbar();
-    });
-
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ['style', 'class', 'id']
-    });
-
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      document.removeEventListener('focus', handleFocus);
-      document.removeEventListener('resize', detectTranslationToolbar);
-      document.removeEventListener('click', handleClick, true);
-      document.removeEventListener('scroll', handleScroll, true);
-      observer.disconnect();
-    };
-  }, []);
-
-  const handleLogout = async () => {
-    if (!isFirebaseConfigured() || !auth) {
-      window.location.href = "/";
-      return;
-    }
-    try {
-      await signOut(auth);
-      window.location.href = "/";
-    } catch (error) {
-      console.error("Sign out error:", error);
-    }
-  };
-
-  useEffect(() => {
+   useEffect(() => {
     if (!isFirebaseConfigured()) {
       setLoading(false);
       return;
@@ -313,11 +230,17 @@ function App() {
             {isDarkTheme ? "☀️" : "🌙"}
           </button>
 
-          <LanguageDropdown
-            options={LANGUAGE_OPTIONS}
-            value={preferredLang}
-            onChange={(val) => syncLanguage(val, setPreferredLang)}
-          />
+            <select
+              className="lang-select notranslate"
+              value={preferredLang}
+              onChange={handleLangChange}
+            >
+              {LANGUAGE_OPTIONS.map((l) => (
+                <option key={l.value} value={l.value}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
 
           <div className="nav-user" onClick={() => setShowScorecard(!showScorecard)}>
             {loading ? (
@@ -358,12 +281,16 @@ function App() {
               <Link to="/login" className="btn-get-started">Get Started</Link>
             )}
           </div>
-        </div>
 
-        <button className="hamburger" onClick={() => setIsOpen(!isOpen)} aria-label="Toggle Menu">
-          {isOpen ? <FaTimes /> : <FaBars />}
-        </button>
-      </nav>
+          <button
+            className="hamburger"
+            onClick={handleNavToggle}
+          >
+            {isOpen ? <FaTimes /> : <FaBars />}
+          </button>
+        </nav>
+
+
 
       {!loading && user && !user.emailVerified && !showScorecard && location.pathname !== "/login" && (
         <div className="verification-overlay">
@@ -402,6 +329,8 @@ function App() {
         <Route path="/share-feedback" element={<Feedback />} />
         <Route path="/admin/feedback" element={<AdminFeedback />} />
         <Route path="/market-prices" element={<MarketPrices />} />
+        <Route path="/farming-map" element={<FarmingMap />} />
+        <Route path="/profit-calculator" element={<CropProfitCalculator />} />
       </Routes>
 
       <ToastContainer position="bottom-right" />
