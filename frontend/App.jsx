@@ -16,7 +16,7 @@ import {
   FaChevronDown,
 } from "react-icons/fa";
 
-import Advisor from "./Advisor";
+import Advisor from "./AdvisorPage";
 import Home from "./Home";
 import Resources from "./Resources";
 import CropGuide from "./CropGuide";
@@ -34,7 +34,7 @@ import MarketPrices from "./MarketPrices";
 import Loader from "./Loader";
 import FarmingMap from "./FarmingMap";
 import CropProfitCalculator from "./CropProfitCalculator";
-import Community from "./Community";
+import Community from "./CommunityPage";
 
  import { syncOfflineRequests } from "./lib/syncOfflineRequests";
  import { auth, db, isFirebaseConfigured, doc, onSnapshot } from "./lib/firebase";
