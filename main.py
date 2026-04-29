@@ -1,13 +1,14 @@
-from fastapi import FastAPI, HTTPException, Request, Form
+from fastapi import FastAPI, HTTPException, Request, Form, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import joblib
 import pandas as pd
 import numpy as np
 from datetime import datetime
-from whatsapp_service import send_whatsapp_message, format_alert_message
 import json
 import os
+from whatsapp_service import send_whatsapp_message, format_alert_message
+from alert_rules import generate_alerts
 
 app = FastAPI()
 
@@ -19,20 +20,29 @@ app.add_middleware(
 )
 
 class PredictRequest(BaseModel):
-    Crop: str
+    Crop: str = Field(..., max_length=50)
     CropCoveredArea: float = Field(..., gt=0)
     CHeight: int = Field(..., ge=0)
-    CNext: str
-    CLast: str
-    CTransp: str
-    IrriType: str
-    IrriSource: str
+    CNext: str = Field(..., max_length=50)
+    CLast: str = Field(..., max_length=50)
+    CTransp: str = Field(..., max_length=50)
+    IrriType: str = Field(..., max_length=50)
+    IrriSource: str = Field(..., max_length=50)
     IrriCount: int = Field(..., ge=1)
     WaterCov: int = Field(..., ge=0, le=100)
-    Season: str
+    Season: str = Field(..., max_length=50)
 
 class PredictResponse(BaseModel):
     predicted_ExpYield: float
+
+class WhatsAppSubscribeRequest(BaseModel):
+    phone_number: str
+    user_id: str
+    name: str
+
+class AlertTriggerRequest(BaseModel):
+    alert_type: str  # 'weather', 'pest', 'advisory'
+    message: str
 
 # Load model
 try:
@@ -42,7 +52,7 @@ except Exception as e:
     print(f"❌ Error loading model: {e}")
     model = None
 
-# Local storage for WhatsApp subscribers (in a real app, this would be in Firestore/PostgreSQL)
+# Local storage for WhatsApp subscribers
 SUBSCRIBERS_FILE = "whatsapp_subscribers.json"
 
 def load_subscribers():
@@ -55,34 +65,19 @@ def save_subscribers(subscribers):
     with open(SUBSCRIBERS_FILE, "w") as f:
         json.dump(subscribers, f)
 
-class WhatsAppSubscribeRequest(BaseModel):
-    phone_number: str
-    user_id: str
-    name: str
-
-class AlertTriggerRequest(BaseModel):
-    alert_type: str  # 'weather', 'pest', 'advisory'
-    message: str
-
-# Store notifications
-notifications = [
+# Store static notifications (initial sample)
+static_notifications = [
     {
         "id": 1,
         "type": "weather",
         "message": "🌧️ Heavy rainfall expected in your region today.",
-        "time": datetime.now().isoformat()
-    },
-    {
-        "id": 2,
-        "type": "recommendation",
-        "message": "🌱 Ideal time to irrigate wheat crops.",
         "time": datetime.now().isoformat()
     }
 ]
 
 @app.get("/")
 def root():
-    return {"message": "Fasal Saathi Yield Prediction API", "status": "running"}
+    return {"message": "Fasal Saathi API", "status": "running"}
 
 @app.get("/predict")
 def predict_get():
@@ -94,19 +89,7 @@ def predict_yield(data: PredictRequest):
         raise HTTPException(status_code=500, detail="Model not loaded")
     
     try:
-        input_data = {
-            'Crop': data.Crop,
-            'CropCoveredArea': data.CropCoveredArea,
-            'CHeight': data.CHeight,
-            'CNext': data.CNext,
-            'CLast': data.CLast,
-            'CTransp': data.CTransp,
-            'IrriType': data.IrriType,
-            'IrriSource': data.IrriSource,
-            'IrriCount': data.IrriCount,
-            'WaterCov': data.WaterCov,
-            'Season': data.Season
-        }
+        input_data = data.model_dump() if hasattr(data, 'model_dump') else data.dict()
         df = pd.DataFrame([input_data])
         
         dummy_cols = ['Crop', 'CNext', 'CLast', 'CTransp', 'IrriType', 'IrriSource', 'Season']
@@ -123,26 +106,24 @@ def predict_yield(data: PredictRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.post("/api/log-error")
-async def log_error(request: Request):
-    """
-    Receive error reports from the frontend for monitoring and debugging.
-    """
-    try:
-        error_data = await request.json()
-        print(f"[Error Log] {error_data.get('message', 'Unknown error')} | Context: {error_data.get('context', 'N/A')}")
-        return {"success": True, "message": "Error logged"}
-    except Exception:
-        return {"success": False, "message": "Invalid error data"}
-
 @app.get("/api/notifications")
-def get_notifications():
-    """Get notifications for the frontend."""
-    return {"success": True, "data": notifications}
+def get_notifications(
+    crop: str = Query(default=None),
+    irrigation_count: int = Query(default=None, ge=0),
+    water_coverage: int = Query(default=None, ge=0, le=100),
+    season: str = Query(default=None)
+):
+    """Generate dynamic farm advisory alerts + static ones."""
+    dynamic_alerts = generate_alerts(
+        crop=crop,
+        irrigation_count=irrigation_count,
+        water_coverage=water_coverage,
+        season=season
+    )
+    return {"success": True, "data": static_notifications + dynamic_alerts}
 
 @app.post("/api/whatsapp/subscribe")
 async def subscribe_whatsapp(data: WhatsAppSubscribeRequest):
-    """Subscribe a user to WhatsApp alerts."""
     subscribers = load_subscribers()
     subscribers[data.user_id] = {
         "phone_number": data.phone_number,
@@ -151,55 +132,55 @@ async def subscribe_whatsapp(data: WhatsAppSubscribeRequest):
     }
     save_subscribers(subscribers)
     
-    # Send welcome message
-    welcome_msg = f"Namaste {data.name}! 🙏\n\nWelcome to *Fasal Saathi WhatsApp Alerts*. You will now receive real-time updates on weather, pests, and farming advisories directly here.\n\nType 'STOP' at any time to unsubscribe."
+    welcome_msg = f"Namaste {data.name}! 🙏\n\nWelcome to *Fasal Saathi WhatsApp Alerts*. You will now receive real-time updates directly here."
     send_whatsapp_message(data.phone_number, welcome_msg)
     
-    return {"success": True, "message": "Successfully subscribed to WhatsApp alerts"}
+    return {"success": True, "message": "Successfully subscribed"}
 
 @app.post("/api/whatsapp/trigger-alert")
 async def trigger_whatsapp_alert(data: AlertTriggerRequest):
-    """Trigger a WhatsApp alert to all subscribers."""
     subscribers = load_subscribers()
     results = []
-    
     formatted_msg = format_alert_message(data.alert_type, data.message)
     
     for user_id, info in subscribers.items():
         res = send_whatsapp_message(info["phone_number"], formatted_msg)
         results.append({"user_id": user_id, "success": res["success"]})
     
-    # Also add to in-app notifications
-    new_notif = {
-        "id": len(notifications) + 1,
+    static_notifications.append({
+        "id": len(static_notifications) + 1,
         "type": data.alert_type,
         "message": data.message,
         "time": datetime.now().isoformat()
-    }
-    notifications.append(new_notif)
+    })
     
     return {"success": True, "results": results}
 
 @app.post("/api/whatsapp/webhook")
 async def whatsapp_webhook(Body: str = Form(...), From: str = Form(...)):
-    """
-    Handle incoming messages from WhatsApp (Bot Logic).
-    """
     incoming_msg = Body.lower().strip()
     sender_number = From.replace("whatsapp:", "")
     
     if "weather" in incoming_msg:
-        response = "🌡️ *Current Weather Update*\n\nYour region is showing 28°C with clear skies. No heavy rain expected for the next 48 hours. It's a great time for field work!"
+        response = "🌡️ *Weather Update*\n\n28°C, Clear skies. No rain expected."
     elif "pest" in incoming_msg:
-        response = "🐛 *Pest Management Assistant*\n\nIf you've spotted pests, please use the 'Pest Management' tool in the app for an AI-powered diagnosis."
+        response = "🐛 *Pest Assistant*\n\nPlease use the Pest Management tool in-app for diagnosis."
     elif "hi" in incoming_msg or "hello" in incoming_msg:
-        response = "🙏 *Namaste from Fasal Saathi!*\n\nI am your AI Farming Assistant. You can ask me about 'Weather', 'Pest', or 'Yield'."
+        response = "🙏 *Namaste!*\n\nI am your AI Farming Assistant. Try 'Weather' or 'Pest'."
     else:
-        response = f"I received your message: '{Body}'. Try typing 'Weather' or 'Pest' for specific help. 🌱"
+        response = f"Received: '{Body}'. Try 'Weather' or 'Pest' 🌱"
 
-    from whatsapp_service import send_whatsapp_message
     send_whatsapp_message(sender_number, response)
     return {"status": "success"}
+
+@app.post("/api/log-error")
+async def log_error(request: Request):
+    try:
+        error_data = await request.json()
+        print(f"[Error Log] {error_data.get('message', 'Unknown error')}")
+        return {"success": True}
+    except Exception:
+        return {"success": False}
 
 if __name__ == "__main__":
     import uvicorn

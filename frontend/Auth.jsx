@@ -8,7 +8,7 @@ import {
   signOut
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FaGoogle, FaEnvelope, FaLock, FaUser, FaArrowRight, FaLeaf } from "react-icons/fa";
 import { auth, db, isFirebaseConfigured } from "./lib/firebase";
 import "./Auth.css";
@@ -23,15 +23,18 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || "/";
 
   if (!isFirebaseConfigured()) {
     return (
       <div className="auth-container">
         <div className="auth-card">
-          <div className="auth-logo">
-            <FaLeaf className="leaf-icon" />
-            <h1>Fasal Saathi</h1>
-          </div>
+           <div className="auth-logo">
+             <FaLeaf className="leaf-icon" />
+             <h1 className="notranslate">Fasal Saathi</h1>
+           </div>
           <p className="auth-subtitle">Firebase credentials not configured</p>
           <div className="auth-message">
             <p>Please configure Firebase credentials in your .env file to enable authentication.</p>
@@ -60,7 +63,7 @@ const Auth = () => {
           return;
         }
 
-        navigate("/");
+        navigate(from, { replace: true });
       } else {
         // Sign Up Logic
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
@@ -115,9 +118,11 @@ const Auth = () => {
         lastLogin: new Date().toISOString()
       }, { merge: true });
 
-      navigate("/");
-    } catch (err) {
-      console.error(err);
+       navigate(from, { replace: true });
+     } catch (err) {
+       if (process.env.NODE_ENV !== 'production') {
+         console.error(err);
+       }
       setError("Failed to sign in with Google.");
     } finally {
       setLoading(false);
@@ -130,9 +135,11 @@ const Auth = () => {
         <div className="auth-header">
           <div className="auth-logo">
             <FaLeaf />
-            <span>Fasal Saathi</span>
+            <span className="notranslate">Fasal Saathi</span>
           </div>
-          <h1>{isLogin ? "Welcome Back" : "Join Fasal Saathi"}</h1>
+          <h1>{isLogin ? "Welcome Back" : (
+            <>Join <span className="notranslate">Fasal Saathi</span></>
+          )}</h1>
           <p>{isLogin ? "Continue your farming journey" : "Start your smart farming journey today"}</p>
         </div>
 

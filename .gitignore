@@ -32,3 +32,6 @@ __pycache__/
 dev-dist/
 dist/
 whatsapp_subscribers.json
+# Frontend build output
+frontend/build/
+frontend/dist/

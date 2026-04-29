@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import "./Advisor.css";
 import WeatherCard from "./weather/WeatherCard";
 import SoilChatbot from "./SoilChatbot";
+import SoilAnalysis from "./SoilAnalysis";
 import IrrigationGuidance from "./IrrigationGuidance";
 import CropProfitCalculator from "./CropProfitCalculator";
 import FarmingMap from "./FarmingMap";
+import FertilizerRecommendation from "./FertilizerRecommendation";
 import {
   Sun,
   Droplets,
@@ -18,8 +20,9 @@ import {
   MessageSquare,
   Info,
   Map,
-} from "lucide-react";
-import { useAdvisorStore } from "./stores/advisorStore";
+  FlaskConical,
+  } from "lucide-react";
+  import { useAdvisorStore } from "./stores/advisorStore";
 import { useYieldPrediction } from "./hooks/useYieldPrediction";
 import CropDiseaseDetection from "./CropDiseaseDetection";
 import PestManagement from "./PestManagement";
@@ -37,6 +40,10 @@ export default function Advisor() {
     setShowWeather,
     showSoilChatbot,
     setShowSoilChatbot,
+    showSoilAnalysis,
+    setShowSoilAnalysis,
+    showFertilizerPopup,
+    setShowFertilizerPopup,
     showComingSoon,
     setShowComingSoon,
     showIrrigation,
@@ -166,16 +173,24 @@ export default function Advisor() {
             </p>
           </div>
 
-          <div
-            className="card reveal"
-            style={{ cursor: "pointer" }}
-            onClick={() => setShowSoilChatbot(true)}
-          >
+          <div className="card reveal" onClick={() => setShowSoilChatbot(true)}>
             <div className="icon">
               <Sprout size={32} strokeWidth={2} />
             </div>
             <h3>Soil Health</h3>
             <p>Get soil analysis & recommendations via AI chatbot.</p>
+          </div>
+
+          <div
+            className="card reveal"
+            style={{ cursor: "pointer" }}
+            onClick={() => setShowSoilAnalysis(true)}
+          >
+            <div className="icon">
+              <FlaskConical size={32} strokeWidth={2} />
+            </div>
+            <h3>Soil Analysis</h3>
+            <p>Analyze NPK nutrients and get personalized crop & fertilizer recommendations.</p>
           </div>
 
           {/* Crop Disease Detection */}
@@ -185,10 +200,10 @@ export default function Advisor() {
             <p>Upload plant images to detect diseases and get remedies.</p>
           </div>
 
-          <div className="card reveal" onClick={() => setShowComingSoon(true)}>
+          <div className="card reveal" onClick={() => setShowFertilizerPopup(true)}>
             <div className="icon">🌾</div>
             <h3>Fertilizer Recommendations</h3>
-            <p>AI-powered fertilizer advice tailored to your soil & crops.</p>
+            <p>Get a crop-aware fertilizer plan based on soil pH and nutrient status.</p>
           </div>
           <div className="card reveal" onClick={() => setShowComingSoon(true)}>
             <div className="icon">
@@ -248,7 +263,7 @@ export default function Advisor() {
               <MessageSquare size={32} strokeWidth={2} />
             </div>
             <h3>Share Feedback</h3>
-            <p>Help us improve Fasal Saathi with your valuable suggestions.</p>
+             <p>Help us improve <span className="notranslate">Fasal Saathi</span> with your valuable suggestions.</p>
           </div>
         </div>
       </div>
@@ -271,7 +286,22 @@ export default function Advisor() {
           </div>
         </div>
       )}
-      
+
+      {showSoilAnalysis && (
+        <div className="weather-overlay" onClick={() => setShowSoilAnalysis(false)}>
+          <div className="soil-analysis-popup" onClick={(e)=>e.stopPropagation()}>
+            <button
+              className="close-btn"
+              onClick={() => setShowSoilAnalysis(false)}
+              style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}
+            >
+              ✕
+            </button>
+            <SoilAnalysis />
+          </div>
+        </div>
+      )}
+
       {showIrrigation && (
         <div className="weather-overlay" onClick={()=>setShowIrrigation(false)}
          style={{ alignItems: 'center', justifyContent: 'center' }}>
@@ -564,6 +594,14 @@ export default function Advisor() {
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {showFertilizerPopup && (
+        <div className="weather-overlay" onClick={() => setShowFertilizerPopup(false)}>
+          <div className="weather-popup fertilizer-popup-shell" onClick={(e) => e.stopPropagation()}>
+            <FertilizerRecommendation onClose={() => setShowFertilizerPopup(false)} />
           </div>
         </div>
       )}

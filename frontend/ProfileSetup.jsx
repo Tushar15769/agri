@@ -127,6 +127,7 @@ const ProfileSetup = ({ user, profileCompleted }) => {
     try {
       const currentUser = auth.currentUser;
       if (currentUser) {
+        // Save profile to Firestore
         await setDoc(doc(db, "users", currentUser.uid), {
           displayName: name,
           language: language,
@@ -153,7 +154,6 @@ const ProfileSetup = ({ user, profileCompleted }) => {
             });
           } catch (whatsappErr) {
             console.error("WhatsApp subscription error:", whatsappErr);
-            // Don't block the profile setup if WhatsApp sub fails
           }
         }
         
@@ -175,7 +175,7 @@ const ProfileSetup = ({ user, profileCompleted }) => {
         <div className="setup-header">
           <FaSeedling className="setup-logo-icon" />
           <h1>Complete Your Profile</h1>
-          <p>Help us personalize your Fasal Saathi experience</p>
+           <p>Help us personalize your <span className="notranslate">Fasal Saathi</span> experience</p>
         </div>
 
         {error && <div className="setup-error">{error}</div>}
