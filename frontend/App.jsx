@@ -14,6 +14,7 @@ import {
   FaMap,
   FaTachometerAlt,
   FaChevronDown,
+  FaWhatsapp,
 } from "react-icons/fa";
 
 import Advisor from "./Advisor";
@@ -333,6 +334,17 @@ function App() {
         <Route path="/profit-calculator" element={<CropProfitCalculator />} />
         <Route path="/community" element={<Community />} />
       </Routes>
+
+      <a 
+        href="https://wa.me/14155238886?text=I%20want%20to%20start%20the%20conversation%20for%20real-time%20data%20sharing" 
+        target="_blank" 
+        rel="noopener noreferrer" 
+        className="whatsapp-float"
+        title="Chat with WhatsApp Bot"
+      >
+        <FaWhatsapp />
+        <span className="tooltip">Chat with Bot</span>
+      </a>
 
       <ToastContainer position="bottom-right" />
     </div>

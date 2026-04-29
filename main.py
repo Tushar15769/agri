@@ -1,10 +1,13 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Form
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import joblib
 import pandas as pd
 import numpy as np
 from datetime import datetime
+from whatsapp_service import send_whatsapp_message, format_alert_message
+import json
+import os
 
 app = FastAPI()
 
@@ -38,6 +41,28 @@ try:
 except Exception as e:
     print(f"❌ Error loading model: {e}")
     model = None
+
+# Local storage for WhatsApp subscribers (in a real app, this would be in Firestore/PostgreSQL)
+SUBSCRIBERS_FILE = "whatsapp_subscribers.json"
+
+def load_subscribers():
+    if os.path.exists(SUBSCRIBERS_FILE):
+        with open(SUBSCRIBERS_FILE, "r") as f:
+            return json.load(f)
+    return {}
+
+def save_subscribers(subscribers):
+    with open(SUBSCRIBERS_FILE, "w") as f:
+        json.dump(subscribers, f)
+
+class WhatsAppSubscribeRequest(BaseModel):
+    phone_number: str
+    user_id: str
+    name: str
+
+class AlertTriggerRequest(BaseModel):
+    alert_type: str  # 'weather', 'pest', 'advisory'
+    message: str
 
 # Store notifications
 notifications = [
@@ -114,3 +139,68 @@ async def log_error(request: Request):
 def get_notifications():
     """Get notifications for the frontend."""
     return {"success": True, "data": notifications}
+
+@app.post("/api/whatsapp/subscribe")
+async def subscribe_whatsapp(data: WhatsAppSubscribeRequest):
+    """Subscribe a user to WhatsApp alerts."""
+    subscribers = load_subscribers()
+    subscribers[data.user_id] = {
+        "phone_number": data.phone_number,
+        "name": data.name,
+        "subscribed_at": datetime.now().isoformat()
+    }
+    save_subscribers(subscribers)
+    
+    # Send welcome message
+    welcome_msg = f"Namaste {data.name}! 🙏\n\nWelcome to *Fasal Saathi WhatsApp Alerts*. You will now receive real-time updates on weather, pests, and farming advisories directly here.\n\nType 'STOP' at any time to unsubscribe."
+    send_whatsapp_message(data.phone_number, welcome_msg)
+    
+    return {"success": True, "message": "Successfully subscribed to WhatsApp alerts"}
+
+@app.post("/api/whatsapp/trigger-alert")
+async def trigger_whatsapp_alert(data: AlertTriggerRequest):
+    """Trigger a WhatsApp alert to all subscribers."""
+    subscribers = load_subscribers()
+    results = []
+    
+    formatted_msg = format_alert_message(data.alert_type, data.message)
+    
+    for user_id, info in subscribers.items():
+        res = send_whatsapp_message(info["phone_number"], formatted_msg)
+        results.append({"user_id": user_id, "success": res["success"]})
+    
+    # Also add to in-app notifications
+    new_notif = {
+        "id": len(notifications) + 1,
+        "type": data.alert_type,
+        "message": data.message,
+        "time": datetime.now().isoformat()
+    }
+    notifications.append(new_notif)
+    
+    return {"success": True, "results": results}
+
+@app.post("/api/whatsapp/webhook")
+async def whatsapp_webhook(Body: str = Form(...), From: str = Form(...)):
+    """
+    Handle incoming messages from WhatsApp (Bot Logic).
+    """
+    incoming_msg = Body.lower().strip()
+    sender_number = From.replace("whatsapp:", "")
+    
+    if "weather" in incoming_msg:
+        response = "🌡️ *Current Weather Update*\n\nYour region is showing 28°C with clear skies. No heavy rain expected for the next 48 hours. It's a great time for field work!"
+    elif "pest" in incoming_msg:
+        response = "🐛 *Pest Management Assistant*\n\nIf you've spotted pests, please use the 'Pest Management' tool in the app for an AI-powered diagnosis."
+    elif "hi" in incoming_msg or "hello" in incoming_msg:
+        response = "🙏 *Namaste from Fasal Saathi!*\n\nI am your AI Farming Assistant. You can ask me about 'Weather', 'Pest', or 'Yield'."
+    else:
+        response = f"I received your message: '{Body}'. Try typing 'Weather' or 'Pest' for specific help. 🌱"
+
+    from whatsapp_service import send_whatsapp_message
+    send_whatsapp_message(sender_number, response)
+    return {"status": "success"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

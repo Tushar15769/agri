@@ -31,3 +31,4 @@ __pycache__/
 .python-version
 dev-dist/
 dist/
+whatsapp_subscribers.json
