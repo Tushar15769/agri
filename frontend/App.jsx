@@ -15,6 +15,7 @@ import {
   FaMap,
   FaTachometerAlt,
   FaChevronDown,
+  FaChevronUp,
   FaWhatsapp,
   FaUser,
 } from "react-icons/fa";
@@ -43,6 +44,10 @@ import AboutUs from "./AboutUs";
 import Contributors from "./Contributors";
 import SeasonalCropPlanner from "./SeasonalCropPlanner";
 
+import FAQ from "./FAQ";
+import NotFound from "./NotFound";
+import PrivacyPolicy from "./PrivacyPolicy";
+import Terms from "./Terms";
 
 import { syncOfflineRequests } from "./lib/syncOfflineRequests";
 import { auth, db, isFirebaseConfigured, doc, onSnapshot } from "./lib/firebase";
@@ -222,6 +227,29 @@ function App() {
       clearInterval(interval);
     };
   }, []);
+
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
 
   return (
     <div className={`app ${isDarkTheme ? "theme-dark" : ""}`}>
@@ -480,6 +508,10 @@ function App() {
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/crop-planner" element={<SeasonalCropPlanner />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
 
@@ -507,6 +539,17 @@ function App() {
         <FaWhatsapp />
         <span className="tooltip">Chat with Bot</span>
       </a>
+
+      {showScrollTop && (
+        <button 
+          className="scroll-to-top" 
+          onClick={scrollToTop}
+          aria-label="Scroll to top"
+          title="Scroll to top"
+        >
+          <FaChevronUp size={24} />
+        </button>
+      )}
 
       <ToastContainer position="bottom-right" />
     </div>

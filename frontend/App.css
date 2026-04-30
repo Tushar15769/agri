@@ -184,6 +184,7 @@ body,
   list-style: none;
   display: flex;
   gap: 20px;
+  gap: 30px;
   align-items: center;
   flex: 1;
   justify-content: center;
@@ -1422,6 +1423,56 @@ html body {
   opacity: 1;
 }
 
+/* Scroll to Top Button */
+.scroll-to-top {
+  position: fixed;
+  bottom: calc(190px + constant(safe-area-inset-bottom));
+  bottom: calc(190px + env(safe-area-inset-bottom));
+  right: 30px;
+  right: calc(30px + constant(safe-area-inset-right));
+  right: calc(30px + env(safe-area-inset-right));
+  width: 60px;
+  height: 60px;
+  background: var(--brand-primary, #2e7d32);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  z-index: 2000;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: scroll-to-top-fade-in 0.3s ease-in-out;
+}
+
+.scroll-to-top:hover {
+  transform: translateY(-5px);
+  background: var(--brand-hover, #1b5e20);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-to-top:active {
+  transform: translateY(0) scale(0.9);
+}
+
+@media (max-width: 768px) {
+  .scroll-to-top {
+    bottom: calc(140px + constant(safe-area-inset-bottom));
+    bottom: calc(140px + env(safe-area-inset-bottom));
+    right: calc(15px + constant(safe-area-inset-right));
+    right: calc(15px + env(safe-area-inset-right));
+    width: 50px;
+    height: 50px;
+  }
+}
+
+@keyframes scroll-to-top-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .nav-whatsapp-link {
   display: flex;
   align-items: center;
@@ -1587,72 +1638,10 @@ html body {
   background: #dc2626;
 }
 
-.animate-dropdown {
-  animation: dropdownFade 0.2s ease-out;
-  transform-origin: top right;
-}
-
-@keyframes dropdownFade {
-  from {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 
 .navbar {
   overflow: visible;
 }
 
-/* WhatsApp Floating Button */
-.whatsapp-float {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  right: calc(30px + constant(safe-area-inset-right));
-  right: calc(30px + env(safe-area-inset-right));
-  width: 65px;
-  height: 65px;
-  background-color: #25d366;
-  color: #fff;
-  border-radius: 50%;
-  text-align: center;
-  font-size: 30px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  z-index: 2000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  transition: all 0.3s ease;
-}
 
-.whatsapp-float:hover {
-  background-color: #128c7e;
-  transform: scale(1.1) rotate(5deg);
-  color: #fff;
-}
-
-.whatsapp-float .tooltip {
-  visibility: hidden;
-  width: 120px;
-  background-color: #333;
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  padding: 5px 0;
-  position: absolute;
-  z-index: 1;
-  right: 110%;
-  opacity: 0;
-  transition: opacity 0.3s;
-  font-size: 14px;
-}
-
-.whatsapp-float:hover .tooltip {
-  visibility: visible;
-  opacity: 1;
-}
