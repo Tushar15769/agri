@@ -111,24 +111,24 @@ export default function SeasonalCropPlanner() {
             </form>
           </div>
 
-          {results && (
-            <div className="glass-card summary-card">
-              <h4>Plan Summary</h4>
-              <div className="summary-item">
-                <span>Recommended Crops</span>
-                <strong>{results.length}</strong>
-              </div>
-              <div className="summary-item">
-                <span>Risk Level</span>
-                <span className="risk-badge low">Low</span>
-              </div>
-              <div className="summary-item">
-                <span>Cycle Stability</span>
-                <span className="stability-badge high">High</span>
-              </div>
-            </div>
-          )}
-        </div>
+           {results && (
+             <div className="glass-card summary-card">
+               <h4>Plan Summary</h4>
+               <div className="summary-item">
+                 <span>Recommended Crops</span>
+                 <strong>{results.length}</strong>
+               </div>
+               <div className="summary-item">
+                 <span>Risk Level</span>
+                 <span className="risk-badge low">Low</span>
+               </div>
+               <div className="summary-item">
+                 <span>Cycle Stability</span>
+                 <span className="stability-badge high">High</span>
+               </div>
+             </div>
+           )}
+         </div>
 
         <div className="planner-main-content">
           {!results && !loading && (
@@ -163,32 +163,32 @@ export default function SeasonalCropPlanner() {
                 </button>
               </div>
 
-              {activeTab === 'recommendations' ? (
-                <div className="recommendations-grid">
-                  {results.length > 0 ? (
-                    results.map((crop, idx) => (
-                      <div className="crop-result-card glass-card" key={idx}>
-                        <div className="crop-card-header">
-                          <div className="crop-icon-wrapper">
-                            <Sprout size={24} />
-                          </div>
-                          <div className="crop-title-group">
-                            <h3>{crop.name}</h3>
-                            <span className="crop-duration">{crop.duration}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="crop-card-body">
-                          <div className="info-section">
-                            <label><CheckCircle2 size={14} /> Benefits</label>
-                            <p>{crop.benefits}</p>
-                          </div>
-                          
-                          <div className="info-section warning">
-                            <label><AlertTriangle size={14} /> Risk Mitigation</label>
-                            <p>{crop.riskMitigation}</p>
-                          </div>
-                        </div>
+               {activeTab === 'recommendations' ? (
+                 <div className="recommendations-grid">
+                   {results.length > 0 ? (
+                     results.map((crop, idx) => (
+                       <div className="crop-result-card glass-card" key={idx}>
+                         <div className="crop-card-header">
+                           <div className="crop-icon-wrapper">
+                             <Sprout size={24} />
+                           </div>
+                           <div className="crop-title-group">
+                             <h3>{crop.name}</h3>
+                             <span className="crop-duration">{crop.duration}</span>
+                           </div>
+                         </div>
+                         
+                         <div className="crop-card-body">
+                           <div className="info-section">
+                             <label><CheckCircle2 size={14} /> Benefits</label>
+                             <p>{crop.benefits}</p>
+                           </div>
+                           
+                           <div className="info-section warning">
+                             <label><AlertTriangle size={14} /> Risk Mitigation</label>
+                             <p>{crop.riskMitigation}</p>
+                           </div>
+                         </div>
 
                         <div className="crop-card-footer">
                           <button className="details-btn">

@@ -4,7 +4,7 @@ import { SkipLink } from "./NavigationManager";
 
 import { ToastContainer } from "react-toastify";
 import { useFloating, flip, shift, offset, autoUpdate } from "@floating-ui/react";
-import {
+  import {
   FaHome,
   FaComments,
   FaInfoCircle,
@@ -129,7 +129,6 @@ function App() {
   const [profileCompleted, setProfileCompleted] = useState(true);
   const [loading, setLoading] = useState(true);
   const [showScorecard, setShowScorecard] = useState(false);
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [preferredLang, setPreferredLang] = useState(getInitialLanguage);
 
   const { floatingStyles } = useFloating({
@@ -364,10 +363,10 @@ function App() {
           </li>
         </ul>
  
-             <div className="nav-right">
-              <button onClick={handleThemeToggle} className="theme-toggle" aria-label="Toggle Theme">
-                {isDarkTheme ? "☀️" : "🌙"}
-              </button>
+              <div className="nav-right">
+                <button onClick={handleThemeToggle} className="theme-toggle" aria-label="Toggle Theme">
+                  {isDarkTheme ? "☀️" : "🌙"}
+                </button>
 
               <button onClick={() => setShowMoreMenu(!showMoreMenu)} className="more-menu-toggle" aria-label="More Options">
               </button>

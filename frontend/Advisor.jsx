@@ -76,18 +76,16 @@ export default function Advisor() {
     closeYieldPopup,
   } = useYieldPrediction();
 
-  /* Animate stats on mount */
-  useEffect(() => {
-    let f = 0,
-      c = 0,
-      l = 0;
-    const interval = setInterval(() => {
-      if (f < 5000) setFarmers((f += 50));
-      if (c < 120) setCrops((c += 2));
-      if (l < 10) setLanguages((l += 1));
-    }, 50);
-    return () => clearInterval(interval);
-  }, [setFarmers, setCrops, setLanguages]);
+   /* Animate stats on mount */
+   useEffect(() => {
+     const interval = setInterval(() => {
+       const state = useAdvisorStore.getState();
+       if (state.farmers < 50000) setFarmers(state.farmers + 500);
+       if (state.crops < 120) setCrops(state.crops + 2);
+       if (state.languages < 12) setLanguages(state.languages + 1);
+     }, 50);
+     return () => clearInterval(interval);
+   }, [setFarmers, setCrops, setLanguages]);
 
   return (
     <section className="advisor">
@@ -131,24 +129,35 @@ export default function Advisor() {
       <br />
       <br />
 
-      <div className="advisor-highlights">
-        <h2 className="slide-in">✨ <span className="notranslate">Features</span></h2>
-        <br />
-        <br />
-        <div className="cards">
-          <div
-            className="card reveal"
-            style={{ cursor: "pointer" }}
-            onClick={() => setShowWeather(true)}
-          >
-            <div className="icon">
-              <Sun size={32} strokeWidth={2} />
-            </div>
-            <h3><span className="notranslate">Weather Forecasts</span></h3>
-            <p>
-              Accurate daily & weekly weather insights for farming decisions.
-            </p>
-          </div>
+       <div className="advisor-highlights">
+         <h2 className="slide-in">✨ <span className="notranslate">Features</span></h2>
+         <br />
+         <br />
+         <div className="cards">
+           <div
+             className="card reveal"
+             style={{ cursor: "pointer" }}
+             onClick={() => navigate("/crop-planner")}
+           >
+             <div className="icon">
+               <Calendar size={32} strokeWidth={2} />
+             </div>
+             <h3><span className="notranslate">Seasonal Crop Planner</span></h3>
+             <p>Plan your crops throughout the year with seasonal recommendations and crop rotation cycles.</p>
+           </div>
+           <div
+             className="card reveal"
+             style={{ cursor: "pointer" }}
+             onClick={() => setShowWeather(true)}
+           >
+             <div className="icon">
+               <Sun size={32} strokeWidth={2} />
+             </div>
+             <h3><span className="notranslate">Weather Forecasts</span></h3>
+             <p>
+               Accurate daily & weekly weather insights for farming decisions.
+             </p>
+           </div>
 
           <div className="card reveal" onClick={() => navigate("/community")}>
             <div className="icon">
