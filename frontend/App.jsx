@@ -44,6 +44,7 @@ import AboutUs from "./AboutUs";
 import Contributors from "./Contributors";
 import SeasonalCropPlanner from "./SeasonalCropPlanner";
 import SoilGuide from "./SoilGuide";
+import CropDiseaseAwareness from "./CropDiseaseAwareness";
 
 import FAQ from "./FAQ";
 import NotFound from "./NotFound";
@@ -326,6 +327,15 @@ function App() {
           </li>
           <li>
             <Link
+              to="/disease-awareness"
+              onClick={() => setIsOpen(false)}
+              aria-label="Learn about crop diseases and remedies"
+            >
+              <span className="notranslate">Awareness</span>
+            </Link>
+          </li>
+          <li>
+            <Link
               to="/about"
               onClick={() => setIsOpen(false)}
               aria-label="Learn about our mission and team"
@@ -512,6 +522,7 @@ function App() {
           <Route path="/about" element={<AboutUs />} />
           <Route path="/crop-planner" element={<SeasonalCropPlanner />} />
           <Route path="/soil-guide" element={<SoilGuide />} />
+          <Route path="/disease-awareness" element={<CropDiseaseAwareness />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<Terms />} />
