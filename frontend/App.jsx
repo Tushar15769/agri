@@ -274,7 +274,7 @@ function App() {
         The 'nav' element defines a landmark region for screen readers.
         Using Link components from react-router-dom ensures client-side routing.
       */}
-        <nav className="navbar" role="navigation" aria-label="Main Navigation">
+        <nav className={`navbar ${isOpen ? "menu-open" : ""}`} role="navigation" aria-label="Main Navigation">
           <div className="nav-left">
             {/* 
               Brand Link: Directs users back to the landing page.

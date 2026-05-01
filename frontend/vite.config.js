@@ -18,9 +18,23 @@ const spaFallbackPlugin = () => ({
   }
 });
 
+const codespaceDevPlugin = () => ({
+  name: 'codespace-dev',
+  configureServer(server) {
+    server.middlewares.use((req, res, next) => {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+      res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      next();
+    });
+  }
+});
+
 export default defineConfig(() => ({
   plugins: [
     spaFallbackPlugin(),
+    codespaceDevPlugin(),
     react(),
     // Legacy browser support removed: React Router 7 requires modern syntax.
     // Minimum supported: Chrome 90+, Android 5+, Safari 14+, Edge 90+
@@ -160,6 +174,8 @@ export default defineConfig(() => ({
     server: {
       port: 5173,
       host: true,
+      cors: true,
+      allowedHosts: 'all',
       hmr: {
         overlay: true
       },
