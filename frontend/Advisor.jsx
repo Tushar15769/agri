@@ -95,7 +95,7 @@ export default function Advisor() {
       </div>
 
       <div className="advisor-hero">
-        <h1 className="fade-in">🌱 AI-Powered Agricultural Advisor</h1>
+        <h1 className="fade-in">🌱 <span className="notranslate">AI-Powered Agricultural Advisor</span></h1>
         <p className="fade-in">
           Personalized guidance for <span className="highlight">weather</span>,{" "}
           <span className="highlight">markets</span>, and{" "}
@@ -105,22 +105,22 @@ export default function Advisor() {
           className="get-started shine"
           onClick={() => setShowSoilChatbot(true)}
         >
-          🚀 Get Started
+          🚀 <span className="notranslate">Get Started</span>
         </button>
       </div>
 
       <div className="advisor-stats">
         <div className="stat">
           <h2>{farmers}+</h2>
-          <p>Farmers Connected</p>
+          <p><span className="notranslate">Farmers Connected</span></p>
         </div>
         <div className="stat">
           <h2>{crops}+</h2>
-          <p>Crops Analyzed</p>
+          <p><span className="notranslate">Crops Analyzed</span></p>
         </div>
         <div className="stat">
           <h2>{languages}+</h2>
-          <p>Languages Available</p>
+          <p><span className="notranslate">Languages Available</span></p>
         </div>
       </div>
 
@@ -128,7 +128,7 @@ export default function Advisor() {
       <br />
 
       <div className="advisor-highlights">
-        <h2 className="slide-in">✨ Features</h2>
+        <h2 className="slide-in">✨ <span className="notranslate">Features</span></h2>
         <br />
         <br />
         <div className="cards">
@@ -140,7 +140,7 @@ export default function Advisor() {
             <div className="icon">
               <Sun size={32} strokeWidth={2} />
             </div>
-            <h3>Weather Forecasts</h3>
+            <h3><span className="notranslate">Weather Forecasts</span></h3>
             <p>
               Accurate daily & weekly weather insights for farming decisions.
             </p>
@@ -150,7 +150,7 @@ export default function Advisor() {
             <div className="icon">
               <MessageSquare size={32} strokeWidth={2} />
             </div>
-            <h3>Farmer Community</h3>
+            <h3><span className="notranslate">Farmer Community</span></h3>
             <p>
               Connect, share tips, and learn from other farmers in your region.
             </p>
@@ -159,7 +159,7 @@ export default function Advisor() {
             <div className="icon">
               <Droplets size={32} strokeWidth={2} />
             </div>
-            <h3>Irrigation Guidance</h3>
+            <h3><span className="notranslate">Irrigation Guidance</span></h3>
             <p>
               Water-saving tips and irrigation schedules tailored to your crops.
             </p>
@@ -169,7 +169,7 @@ export default function Advisor() {
             <div className="icon">
               <IndianRupee size={32} strokeWidth={2} />
             </div>
-            <h3>Market Price Guidance</h3>
+            <h3><span className="notranslate">Market Price Guidance</span></h3>
             <p>
               Market trends and price alerts to help you sell at the best time.
             </p>
@@ -179,7 +179,7 @@ export default function Advisor() {
             <div className="icon">
               <Sprout size={32} strokeWidth={2} />
             </div>
-            <h3>Soil Health</h3>
+            <h3><span className="notranslate">Soil Health</span></h3>
             <p>Get soil analysis & recommendations via AI chatbot.</p>
           </div>
 
@@ -191,38 +191,38 @@ export default function Advisor() {
             <div className="icon">
               <FlaskConical size={32} strokeWidth={2} />
             </div>
-            <h3>Soil Analysis</h3>
+            <h3><span className="notranslate">Soil Analysis</span></h3>
             <p>Analyze NPK nutrients and get personalized crop & fertilizer recommendations.</p>
           </div>
 
           {/* Crop Disease Detection */}
           <div className="card reveal" onClick={() => setShowCropDiseaseDetection(true)}>
             <div className="icon">🌿</div>
-            <h3>Crop Disease Detection</h3>
+            <h3><span className="notranslate">Crop Disease Detection</span></h3>
             <p>Upload plant images to detect diseases and get remedies.</p>
           </div>
 
           <div className="card reveal" onClick={() => setShowFertilizerPopup(true)}>
             <div className="icon">🌾</div>
-            <h3>Fertilizer Recommendations</h3>
+            <h3><span className="notranslate">Fertilizer Recommendations</span></h3>
             <p>Get a crop-aware fertilizer plan based on soil pH and nutrient status.</p>
           </div>
           <div className="card reveal" onClick={() => setShowComingSoon(true)}>
             <div className="icon">
               <WifiOff size={32} strokeWidth={2} />
             </div>
-            <h3>Offline Access</h3>
+            <h3><span className="notranslate">Offline Access</span></h3>
             <p>Use the app anytime, even without internet connectivity.</p>
           </div>
           <div className="card reveal" onClick={() => setShowPestManagement(true)}>
             <div className="icon">🐛</div>
-            <h3>Pest Management</h3>
+            <h3><span className="notranslate">Pest Management</span></h3>
             <p>Early warnings & organic pest control tips.</p>
           </div>
 
           <div className="card reveal" onClick={() => setShowYieldPopup(true)}>
             <div className="icon">📊</div>
-            <h3>Yield Prediction</h3>
+            <h3><span className="notranslate">Yield Prediction</span></h3>
             <p>AI predicts crop yield based on soil & weather data.</p>
           </div>
 
@@ -230,13 +230,13 @@ export default function Advisor() {
             <div className="icon">
               <Landmark size={32} strokeWidth={2} />
             </div>
-            <h3>Govt Schemes</h3>
+            <h3><span className="notranslate">Govt Schemes</span></h3>
             <p>Direct subsidies, insurance, and financial benefits for farmers.</p>
           </div>
 
           <div className="card reveal" onClick={() => setShowProfitCalculator(true)}>
             <div className="icon">💰</div>
-            <h3>Profit Calculator</h3>
+            <h3><span className="notranslate">Profit Calculator</span></h3>
             <p>Calculate your crop profits and ROI before planting.</p>
           </div>
 
@@ -248,7 +248,7 @@ export default function Advisor() {
             <div className="icon">
               <Map size={32} strokeWidth={2} />
             </div>
-            <h3>Farming Map</h3>
+            <h3><span className="notranslate">Farming Map</span></h3>
             <p>View your fields, weather data, and crop locations on an interactive map.</p>
           </div>
 
@@ -256,7 +256,7 @@ export default function Advisor() {
             <div className="icon">
               <Calendar size={32} strokeWidth={2} />
             </div>
-            <h3>Activity Calendar</h3>
+            <h3><span className="notranslate">Activity Calendar</span></h3>
             <p>Schedule sowing, watering, and harvesting with reminders.</p>
           </div>
 
@@ -264,8 +264,16 @@ export default function Advisor() {
             <div className="icon">
               <MessageSquare size={32} strokeWidth={2} />
             </div>
-            <h3>Share Feedback</h3>
-             <p>Help us improve <span className="notranslate">Fasal Saathi</span> with your valuable suggestions.</p>
+            <h3><span className="notranslate">Share Feedback</span></h3>
+             <p>Help us improve <span className="notranslate" translate="no">Fasal Saathi</span> with your valuable suggestions.</p>
+          </div>
+
+          <div className="card reveal" onClick={() => navigate("/crop-planner")}>
+            <div className="icon">
+              <Calendar size={32} strokeWidth={2} />
+            </div>
+            <h3><span className="notranslate">Seasonal Crop Planner</span></h3>
+            <p>Plan your crops throughout the year with seasonal recommendations and crop rotation cycles.</p>
           </div>
         </div>
       </div>

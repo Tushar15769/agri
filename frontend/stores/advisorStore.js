@@ -33,17 +33,14 @@ export const useAdvisorStore = create((set) => ({
    showCropDiseaseDetection: false,
    setShowCropDiseaseDetection: (show) => set({ showCropDiseaseDetection: show }),
 
-  showPestManagement: false,
-  setShowPestManagement: (show) => set({ showPestManagement: show }),
+   showPestManagement: false,
+   setShowPestManagement: (show) => set({ showPestManagement: show }),
 
-  showSoilAnalysis: false,
-  setShowSoilAnalysis: (show) => set({ showSoilAnalysis: show }),
+   showSoilAnalysis: false,
+   setShowSoilAnalysis: (show) => set({ showSoilAnalysis: show }),
 
-  showFertilizerPopup: false,
-  setShowFertilizerPopup: (show) => set({ showFertilizerPopup: show }),
-
-  showPestManagement: false,
-  setShowPestManagement: (show) => set({ showPestManagement: show }),
+   showFertilizerPopup: false,
+   setShowFertilizerPopup: (show) => set({ showFertilizerPopup: show }),
 
   // Reset store
    resetAdvisorStore: () =>
