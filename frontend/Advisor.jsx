@@ -4,6 +4,7 @@ import "./Advisor.css";
 import WeatherCard from "./weather/WeatherCard";
 import SoilChatbot from "./SoilChatbot";
 import SoilAnalysis from "./SoilAnalysis";
+import SoilGuide from "./SoilGuide";
 import IrrigationGuidance from "./IrrigationGuidance";
 import CropProfitCalculator from "./CropProfitCalculator";
 import FarmingMap from "./FarmingMap";
@@ -22,6 +23,7 @@ import {
   Info,
   Map,
   FlaskConical,
+  Layers,
   } from "lucide-react";
   import { useAdvisorStore } from "./stores/advisorStore";
 import { useYieldPrediction } from "./hooks/useYieldPrediction";
@@ -43,6 +45,8 @@ export default function Advisor() {
     setShowSoilChatbot,
     showSoilAnalysis,
     setShowSoilAnalysis,
+    showSoilGuide,
+    setShowSoilGuide,
     showFertilizerPopup,
     setShowFertilizerPopup,
     showComingSoon,
@@ -195,6 +199,18 @@ export default function Advisor() {
             <p>Analyze NPK nutrients and get personalized crop & fertilizer recommendations.</p>
           </div>
 
+          <div
+            className="card reveal"
+            style={{ cursor: "pointer" }}
+            onClick={() => setShowSoilGuide(true)}
+          >
+            <div className="icon">
+              <Layers size={32} strokeWidth={2} />
+            </div>
+            <h3>Soil Type Guide</h3>
+            <p>Explore major soil types in India and find the most suitable crops for your land.</p>
+          </div>
+
           {/* Crop Disease Detection */}
           <div className="card reveal" onClick={() => setShowCropDiseaseDetection(true)}>
             <div className="icon">🌿</div>
@@ -300,6 +316,21 @@ export default function Advisor() {
               ✕
             </button>
             <SoilAnalysis />
+          </div>
+        </div>
+      )}
+
+      {showSoilGuide && (
+        <div className="weather-overlay" onClick={() => setShowSoilGuide(false)}>
+          <div className="soil-analysis-popup" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="close-btn"
+              onClick={() => setShowSoilGuide(false)}
+              style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}
+            >
+              ✕
+            </button>
+            <SoilGuide />
           </div>
         </div>
       )}

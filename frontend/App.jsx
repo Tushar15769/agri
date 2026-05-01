@@ -43,6 +43,7 @@ import ContactUs from "./ContactUs";
 import AboutUs from "./AboutUs";
 import Contributors from "./Contributors";
 import SeasonalCropPlanner from "./SeasonalCropPlanner";
+import SoilGuide from "./SoilGuide";
 
 import FAQ from "./FAQ";
 import NotFound from "./NotFound";
@@ -508,6 +509,7 @@ function App() {
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/crop-planner" element={<SeasonalCropPlanner />} />
+          <Route path="/soil-guide" element={<SoilGuide />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<Terms />} />
