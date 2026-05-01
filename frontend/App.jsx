@@ -4,7 +4,7 @@ import { SkipLink } from "./NavigationManager";
 
 import { ToastContainer } from "react-toastify";
 import { useFloating, flip, shift, offset, autoUpdate } from "@floating-ui/react";
-import {
+  import {
   FaHome,
   FaComments,
   FaInfoCircle,
@@ -128,7 +128,6 @@ function App() {
   const [profileCompleted, setProfileCompleted] = useState(true);
   const [loading, setLoading] = useState(true);
   const [showScorecard, setShowScorecard] = useState(false);
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [preferredLang, setPreferredLang] = useState(getInitialLanguage);
 
   const { floatingStyles } = useFloating({
@@ -306,15 +305,7 @@ function App() {
               <span className="notranslate">Works</span>
             </Link>
           </li>
-          <li>
-            <Link
-              to="/crop-guide"
-              onClick={() => setIsOpen(false)}
-              aria-label="View our comprehensive Crop Guide"
-            >
-              <span className="notranslate">Guide</span>
-            </Link>
-          </li>
+
           <li>
             <Link
               to="/resources"
@@ -342,67 +333,39 @@ function App() {
               <span className="notranslate">Contact</span>
             </Link>
           </li>
+
           <li>
             <Link
-              to="/crop-planner"
+              to="/dashboard"
               onClick={() => setIsOpen(false)}
-              className="planner-nav-link"
-              aria-label="Plan your seasonal crops"
+              aria-label="Go to Farmer Dashboard"
             >
-              <span className="notranslate">Planner</span>
+              <FaTachometerAlt aria-hidden="true" /> <span className="notranslate">Dashboard</span>
             </Link>
+          </li>
+          <li className="nav-language">
+            <span className="language-label-mobile">
+              <span className="notranslate">Language:</span>
+            </span>
+            <div className="language-dropdown-mobile" onClick={(e) => e.stopPropagation()}>
+              <LanguageDropdown 
+                options={LANGUAGE_OPTIONS}
+                value={settings.language}
+                onChange={(lang) => {
+                  setSettings({ ...settings, language: lang });
+                  syncLanguage(lang, setPreferredLang);
+                }}
+              />
+            </div>
           </li>
         </ul>
  
-             <div className="nav-right">
-              <button onClick={handleThemeToggle} className="theme-toggle" aria-label="Toggle Theme">
-                {isDarkTheme ? "☀️" : "🌙"}
-              </button>
+              <div className="nav-right">
+                <button onClick={handleThemeToggle} className="theme-toggle" aria-label="Toggle Theme">
+                  {isDarkTheme ? "☀️" : "🌙"}
+                </button>
 
-              <button onClick={() => setShowMoreMenu(!showMoreMenu)} className="more-menu-toggle" aria-label="More Options">
-              </button>
-
-              {showMoreMenu && (
-                <div className="more-dropdown" onClick={(e) => e.stopPropagation()} role="menu">
-                  <div className="dropdown-links">
-                    {/* Language Selector in hamburger menu */}
-                    <div className="language-selector-section">
-                      <label className="language-label">Language:</label>
-                      <LanguageDropdown 
-                        options={LANGUAGE_OPTIONS}
-                        value={settings.language}
-                        onChange={(lang) => {
-                          setSettings({ ...settings, language: lang });
-                          syncLanguage(lang, setPreferredLang);
-                        }}
-                      />
-                    </div>
-                    {/* 
-                      Internal App Links:
-                      Using Dashboard and Community links within the dropdown.
-                      We ensure these are also focusable and labeled correctly.
-                    */}
-                     <Link
-                       to="/dashboard"
-                       onClick={() => setShowMoreMenu(false)}
-                       role="menuitem"
-                       aria-label="Go to Farmer Dashboard"
-                     >
-                       <FaTachometerAlt aria-hidden="true" /> <span className="notranslate">Dashboard</span>
-                     </Link>
-                     <Link
-                       to="/community"
-                       onClick={() => setShowMoreMenu(false)}
-                       role="menuitem"
-                       aria-label="Join our Community forum"
-                     >
-                       <FaComments aria-hidden="true" /> <span className="notranslate">Community</span>
-                     </Link>
-                  </div>
-                </div>
-              )}
-
-           <div className="nav-user" ref={scorecardRef} onClick={() => { setShowScorecard(!showScorecard); setShowMoreMenu(false); }}>
+            <div className="nav-user" ref={scorecardRef} onClick={() => { setShowScorecard(!showScorecard); }}>
             {loading ? (
               <div className="nav-loader-mini"></div>
             ) : user ? (
