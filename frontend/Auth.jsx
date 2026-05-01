@@ -31,10 +31,10 @@ const Auth = () => {
     return (
       <div className="auth-container">
         <div className="auth-card">
-           <div className="auth-logo">
-             <FaLeaf className="leaf-icon" />
-             <h1 className="notranslate">Fasal Saathi</h1>
-           </div>
+            <div className="auth-logo">
+              <FaLeaf className="leaf-icon" />
+              <h1 className="notranslate" translate="no">Fasal Saathi</h1>
+            </div>
           <p className="auth-subtitle">Firebase credentials not configured</p>
           <div className="auth-message">
             <p>Please configure Firebase credentials in your .env file to enable authentication.</p>
@@ -156,10 +156,10 @@ const Auth = () => {
         <div className="auth-header">
           <div className="auth-logo">
             <FaLeaf />
-            <span className="notranslate">Fasal Saathi</span>
+            <span className="notranslate" translate="no">Fasal Saathi</span>
           </div>
           <h1>{isLogin ? "Welcome Back" : (
-            <>Join <span className="notranslate">Fasal Saathi</span></>
+            <>Join <span className="notranslate" translate="no">Fasal Saathi</span></>
           )}</h1>
           <p>{isLogin ? "Continue your farming journey" : "Start your smart farming journey today"}</p>
         </div>

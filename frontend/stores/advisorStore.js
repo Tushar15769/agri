@@ -45,7 +45,7 @@ export const useAdvisorStore = create((set) => ({
   showFertilizerPopup: false,
   setShowFertilizerPopup: (show) => set({ showFertilizerPopup: show }),
 
-  // Reset store
+  // Reset all modals to closed
   resetAdvisorStore: () =>
     set({
       farmers: 0,
