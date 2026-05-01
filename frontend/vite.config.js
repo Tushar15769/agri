@@ -25,9 +25,12 @@ export default defineConfig(() => ({
     // Legacy browser support removed: React Router 7 requires modern syntax.
     // Minimum supported: Chrome 90+, Android 5+, Safari 14+, Edge 90+
     
- VitePWA({
+    VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'tractor.png'],
+      devOptions: {
+        enabled: true
+      },
       manifest: {
         name: 'Fasal Saathi - AI-Powered Farming Assistant',
         short_name: 'FasalSaathi',
@@ -52,7 +55,7 @@ export default defineConfig(() => ({
           }
         ]
       },
-       workbox: {
+      workbox: {
          globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2,json,webmanifest}'],
           runtimeCaching: [
             // API endpoints for offline data and search
