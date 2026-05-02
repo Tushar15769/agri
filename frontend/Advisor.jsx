@@ -24,6 +24,7 @@ import {
   Map,
   FlaskConical,
   Layers,
+  Book,
 } from "lucide-react";
 import { useAdvisorStore } from "./stores/advisorStore";
 import { useYieldPrediction } from "./hooks/useYieldPrediction";
@@ -111,20 +112,20 @@ export default function Advisor() {
         </button>
       </div>
 
-      <div className="advisor-stats">
-        <div className="stat">
-          <h2>{farmers}+</h2>
-          <p><span className="notranslate">Farmers Connected</span></p>
-        </div>
-        <div className="stat">
-          <h2>{crops}+</h2>
-          <p><span className="notranslate">Crops Analyzed</span></p>
-        </div>
-        <div className="stat">
-          <h2>{languages}+</h2>
-          <p><span className="notranslate">Languages Available</span></p>
-        </div>
-      </div>
+       <div className="advisor-stats">
+         <div className="stat">
+           <h2><span className="stat-number">{farmers.toLocaleString()}</span>{farmers >= 50000 && <span className="stat-plus">+</span>}</h2>
+           <p><span className="notranslate">Farmers Connected</span></p>
+         </div>
+         <div className="stat">
+           <h2><span className="stat-number">{crops}</span>{crops >= 120 && <span className="stat-plus">+</span>}</h2>
+           <p><span className="notranslate">Crops Analyzed</span></p>
+         </div>
+         <div className="stat">
+           <h2><span className="stat-number">{languages}</span>{languages >= 12 && <span className="stat-plus">+</span>}</h2>
+           <p><span className="notranslate">Languages Available</span></p>
+         </div>
+       </div>
 
       <br />
       <br />
@@ -159,24 +160,33 @@ export default function Advisor() {
              </p>
            </div>
 
-           <div className="card reveal" onClick={() => navigate("/community")}>
-             <div className="icon">
-               <MessageSquare size={32} strokeWidth={2} />
-             </div>
-             <h3><span className="notranslate">Farmer Community</span></h3>
-             <p>
-               Connect, share tips, and learn from other farmers in your region.
-             </p>
-           </div>
-            <div className="card reveal" onClick={() => navigate("/helpline")}>
+            <div className="card reveal" onClick={() => navigate("/community")}>
               <div className="icon">
-                <Landmark size={32} strokeWidth={2} />
+                <MessageSquare size={32} strokeWidth={2} />
               </div>
-              <h3><span className="notranslate">Emergency Helpline</span></h3>
+              <h3><span className="notranslate">Farmer Community</span></h3>
               <p>
-                Quick access to emergency farming support and expert advice.
+                Connect, share tips, and learn from other farmers in your region.
               </p>
             </div>
+             <div className="card reveal" onClick={() => navigate("/helpline")}>
+               <div className="icon">
+                 <Landmark size={32} strokeWidth={2} />
+               </div>
+               <h3><span className="notranslate">Emergency Helpline</span></h3>
+               <p>
+                 Quick access to emergency farming support and expert advice.
+               </p>
+             </div>
+             <div className="card reveal" onClick={() => navigate("/blog")}>
+               <div className="icon">
+                 <Book size={32} strokeWidth={2} />
+               </div>
+               <h3><span className="notranslate">Knowledge Blog</span></h3>
+               <p>
+                 Read articles on crop management, weather, and farming best practices.
+               </p>
+             </div>
             <div className="card reveal" onClick={() => navigate("/disease-awareness")}>
               <div className="icon">
                 <Info size={32} strokeWidth={2} />
@@ -308,16 +318,9 @@ export default function Advisor() {
             </div>
             <h3><span className="notranslate">Share Feedback</span></h3>
              <p>Help us improve <span className="notranslate" translate="no">Fasal Saathi</span> with your valuable suggestions.</p>
-          </div>
-           <div className="card reveal" onClick={() => navigate("/crop-planner")}>
-            <div className="icon">
-              <Calendar size={32} strokeWidth={2} />
             </div>
-            <h3><span className="notranslate">Seasonal Crop Planner</span></h3>
-            <p>Plan your crops throughout the year with seasonal recommendations.</p>
-          </div>
-        </div>
-      </div>
+         </div>
+       </div>
           {showWeather && (
         <div className="weather-overlay" onClick={() => setShowWeather(false)}>
           <div className="weather-popup" onClick={(e)=>{e.stopPropagation()}}>

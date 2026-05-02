@@ -50,6 +50,8 @@ import CropDiseaseAwareness from "./CropDiseaseAwareness";
 import Helpline from "./Helpline";
 import Glossary from "./Glossary";
 import RiskIndex from "./RiskIndex";
+import Blog from "./Blog";
+import BlogDetail from "./BlogDetail";
 
 import FAQ from "./FAQ";
 import NotFound from "./NotFound";
@@ -545,9 +547,11 @@ function App() {
           <Route path="/soil-guide" element={<SoilGuide />} />
           <Route path="/disease-awareness" element={<CropDiseaseAwareness />} />
           <Route path="/helpline" element={<Helpline />} />
-          <Route path="/glossary" element={<Glossary />} />
-          <Route path="/risk-index" element={<RiskIndex />} />
-          <Route path="/faq" element={<FAQ />} />
+           <Route path="/glossary" element={<Glossary />} />
+           <Route path="/risk-index" element={<RiskIndex />} />
+            <Route path="/blog" element={<Blog />} />
+           <Route path="/blog/:id" element={<BlogDetail />} />
+           <Route path="/faq" element={<FAQ />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<Terms />} />
           <Route path="*" element={<NotFound />} />
