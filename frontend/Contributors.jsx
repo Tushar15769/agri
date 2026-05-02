@@ -56,21 +56,21 @@ export default function Contributors() {
         </p>
       </div>
 
-      {/* STATS SECTION */}
-      <div className="contributors-stats">
-        <div className="stat-card">
-          <h3>{contributors.length}+</h3>
-          <p>Contributors</p>
-        </div>
-        <div className="stat-card">
-          <h3>🚀</h3>
-          <p>Active Development</p>
-        </div>
-        <div className="stat-card">
-          <h3>💚</h3>
-          <p>Open Source</p>
-        </div>
-      </div>
+       {/* STATS SECTION */}
+       <div className="contributors-stats">
+         <div className="stat-card">
+           <h3>{contributors.length}</h3>
+           <p>Contributors</p>
+         </div>
+         <div className="stat-card">
+           <h3>🚀</h3>
+           <p>Active Development</p>
+         </div>
+         <div className="stat-card">
+           <h3>💚</h3>
+           <p>Open Source</p>
+         </div>
+       </div>
 
       {/* CTA SECTION */}
       <div className="contribute-cta">

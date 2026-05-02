@@ -657,6 +657,17 @@
   background: var(--light);
 }
 
+.section-header .subtitle {
+  font-size: 20px;
+  color: var(--primary);
+  font-weight: 500;
+  margin-bottom: 0;
+}
+
+.theme-dark .section-header .subtitle {
+  color: var(--primary-light);
+}
+
 .contributors-home-card {
   max-width: 1200px;
   margin: 0 auto;

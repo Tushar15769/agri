@@ -353,10 +353,10 @@ export default function Home({ user }) {
 
        {/* Contributors Section */}
        <section className="contributors-home-section">
-         <div className="section-header">
-           <h2>🌟 Our Contributors</h2>
-            <p>Meet the amazing people behind <span className="notranslate">Fasal Saathi</span></p>
-         </div>
+          <div className="section-header">
+            <h2>🌟 Our Contributors</h2>
+            <p className="subtitle">Meet the amazing people behind <span className="notranslate">Fasal Saathi</span></p>
+          </div>
          <div className="contributors-home-card">
            <div className="contributors-home-content">
              <div className="contributors-info">
