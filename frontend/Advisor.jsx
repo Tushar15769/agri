@@ -28,7 +28,7 @@ import {
   Book,
 } from "lucide-react";
 import AgriMarketplace from "./AgriMarketplace";
-import { useNavigate } from "react-router-dom";
+import FarmDiary from "./FarmDiary";
 import { useAdvisorStore } from "./stores/advisorStore";
 import { useYieldPrediction } from "./hooks/useYieldPrediction";
 import CropDiseaseDetection from "./CropDiseaseDetection";
@@ -67,6 +67,8 @@ export default function Advisor() {
     setShowPestManagement,
     showMarketplace,
     setShowMarketplace,
+    showFarmDiary,
+    setShowFarmDiary,
   } = useAdvisorStore();
 
   const {
@@ -331,6 +333,14 @@ export default function Advisor() {
             </div>
             <h3><span className="notranslate">Equipment Marketplace</span></h3>
             <p>Rent tractors, harvesters, and drones from local farmers at affordable rates.</p>
+          </div>
+          
+          <div className="card reveal" onClick={() => setShowFarmDiary(true)}>
+            <div className="icon">
+              <Book size={32} strokeWidth={2} />
+            </div>
+            <h3><span className="notranslate">Digital Farm Diary</span></h3>
+            <p>Log daily farming activities, set task reminders, and export records as PDF reports.</p>
           </div>
         </div>
       </div>
@@ -772,6 +782,14 @@ export default function Advisor() {
               </svg>
             </button>
             <AgriMarketplace onClose={() => setShowMarketplace(false)} />
+          </div>
+        </div>
+      )}
+
+      {showFarmDiary && (
+        <div className="weather-overlay" onClick={() => setShowFarmDiary(false)} style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <FarmDiary onClose={() => setShowFarmDiary(false)} />
           </div>
         </div>
       )}

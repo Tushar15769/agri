@@ -15,7 +15,12 @@ import {
   FaBug,
   FaArrowRight,
   FaBook,
-  FaShieldAlt
+  FaShieldAlt,
+  FaSun,
+  FaFlask,
+  FaPhoneAlt,
+  FaQuoteLeft,
+  FaSeedling
 } from "react-icons/fa";
 import WeatherAlertBar from "./weather/WeatherAlertBar";
 import WeatherQuickWidget from "./weather/WeatherQuickWidget";
@@ -128,7 +133,19 @@ const testimonials = [
   { name: "Suresh Patel", location: "Gujarat", text: "Best AI farming assistant. Simple to use even for elderly farmers." },
 ];
 
-export default function Home() {
+export default function Home({ user }) {
+  const [statValues, setStatValues] = React.useState([0, 0, 0, 0]);
+
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      setStatValues(prev => prev.map((val, idx) => {
+        const target = stats[idx].target;
+        return val < target ? Math.min(val + Math.max(1, Math.ceil(target / 20)), target) : target;
+      }));
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="home">
       <WeatherAlertBar />
@@ -423,3 +440,19 @@ export default function Home() {
     </div>
   );
 }
+
+const Cloud = ({ className }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '100px', height: '100px', opacity: 0.8 }}>
+    <path d="M17.5 19a4.5 4.5 0 0 0 2.9-7.7A7 7 0 0 0 7 9a5.2 5.2 0 0 0-4 8.5" />
+    <path d="M7 19h10.5" />
+  </svg>
+);
+
+const Birds = () => (
+  <div className="birds-anim-wrap" aria-hidden="true" style={{ position: 'absolute', top: '10%', left: '0', width: '100%', height: '100%', pointerEvents: 'none' }}>
+    <svg className="bird bird-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '30px', height: '30px', position: 'absolute', left: '20%', animation: 'fly 10s linear infinite' }}>
+      <path d="M2 12s3-3 6-3 4 3 4 3" />
+      <path d="M12 12s3-3 6-3 4 3 4 3" />
+    </svg>
+  </div>
+);

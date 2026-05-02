@@ -13,6 +13,7 @@ import {
   FaSeedling,
   FaTachometerAlt,
   FaTimes,
+  FaBars,
   FaCalculator,
   FaMap,
   FaChevronDown,
@@ -33,7 +34,7 @@ import CropProfitCalculator from "./CropProfitCalculator";
 import Dashboard from "./Dashboard";
 import Feedback from "./Feedback";
 import FarmingMap from "./FarmingMap";
-import GovernmentSchemes from "./GovernmentSchemes";
+import Schemes from "./GovernmentSchemes";
 import How from "./How";
 import Home from "./Home";
 import MarketPrices from "./MarketPrices";
@@ -41,6 +42,10 @@ import Loader from "./Loader";
 import Community from "./Community";
 import ContactUs from "./ContactUs";
 import AboutUs from "./AboutUs";
+import LanguageDropdown from "./LanguageDropdown";
+import useNotifications from "./Notifications";
+import ProfileSetup from "./ProfileSetup";
+import Resources from "./Resources";
 import SeasonalCropPlanner from "./SeasonalCropPlanner";
 import SoilGuide from "./SoilGuide";
 import CropDiseaseAwareness from "./CropDiseaseAwareness";
