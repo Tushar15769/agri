@@ -46,6 +46,7 @@ import AboutUs from "./AboutUs";
 import LanguageDropdown from "./LanguageDropdown";
 import useNotifications from "./Notifications";
 import ProfileSetup from "./ProfileSetup";
+import QRTraceability from "./QRTraceability";
 import Resources from "./Resources";
 import SeasonalCropPlanner from "./SeasonalCropPlanner";
 import SoilGuide from "./SoilGuide";
@@ -598,6 +599,7 @@ function App() {
           <Route path="/calendar" element={<Calendar />} />
           <Route path="/share-feedback" element={<Feedback />} />
           <Route path="/admin/feedback" element={<AdminFeedback />} />
+          <Route path="/trace/:id" element={<QRTraceability />} />
           <Route path="/market-prices" element={<MarketPrices />} />
           <Route path="/farming-map" element={<FarmingMap />} />
           <Route path="/profit-calculator" element={<CropProfitCalculator />} />
