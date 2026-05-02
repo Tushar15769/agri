@@ -7,9 +7,12 @@ import { useFloating, flip, shift, offset, autoUpdate } from "@floating-ui/react
   import {
   FaHome,
   FaComments,
+  FaGlobe,
+  FaHome,
   FaInfoCircle,
   FaLeaf,
-  FaBars,
+  FaSeedling,
+  FaTachometerAlt,
   FaTimes,
   FaCalculator,
   FaMap,
@@ -22,20 +25,19 @@ import { useFloating, flip, shift, offset, autoUpdate } from "@floating-ui/react
   FaShieldAlt,
 } from "react-icons/fa";
 
-import Advisor from "./Advisor";
-import Home from "./Home";
-import Resources from "./Resources";
-import CropGuide from "./CropGuide";
-import How from "./How";
-import Dashboard from "./Dashboard";
-import Auth from "./Auth";
-import ProfileSetup from "./ProfileSetup";
-import LanguageDropdown from "./LanguageDropdown";
-import useNotifications from "./Notifications";
-import Schemes from "./GovernmentSchemes";
-import Feedback from "./Feedback";
 import AdminFeedback from "./AdminFeedback";
+import Advisor from "./Advisor";
+import Auth from "./Auth";
 import Calendar from "./FarmingCalendar";
+import Contributors from "./Contributors";
+import CropGuide from "./CropGuide";
+import CropProfitCalculator from "./CropProfitCalculator";
+import Dashboard from "./Dashboard";
+import Feedback from "./Feedback";
+import FarmingMap from "./FarmingMap";
+import GovernmentSchemes from "./GovernmentSchemes";
+import How from "./How";
+import Home from "./Home";
 import MarketPrices from "./MarketPrices";
 import Loader from "./Loader";
 import FarmingMap from "./FarmingMap";
