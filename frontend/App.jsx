@@ -44,6 +44,7 @@ import AboutUs from "./AboutUs";
 import Contributors from "./Contributors";
 import SeasonalCropPlanner from "./SeasonalCropPlanner";
 import SoilGuide from "./SoilGuide";
+import CropDiseaseAwareness from "./CropDiseaseAwareness";
 
 import FAQ from "./FAQ";
 import NotFound from "./NotFound";
@@ -305,7 +306,15 @@ function App() {
               <span className="notranslate">Works</span>
             </Link>
           </li>
-
+          <li>
+            <Link
+              to="/crop-guide"
+              onClick={() => setIsOpen(false)}
+              aria-label="View our comprehensive Crop Guide"
+            >
+              <span className="notranslate">Guide</span>
+            </Link>
+          </li>
           <li>
             <Link
               to="/resources"
@@ -313,6 +322,15 @@ function App() {
               aria-label="Access farming resources and materials"
             >
               <span className="notranslate">Resources</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/disease-awareness"
+              onClick={() => setIsOpen(false)}
+              aria-label="Learn about crop diseases and remedies"
+            >
+              <span className="notranslate">Awareness</span>
             </Link>
           </li>
           <li>
@@ -333,30 +351,15 @@ function App() {
               <span className="notranslate">Contact</span>
             </Link>
           </li>
-
           <li>
             <Link
-              to="/dashboard"
+              to="/crop-planner"
               onClick={() => setIsOpen(false)}
-              aria-label="Go to Farmer Dashboard"
+              className="planner-nav-link"
+              aria-label="Plan your seasonal crops"
             >
-              <FaTachometerAlt aria-hidden="true" /> <span className="notranslate">Dashboard</span>
+              <span className="notranslate">Planner</span>
             </Link>
-          </li>
-          <li className="nav-language">
-            <span className="language-label-mobile">
-              <span className="notranslate">Language:</span>
-            </span>
-            <div className="language-dropdown-mobile" onClick={(e) => e.stopPropagation()}>
-              <LanguageDropdown 
-                options={LANGUAGE_OPTIONS}
-                value={settings.language}
-                onChange={(lang) => {
-                  setSettings({ ...settings, language: lang });
-                  syncLanguage(lang, setPreferredLang);
-                }}
-              />
-            </div>
           </li>
         </ul>
  
@@ -365,7 +368,50 @@ function App() {
                   {isDarkTheme ? "☀️" : "🌙"}
                 </button>
 
-            <div className="nav-user" ref={scorecardRef} onClick={() => { setShowScorecard(!showScorecard); }}>
+              <button onClick={() => setShowMoreMenu(!showMoreMenu)} className="more-menu-toggle" aria-label="More Options">
+              </button>
+
+              {showMoreMenu && (
+                <div className="more-dropdown" onClick={(e) => e.stopPropagation()} role="menu">
+                  <div className="dropdown-links">
+                    {/* Language Selector in hamburger menu */}
+                    <div className="language-selector-section">
+                      <label className="language-label">Language:</label>
+                      <LanguageDropdown 
+                        options={LANGUAGE_OPTIONS}
+                        value={settings.language}
+                        onChange={(lang) => {
+                          setSettings({ ...settings, language: lang });
+                          syncLanguage(lang, setPreferredLang);
+                        }}
+                      />
+                    </div>
+                    {/* 
+                      Internal App Links:
+                      Using Dashboard and Community links within the dropdown.
+                      We ensure these are also focusable and labeled correctly.
+                    */}
+                     <Link
+                       to="/dashboard"
+                       onClick={() => setShowMoreMenu(false)}
+                       role="menuitem"
+                       aria-label="Go to Farmer Dashboard"
+                     >
+                       <FaTachometerAlt aria-hidden="true" /> <span className="notranslate">Dashboard</span>
+                     </Link>
+                     <Link
+                       to="/community"
+                       onClick={() => setShowMoreMenu(false)}
+                       role="menuitem"
+                       aria-label="Join our Community forum"
+                     >
+                       <FaComments aria-hidden="true" /> <span className="notranslate">Community</span>
+                     </Link>
+                  </div>
+                </div>
+              )}
+
+           <div className="nav-user" ref={scorecardRef} onClick={() => { setShowScorecard(!showScorecard); setShowMoreMenu(false); }}>
             {loading ? (
               <div className="nav-loader-mini"></div>
             ) : user ? (
@@ -475,6 +521,7 @@ function App() {
           <Route path="/about" element={<AboutUs />} />
           <Route path="/crop-planner" element={<SeasonalCropPlanner />} />
           <Route path="/soil-guide" element={<SoilGuide />} />
+          <Route path="/disease-awareness" element={<CropDiseaseAwareness />} />
           <Route path="/faq" element={<FAQ />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<Terms />} />

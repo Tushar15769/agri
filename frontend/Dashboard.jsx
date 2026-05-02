@@ -177,6 +177,7 @@ export default function Dashboard() {
     { label: "AI Advisor", icon: <FaSeedling />, link: "/advisor" },
     { label: "Crop Planner", icon: <FaCalendarAlt />, link: "/crop-planner" },
     { label: "Community", icon: <FaComments />, link: "/community" },
+    { label: "Diseases", icon: <FaBug />, link: "/disease-awareness" },
     { label: "How It Works", icon: <FaChartLine />, link: "/how-it-works" },
   ];
   const filteredData = yieldData.filter((item) => {

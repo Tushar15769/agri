@@ -380,10 +380,7 @@ body,
 
 .planner-nav-link:hover {
   background: rgba(255, 255, 255, 0.3) !important;
-   transition: all 0.3s ease;
-   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-   white-space: nowrap;
- }
+}
 
  .btn-get-started:hover {
   background: #f0f0f0;
@@ -1199,41 +1196,6 @@ html body {
   color: #94a3b8;
 }
 
-.lang-dropdown-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background-color: #f5a623;
-  color: #000;
-  font-size: 0.95rem;
-  font-weight: 700;
-  font-family: Poppins, sans-serif;
-  padding: 8px 14px;
-  border-radius: 8px;
-  border: 2px solid transparent;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: filter 0.3s ease, transform 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-}
-
-.lang-dropdown-btn:hover {
-  filter: brightness(1.1);
-  transform: translateY(-2px);
-}
-
-.lang-dropdown-panel {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
-  z-index: 9999;
-  background: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  min-width: 210px;
-  overflow: hidden;
-}
 
 /* Page container for map and other full-page views */
 .page-container {
@@ -1283,43 +1245,6 @@ html body {
   font-weight: 600;
 }
 
-.lang-dropdown-check {
-  color: #2e7d32;
-  font-weight: 700;
-  margin-left: 8px;
-}
-
-.lang-dropdown-empty {
-  padding: 12px 14px;
-  font-size: 0.88rem;
-  color: #999;
-  text-align: center;
-  list-style: none;
-}
-
-/* Dark theme overrides for Dropdown */
-.theme-dark .lang-dropdown-panel {
-  background: #1a2e1a;
-  border-color: #2e7d32;
-}
-
-.theme-dark .lang-dropdown-search {
-  background: #1a2e1a;
-  color: #fff;
-  border-bottom-color: #2e7d32;
-}
-
-.theme-dark .lang-dropdown-item {
-  color: #eee;
-}
-
-.theme-dark .lang-dropdown-item:hover {
-  background: #243d24;
-}
-
-.theme-dark .lang-dropdown-item--selected {
-  background: #1b5e20;
-}
 
 /* Offline Banner */
 .offline-banner {
@@ -1617,7 +1542,3 @@ html body {
   background: #dc2626;
 }
 
-
-.navbar {
-  overflow: visible;
-}
