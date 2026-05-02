@@ -270,7 +270,7 @@ function App() {
       <SkipLink />
 
        {loading && <Loader fullPage={true} message={<span className="notranslate">Initializing Fasal Saathi...</span>} />}
-      {isOffline && (
+      {false && (
         <div className="offline-banner" role="alert">
           You are currently offline. Running in offline mode using local data.
         </div>
