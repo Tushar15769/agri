@@ -45,6 +45,9 @@ export const useAdvisorStore = create((set) => ({
   showFertilizerPopup: false,
   setShowFertilizerPopup: (show) => set({ showFertilizerPopup: show }),
 
+  showMarketplace: false,
+  setShowMarketplace: (show) => set({ showMarketplace: show }),
+
   // Reset all modals to closed
   resetAdvisorStore: () =>
     set({
@@ -62,5 +65,6 @@ export const useAdvisorStore = create((set) => ({
       showCropDiseaseDetection: false,
       showPestManagement: false,
       showComingSoon: false,
+      showMarketplace: false,
     }),
 }));
