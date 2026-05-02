@@ -13,6 +13,7 @@ import LastUpdated from "./LastUpdated";
 import AgriMarketplace from "./AgriMarketplace";
 import AgriLMS from "./AgriLMS";
 import QRTraceability from "./QRTraceability";
+import FarmPlanner3D from "./FarmPlanner3D";
 import {
   Sun,
   Droplets,
@@ -73,6 +74,8 @@ export default function Advisor() {
     setShowAgriLMS,
     showQRTraceability,
     setShowQRTraceability,
+    showFarmPlanner3D,
+    setShowFarmPlanner3D,
     showFarmDiary,
     setShowFarmDiary,
   } = useAdvisorStore();
@@ -316,6 +319,12 @@ export default function Advisor() {
             <div className="icon">🔍</div>
             <h3><span className="notranslate">QR-Farm Traceability</span></h3>
             <p>Generate QR codes for your produce. Let customers trace their food from farm to table.</p>
+          </div>
+
+          <div className="card reveal" onClick={() => setShowFarmPlanner3D(true)}>
+            <div className="icon">🗺️</div>
+            <h3><span className="notranslate">3D Farm Planner</span></h3>
+            <p>Design your farm layout in interactive 3D. Optimize land usage and irrigation.</p>
           </div>
 
           <div className="card reveal" onClick={() => setShowProfitCalculator(true)}>
@@ -772,6 +781,15 @@ export default function Advisor() {
           <div className="agri-modal-wrapper" style={{ maxWidth: '1200px' }} onClick={(e) => e.stopPropagation()}>
             <button className="close-btn agri-close-btn" onClick={() => setShowQRTraceability(false)}>✕</button>
             <QRTraceability />
+          </div>
+        </div>
+      )}
+
+      {showFarmPlanner3D && (
+        <div className="weather-overlay" onClick={() => setShowFarmPlanner3D(false)}>
+          <div className="agri-modal-wrapper" style={{ maxWidth: '1200px' }} onClick={(e) => e.stopPropagation()}>
+            <button className="close-btn agri-close-btn" onClick={() => setShowFarmPlanner3D(false)}>✕</button>
+            <FarmPlanner3D />
           </div>
         </div>
       )}
