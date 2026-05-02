@@ -10,6 +10,7 @@ import CropProfitCalculator from "./CropProfitCalculator";
 import FarmingMap from "./FarmingMap";
 import FertilizerRecommendation from "./FertilizerRecommendation";
 import LastUpdated from "./LastUpdated";
+import AgriMarketplace from "./AgriMarketplace";
 import {
   Sun,
   Droplets,
@@ -27,7 +28,6 @@ import {
   ShoppingCart,
   Book,
 } from "lucide-react";
-import AgriMarketplace from "./AgriMarketplace";
 import FarmDiary from "./FarmDiary";
 import { useAdvisorStore } from "./stores/advisorStore";
 import { useYieldPrediction } from "./hooks/useYieldPrediction";
@@ -65,8 +65,8 @@ export default function Advisor() {
     setShowCropDiseaseDetection,
     showPestManagement,
     setShowPestManagement,
-    showMarketplace,
-    setShowMarketplace,
+    showAgriMarketplace,
+    setShowAgriMarketplace,
     showFarmDiary,
     setShowFarmDiary,
   } = useAdvisorStore();
@@ -294,6 +294,12 @@ export default function Advisor() {
             <p>Direct subsidies, insurance, and financial benefits for farmers.</p>
           </div>
 
+          <div className="card reveal" onClick={() => setShowAgriMarketplace(true)}>
+            <div className="icon">🚜</div>
+            <h3><span className="notranslate">Agri Marketplace</span></h3>
+            <p>Rent or list farm equipment locally. Save costs and earn extra.</p>
+          </div>
+
           <div className="card reveal" onClick={() => setShowProfitCalculator(true)}>
             <div className="icon">💰</div>
             <h3><span className="notranslate">Profit Calculator</span></h3>
@@ -327,14 +333,6 @@ export default function Advisor() {
              <p>Help us improve <span className="notranslate" translate="no">Fasal Saathi</span> with your valuable suggestions.</p>
           </div>
 
-          <div className="card reveal" onClick={() => setShowMarketplace(true)}>
-            <div className="icon">
-              <ShoppingCart size={32} strokeWidth={2} />
-            </div>
-            <h3><span className="notranslate">Equipment Marketplace</span></h3>
-            <p>Rent tractors, harvesters, and drones from local farmers at affordable rates.</p>
-          </div>
-          
           <div className="card reveal" onClick={() => setShowFarmDiary(true)}>
             <div className="icon">
               <Book size={32} strokeWidth={2} />
@@ -733,6 +731,15 @@ export default function Advisor() {
         </div>
       )}
 
+      {showAgriMarketplace && (
+        <div className="weather-overlay" onClick={() => setShowAgriMarketplace(false)}>
+          <div className="agri-modal-wrapper" onClick={(e) => e.stopPropagation()}>
+            <button className="close-btn agri-close-btn" onClick={() => setShowAgriMarketplace(false)}>✕</button>
+            <AgriMarketplace onClose={() => setShowAgriMarketplace(false)} />
+          </div>
+        </div>
+      )}
+
       {showComingSoon && (
         <div className="weather-overlay" onClick={()=>{setShowComingSoon(false)}}>
           <div className="weather-popup coming-soon" onClick={(e)=>e.stopPropagation()}>
@@ -748,43 +755,7 @@ export default function Advisor() {
         </div>
       )}
 
-      {showMarketplace && (
-        <div className="weather-overlay" onClick={() => setShowMarketplace(false)}>
-          <div className="marketplace-popup-shell" onClick={(e) => e.stopPropagation()} style={{ width: '90%', maxWidth: '1200px', position: 'relative' }}>
-            <button
-              onClick={() => setShowMarketplace(false)}
-              style={{
-                position: 'absolute',
-                top: '16px',
-                right: '16px',
-                zIndex: 100,
-                width: '40px',
-                height: '40px',
-                borderRadius: '50%',
-                border: '1.5px solid rgba(255,255,255,0.25)',
-                background: 'rgba(20,20,20,0.7)',
-                backdropFilter: 'blur(8px)',
-                color: 'rgba(255,255,255,0.85)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                transition: 'background 0.2s, border-color 0.2s, color 0.2s',
-                lineHeight: 1,
-                padding: 0,
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.85)'; e.currentTarget.style.borderColor = 'rgba(239,68,68,0.6)'; e.currentTarget.style.color = '#fff'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'rgba(20,20,20,0.7)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)'; e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; }}
-              aria-label="Close Marketplace"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </button>
-            <AgriMarketplace onClose={() => setShowMarketplace(false)} />
-          </div>
-        </div>
-      )}
+      {/* AgriMarketplace Modal removed duplication */}
 
       {showFarmDiary && (
         <div className="weather-overlay" onClick={() => setShowFarmDiary(false)} style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

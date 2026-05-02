@@ -42,14 +42,14 @@ export const useAdvisorStore = create((set) => ({
   showSoilGuide: false,
   setShowSoilGuide: (show) => set({ showSoilGuide: show }),
 
-  showFertilizerPopup: false,
-  setShowFertilizerPopup: (show) => set({ showFertilizerPopup: show }),
-
-  showMarketplace: false,
-  setShowMarketplace: (show) => set({ showMarketplace: show }),
+   showFertilizerPopup: false,
+   setShowFertilizerPopup: (show) => set({ showFertilizerPopup: show }),
 
   showFarmDiary: false,
   setShowFarmDiary: (show) => set({ showFarmDiary: show }),
+
+  showAgriMarketplace: false,
+  setShowAgriMarketplace: (show) => set({ showAgriMarketplace: show }),
 
   // Reset all modals to closed
   resetAdvisorStore: () =>
@@ -68,7 +68,7 @@ export const useAdvisorStore = create((set) => ({
       showCropDiseaseDetection: false,
       showPestManagement: false,
       showComingSoon: false,
-      showMarketplace: false,
+      showAgriMarketplace: false,
       showFarmDiary: false,
     }),
 }));

@@ -7,6 +7,8 @@
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
 }
 
 /* Header & Search */
@@ -425,5 +427,28 @@
   
   .header-top h1 {
     font-size: 1.4rem;
+  }
+}
+
+.marketplace-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+  .search-bar-container {
+    flex-direction: column;
+  }
+
+  .header-top h1 {
+    font-size: 1.4rem;
+  }
+
+  .marketplace-container {
+    padding: 1rem;
+    height: 90vh;
+  }
+
+  .equipment-grid {
+    grid-template-columns: 1fr;
   }
 }
