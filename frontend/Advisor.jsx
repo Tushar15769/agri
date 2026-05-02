@@ -11,6 +11,7 @@ import FarmingMap from "./FarmingMap";
 import FertilizerRecommendation from "./FertilizerRecommendation";
 import LastUpdated from "./LastUpdated";
 import AgriMarketplace from "./AgriMarketplace";
+import AgriLMS from "./AgriLMS";
 import {
   Sun,
   Droplets,
@@ -67,6 +68,8 @@ export default function Advisor() {
     setShowPestManagement,
     showAgriMarketplace,
     setShowAgriMarketplace,
+    showAgriLMS,
+    setShowAgriLMS,
     showFarmDiary,
     setShowFarmDiary,
   } = useAdvisorStore();
@@ -298,6 +301,12 @@ export default function Advisor() {
             <div className="icon">🚜</div>
             <h3><span className="notranslate">Agri Marketplace</span></h3>
             <p>Rent or list farm equipment locally. Save costs and earn extra.</p>
+          </div>
+
+          <div className="card reveal" onClick={() => setShowAgriLMS(true)}>
+            <div className="icon">🎓</div>
+            <h3><span className="notranslate">Agri-LMS Academy</span></h3>
+            <p>Access video tutorials on modern farming and earn completion certificates.</p>
           </div>
 
           <div className="card reveal" onClick={() => setShowProfitCalculator(true)}>
@@ -736,6 +745,15 @@ export default function Advisor() {
           <div className="agri-modal-wrapper" onClick={(e) => e.stopPropagation()}>
             <button className="close-btn agri-close-btn" onClick={() => setShowAgriMarketplace(false)}>✕</button>
             <AgriMarketplace onClose={() => setShowAgriMarketplace(false)} />
+          </div>
+        </div>
+      )}
+
+      {showAgriLMS && (
+        <div className="weather-overlay" onClick={() => setShowAgriLMS(false)}>
+          <div className="agri-modal-wrapper" style={{ maxWidth: '1200px' }} onClick={(e) => e.stopPropagation()}>
+            <button className="close-btn agri-close-btn" onClick={() => setShowAgriLMS(false)}>✕</button>
+            <AgriLMS onClose={() => setShowAgriLMS(false)} />
           </div>
         </div>
       )}
