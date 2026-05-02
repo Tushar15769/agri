@@ -270,11 +270,11 @@ function App() {
       <SkipLink />
 
        {loading && <Loader fullPage={true} message={<span className="notranslate">Initializing Fasal Saathi...</span>} />}
-      {false && (
-        <div className="offline-banner" role="alert">
-          You are currently offline. Running in offline mode using local data.
-        </div>
-      )}
+       {isOffline && (
+         <div className="offline-banner" role="alert">
+           You are currently offline. Running in offline mode using local data.
+         </div>
+       )}
 
       {/* 
         ACCESSIBILITY IMPROVEMENT: Semantic Navigation
@@ -329,54 +329,26 @@ function App() {
             >
               <span className="notranslate">Resources</span>
             </Link>
-          </li>
-          <li>
-            <Link
-              to="/disease-awareness"
-              onClick={() => setIsOpen(false)}
-              aria-label="Learn about crop diseases and remedies"
-            >
-              <span className="notranslate">Awareness</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/about"
-              onClick={() => setIsOpen(false)}
-              aria-label="Learn about our mission and team"
-            >
-              <span className="notranslate">About</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/contact"
-              onClick={() => setIsOpen(false)}
-              aria-label="Get in touch with us"
-            >
-              <span className="notranslate">Contact</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/helpline"
-              onClick={() => setIsOpen(false)}
-              aria-label="Emergency farming helplines and support"
-            >
-              <span className="notranslate">Helpline</span>
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/crop-planner"
-              onClick={() => setIsOpen(false)}
-              className="planner-nav-link"
-              aria-label="Plan your seasonal crops"
-            >
-              <span className="notranslate">Planner</span>
-            </Link>
-          </li>
-          <li className="mobile-only-language">
+           </li>
+           <li>
+             <Link
+               to="/about"
+               onClick={() => setIsOpen(false)}
+               aria-label="Learn about our mission and team"
+             >
+               <span className="notranslate">About</span>
+             </Link>
+           </li>
+           <li>
+             <Link
+               to="/contact"
+               onClick={() => setIsOpen(false)}
+               aria-label="Get in touch with us"
+             >
+               <span className="notranslate">Contact</span>
+             </Link>
+           </li>
+           <li className="mobile-only-language">
             <div className="language-selector-section">
               <label className="language-label">Language:</label>
               <LanguageDropdown 

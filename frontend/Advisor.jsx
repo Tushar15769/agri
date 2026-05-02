@@ -159,16 +159,34 @@ export default function Advisor() {
              </p>
            </div>
 
-          <div className="card reveal" onClick={() => navigate("/community")}>
-            <div className="icon">
-              <MessageSquare size={32} strokeWidth={2} />
+           <div className="card reveal" onClick={() => navigate("/community")}>
+             <div className="icon">
+               <MessageSquare size={32} strokeWidth={2} />
+             </div>
+             <h3><span className="notranslate">Farmer Community</span></h3>
+             <p>
+               Connect, share tips, and learn from other farmers in your region.
+             </p>
+           </div>
+            <div className="card reveal" onClick={() => navigate("/helpline")}>
+              <div className="icon">
+                <Landmark size={32} strokeWidth={2} />
+              </div>
+              <h3><span className="notranslate">Emergency Helpline</span></h3>
+              <p>
+                Quick access to emergency farming support and expert advice.
+              </p>
             </div>
-            <h3><span className="notranslate">Farmer Community</span></h3>
-            <p>
-              Connect, share tips, and learn from other farmers in your region.
-            </p>
-          </div>
-          <div className="card reveal" onClick={() => setShowIrrigation(true)}>
+            <div className="card reveal" onClick={() => navigate("/disease-awareness")}>
+              <div className="icon">
+                <Info size={32} strokeWidth={2} />
+              </div>
+              <h3><span className="notranslate">Crop Disease Awareness</span></h3>
+              <p>
+                Learn about crop diseases and remedies for better farming.
+              </p>
+            </div>
+            <div className="card reveal" onClick={() => setShowIrrigation(true)}>
             <div className="icon">
               <Droplets size={32} strokeWidth={2} />
             </div>
@@ -277,14 +295,13 @@ export default function Advisor() {
             <p>View your fields, weather data, and crop locations on an interactive map.</p>
           </div>
 
-          <div className="card reveal" onClick={() => navigate("/calendar")}>
+           <div className="card reveal" onClick={() => navigate("/calendar")}>
             <div className="icon">
               <Calendar size={32} strokeWidth={2} />
             </div>
             <h3><span className="notranslate">Activity Calendar</span></h3>
             <p>Schedule sowing, watering, and harvesting with reminders.</p>
           </div>
-
           <div className="card reveal" onClick={() => navigate("/share-feedback")}>
             <div className="icon">
               <MessageSquare size={32} strokeWidth={2} />
@@ -292,13 +309,12 @@ export default function Advisor() {
             <h3><span className="notranslate">Share Feedback</span></h3>
              <p>Help us improve <span className="notranslate" translate="no">Fasal Saathi</span> with your valuable suggestions.</p>
           </div>
-
-          <div className="card reveal" onClick={() => navigate("/crop-planner")}>
+           <div className="card reveal" onClick={() => navigate("/crop-planner")}>
             <div className="icon">
               <Calendar size={32} strokeWidth={2} />
             </div>
             <h3><span className="notranslate">Seasonal Crop Planner</span></h3>
-            <p>Plan your crops throughout the year with seasonal recommendations and crop rotation cycles.</p>
+            <p>Plan your crops throughout the year with seasonal recommendations.</p>
           </div>
         </div>
       </div>
