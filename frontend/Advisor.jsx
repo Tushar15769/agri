@@ -772,6 +772,7 @@ export default function Advisor() {
           <div className="agri-modal-wrapper" style={{ maxWidth: '1200px' }} onClick={(e) => e.stopPropagation()}>
             <button className="close-btn agri-close-btn" onClick={() => setShowQRTraceability(false)}>✕</button>
             <QRTraceability />
+            <AgriLMS onClose={() => setShowAgriLMS(false)} />
           </div>
         </div>
       )}
