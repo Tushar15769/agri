@@ -4,6 +4,18 @@ import "./App.css";
 import Advisor from "./Advisor";
 import How from "./How";
 import Home from "./Home";
+import FAQ from "./pages/FAQ";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import Resources from "./Resources";
+import CropGuide from "./CropGuide";
+import { ToastContainer } from "react-toastify";
+import useNotifications from "./Notifications";
+import React, { useEffect, useState } from "react";
+import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
+
+import { ToastContainer } from "react-toastify";
+
 import FAQ from "./FAQ";
 import Terms from "./Terms";
 import Privacy from "./Privacy";
@@ -256,6 +268,14 @@ function App() {
   };
 
   return (
+    <BrowserRouter>
+      <div className={`app ${isDarkTheme ? "theme-dark" : ""}`}>
+      {loading && <Loader fullPage={true} message="Initializing Fasal Saathi..." />}
+      {isOffline && (
+        <div className="offline-banner">
+          You are currently offline. Running in offline mode using local data.
+        </div>
+      )}
     <div className={`app ${isDarkTheme ? "theme-dark" : ""}`}>
       <SkipLink />
 
@@ -679,6 +699,39 @@ function App() {
            </div>
           )}
 
+      <Routes>
+        <Route path="/" element={<Home user={user} />} />
+       <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/advisor" element={<Advisor />} />
+        <Route path="/how-it-works" element={<How />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/crop-guide" element={<CropGuide />} />
+        <Route path="/schemes" element={<Schemes />} />
+        <Route path="/resources" element={<Resources />} />
+        <Route path="/login" element={<Auth />} />
+        <Route path="/profile-setup" element={<ProfileSetup user={user} profileCompleted={profileCompleted} />} />
+        <Route path="/calendar" element={<Calendar />} />
+        <Route path="/share-feedback" element={<Feedback />} />
+        <Route path="/admin/feedback" element={<AdminFeedback />} />
+        <Route path="/market-prices" element={<MarketPrices />} />
+        <Route path="/farming-map" element={<FarmingMap />} />
+        <Route path="/profit-calculator" element={<CropProfitCalculator />} />
+        <Route path="/community" element={<Community />} />
+        <Route path="/soil-analysis" element={<SoilAnalysis />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy-policy" element={<Privacy />} />
+      </Routes>
+
+        {/* Floating Chat Button */}
+        <Link to="/advisor" className="floating-chat-btn" aria-label="Chat Support">
+          <FaComments size={28} />
+        </Link>
+
+        <ToastContainer position="bottom-right" />
+      </div>
+    </BrowserRouter>
         {!loading && user && user.emailVerified && !profileCompleted && window.location.pathname !== "/profile-setup" && (
           <Navigate to="/profile-setup" />
         )}
