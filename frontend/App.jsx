@@ -1,3 +1,13 @@
+import React, { useState, useRef, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import "./App.css";
+import Advisor from "./Advisor";
+import How from "./How";
+import Home from "./Home";
+import FAQ from "./pages/FAQ";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
+import {
 import React, { useEffect, useState, useRef } from "react";
 import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
 import { SkipLink } from "./NavigationManager";
@@ -589,6 +599,46 @@ function App() {
           <Route path="/" element={<Home user={user} />} />
           <Route path="/advisor" element={<Advisor />} />
           <Route path="/how-it-works" element={<How />} />
+          
+  {/* NEW ROUTES */}
+  <Route path="/faq" element={<FAQ />} />
+  <Route path="/terms" element={<Terms />} />
+  <Route path="/privacy-policy" element={<Privacy />} />
+
+          <Route
+            path="/login"
+            element={
+              <div className="login-page">
+                <div className="login-card">
+                  <h2>👨‍🌾 Farmer Login</h2>
+                  <p>Welcome! Please provide your details to continue.</p>
+                  <form onSubmit={handleLogin}>
+                    <input
+                      type="text"
+                      placeholder="Enter your name"
+                      value={inputName}
+                      onChange={(e) => setInputName(e.target.value)}
+                      required
+                    />
+                    <select
+                      value={preferredLang}
+                      onChange={(e) => setPreferredLang(e.target.value)}
+                      required
+                    >
+                      <option value="en">English</option>
+                      <option value="hi">Hindi</option>
+                      <option value="mr">Marathi</option>
+                    </select>
+                    <button type="submit">Login</button>
+                  </form>
+                  <p className="login-note">
+                    Your preferences will be saved for future visits.
+                  </p>
+                </div>
+              </div>
+            }
+          />
+          
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/crop-guide" element={<CropGuide />} />
           <Route path="/schemes" element={<Schemes />} />
