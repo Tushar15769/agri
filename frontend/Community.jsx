@@ -12,8 +12,11 @@ import {
   Tag, 
   MoreVertical,
   Send,
-  X
+  X,
+  ShieldCheck,
+  MessageCircle
 } from "lucide-react";
+import P2PChat from "./P2PChat";
 import { auth, db, isFirebaseConfigured } from "./lib/firebase";
 import { 
   collection, 
@@ -27,7 +30,8 @@ import {
   arrayRemove,
   where,
   Timestamp,
-  getDocs
+  getDocs,
+  increment
 } from "firebase/firestore";
 import Loader from "./Loader";
 import "./Community.css";
@@ -52,6 +56,13 @@ const Community = () => {
   const [newComment, setNewComment] = useState("");
   const [postComments, setPostComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
+  const [showP2PChat, setShowP2PChat] = useState(null); // stores the recipient object
+  
+  // Mock verification check for demo
+  const isVerified = (userId) => {
+    // For demo: all users with 'a' in their ID or the word 'farmer' are verified
+    return userId.length > 10 || userId.includes('farmer');
+  };
 
   const currentUser = isFirebaseConfigured() ? auth?.currentUser : null;
 
@@ -99,6 +110,10 @@ const Community = () => {
       });
       setNewPost({ content: "", category: "general" });
       setShowCreateModal(false);
+      
+      // Award points for creating a post
+      const userRef = doc(db, "users", currentUser.uid);
+      await updateDoc(userRef, { reputation: increment(10) });
     } catch (err) {
       console.error("Error creating post:", err);
     }
@@ -113,6 +128,12 @@ const Community = () => {
       await updateDoc(postRef, {
         likes: isLiked ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid)
       });
+
+      // Award points to the author when liked
+      if (!isLiked && post.userId !== currentUser.uid) {
+        const authorRef = doc(db, "users", post.userId);
+        await updateDoc(authorRef, { reputation: increment(10) });
+      }
     } catch (err) {
       console.error("Error liking post:", err);
     }
@@ -160,6 +181,10 @@ const Community = () => {
       setNewComment("");
       // Refresh comments locally for now or use another listener
       openComments(showCommentsModal);
+
+      // Award points for commenting
+      const userRef = doc(db, "users", currentUser.uid);
+      await updateDoc(userRef, { reputation: increment(5) });
     } catch (err) {
       console.error("Error adding comment:", err);
     }
@@ -229,6 +254,7 @@ const Community = () => {
                   <div className="user-info">
                     <div className="user-avatar">
                       {post.userName ? post.userName[0].toUpperCase() : "U"}
+                      {isVerified(post.userId) && <ShieldCheck className="verified-badge-community" size={14} />}
                     </div>
                     <div>
                       <h3>{post.userName}</h3>
@@ -260,6 +286,16 @@ const Community = () => {
                     <MessageSquare size={18} />
                     {post.commentsCount || 0}
                   </button>
+                  {currentUser && (
+                    <button 
+                      className="action-btn p2p-action-btn" 
+                      onClick={() => setShowP2PChat({ userId: post.userId, userName: post.userName })}
+                      title="Send Private Encrypted Message"
+                    >
+                      <MessageCircle size={18} />
+                      <span className="p2p-label">Chat</span>
+                    </button>
+                  )}
                   <button className="action-btn">
                     <Share2 size={18} />
                   </button>
@@ -356,6 +392,17 @@ const Community = () => {
                />
                <button type="submit" className="send-btn" disabled={!isFirebaseConfigured() || !currentUser}><Send size={18} /></button>
              </form>
+          </div>
+        </div>
+      )}
+      {/* P2P Chat Modal */}
+      {showP2PChat && (
+        <div className="modal-overlay chat-modal-overlay">
+          <div className="modal-card p2p-chat-modal-wrapper" onClick={(e) => e.stopPropagation()}>
+            <P2PChat 
+              recipient={showP2PChat} 
+              onClose={() => setShowP2PChat(null)} 
+            />
           </div>
         </div>
       )}
