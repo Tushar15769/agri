@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './AgriLMS.css';
-import { Play, CheckCircle, Award, BookOpen, Clock, Download, ChevronRight } from 'lucide-react';
+import { Play, CheckCircle, Award, BookOpen, Clock, Download, ChevronRight, MessageCircle } from 'lucide-react';
 import jsPDF from 'jspdf';
+import SoilChatbot from './SoilChatbot';
 
 const COURSES = [
   {
@@ -44,6 +45,7 @@ export default function AgriLMS() {
     const saved = localStorage.getItem('agriLmsProgress');
     return saved ? JSON.parse(saved) : {};
   });
+  const [showAdvisor, setShowAdvisor] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('agriLmsProgress', JSON.stringify(progress));
@@ -59,16 +61,10 @@ export default function AgriLMS() {
   };
 
   const generateCertificate = (course) => {
-    const doc = new jsPDF({
-      orientation: 'landscape',
-      unit: 'mm',
-      format: 'a4'
-    });
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
 
-    // Simple Certificate Design
     doc.setFillColor(245, 247, 241);
     doc.rect(0, 0, 297, 210, 'F');
-    
     doc.setDrawColor(46, 125, 50);
     doc.setLineWidth(5);
     doc.rect(10, 10, 277, 190);
@@ -80,7 +76,7 @@ export default function AgriLMS() {
     doc.setTextColor(33, 33, 33);
     doc.setFontSize(20);
     doc.text('This is to certify that', 148.5, 80, { align: 'center' });
-    
+
     doc.setFontSize(30);
     doc.setFont('helvetica', 'bold');
     doc.text('Fasal Saathi Student', 148.5, 105, { align: 'center' });
@@ -100,8 +96,10 @@ export default function AgriLMS() {
     doc.save(`AgriLMS_Certificate_${course.id}.pdf`);
   };
 
+  let content;
+
   if (activeCourse) {
-    return (
+    content = (
       <div className="lms-content active-course">
         <div className="lms-header active-header">
           <button className="back-btn" onClick={() => { setActiveCourse(null); setActiveLesson(null); }}>
@@ -132,13 +130,13 @@ export default function AgriLMS() {
                   <div className="lesson-text">
                     <h3>{activeLesson.title}</h3>
                     <p className="instruction-text">
-                      {progress[activeLesson.id] 
-                        ? "You've completed this lesson!" 
+                      {progress[activeLesson.id]
+                        ? "You've completed this lesson!"
                         : "Watch the video and click the button to mark it as finished."}
                     </p>
                   </div>
                   <div className="video-actions">
-                    <button 
+                    <button
                       className={`complete-btn ${progress[activeLesson.id] ? 'completed' : 'pulse'}`}
                       onClick={() => markAsComplete(activeLesson.id)}
                     >
@@ -164,8 +162,8 @@ export default function AgriLMS() {
           <div className="lessons-list">
             <h3>Course Content</h3>
             {activeCourse.lessons.map((lesson, idx) => (
-              <div 
-                key={lesson.id} 
+              <div
+                key={lesson.id}
                 className={`lesson-item ${activeLesson?.id === lesson.id ? 'active' : ''} ${progress[lesson.id] ? 'finished' : ''}`}
                 onClick={() => setActiveLesson(lesson)}
               >
@@ -177,7 +175,7 @@ export default function AgriLMS() {
                 {progress[lesson.id] && <CheckCircle size={16} className="status-icon" />}
               </div>
             ))}
-            
+
             {getCourseProgress(activeCourse) === 100 && (
               <div className="certification-ready">
                 <Award size={32} />
@@ -191,53 +189,66 @@ export default function AgriLMS() {
         </div>
       </div>
     );
+  } else {
+    content = (
+      <div className="lms-container">
+        <div className="lms-header">
+          <h1><BookOpen size={28} /> Agri-LMS Learning Portal</h1>
+          <p>Empowering the next generation of farmers through digital education.</p>
+        </div>
+
+        <div className="course-categories">
+          {COURSES.map(course => (
+            <div key={course.id} className="course-card">
+              <div className="course-badge">{course.category}</div>
+              <h3>{course.title}</h3>
+              <div className="course-meta">
+                <span><Clock size={14} /> {course.duration}</span>
+                <span><Play size={14} /> {course.lessons.length} Lessons</span>
+              </div>
+
+              <div className="progress-bar-container">
+                <div className="progress-bar-fill" style={{ width: `${getCourseProgress(course)}%` }}></div>
+              </div>
+              <div className="progress-text">
+                {getCourseProgress(course)}% Completed
+                {getCourseProgress(course) === 100 && <CheckCircle size={14} style={{ color: '#4caf50', marginLeft: '8px' }} />}
+              </div>
+
+              {getCourseProgress(course) === 100 ? (
+                <div className="card-actions">
+                  <button className="start-course-btn" onClick={() => setActiveCourse(course)}>
+                    Review Course
+                  </button>
+                  <button className="cert-btn-small" onClick={(e) => { e.stopPropagation(); generateCertificate(course); }}>
+                    <Award size={16} /> Get Certificate
+                  </button>
+                </div>
+              ) : (
+                <button className="start-course-btn" onClick={() => setActiveCourse(course)}>
+                  {getCourseProgress(course) > 0 ? 'Continue Learning' : 'Start Course'}
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="lms-container">
-      <div className="lms-header">
-        <h1><BookOpen size={28} /> Agri-LMS Learning Portal</h1>
-        <p>Empowering the next generation of farmers through digital education.</p>
-      </div>
-
-      <div className="course-categories">
-        {COURSES.map(course => (
-          <div key={course.id} className="course-card">
-            <div className="course-badge">{course.category}</div>
-            <h3>{course.title}</h3>
-            <div className="course-meta">
-              <span><Clock size={14} /> {course.duration}</span>
-              <span><Play size={14} /> {course.lessons.length} Lessons</span>
-            </div>
-            
-            <div className="progress-bar-container">
-              <div 
-                className="progress-bar-fill" 
-                style={{ width: `${getCourseProgress(course)}%` }}
-              ></div>
-            </div>
-            <div className="progress-text">
-              {getCourseProgress(course)}% Completed
-              {getCourseProgress(course) === 100 && <CheckCircle size={14} style={{ color: '#4caf50', marginLeft: '8px' }} />}
-            </div>
-
-            {getCourseProgress(course) === 100 ? (
-              <div className="card-actions">
-                <button className="start-course-btn" onClick={() => setActiveCourse(course)}>
-                  Review Course
-                </button>
-                <button className="cert-btn-small" onClick={(e) => { e.stopPropagation(); generateCertificate(course); }}>
-                  <Award size={16} /> Get Certificate
-                </button>
-              </div>
-            ) : (
-              <button className="start-course-btn" onClick={() => setActiveCourse(course)}>
-                {getCourseProgress(course) > 0 ? 'Continue Learning' : 'Start Course'}
-              </button>
-            )}
+    <>
+      {content}
+      <button className="advisor-fab" onClick={() => setShowAdvisor(true)} aria-label="Open AI Advisor">
+        <MessageCircle size={24} />
+      </button>
+      {showAdvisor && (
+        <div className="advisor-overlay" onClick={() => setShowAdvisor(false)}>
+          <div className="advisor-modal" onClick={e => e.stopPropagation()}>
+            <SoilChatbot onClose={() => setShowAdvisor(false)} />
           </div>
-        ))}
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 }

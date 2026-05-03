@@ -89,13 +89,10 @@ export default function How() {
               }}
             >
               <div className="step-number">0{index + 1}</div>
-
               <div className="step-icon">{step.icon}</div>
-
               <div className="step-content">
                 <h3>{step.title}</h3>
                 <p>{step.desc}</p>
-                
                 {activeStep === index && (
                   <div className="step-expanded">
                     <div className="step-details">{step.details}</div>
@@ -107,7 +104,6 @@ export default function How() {
                   </div>
                 )}
               </div>
-
               <div className="step-indicator"></div>
             </div>
           ))}

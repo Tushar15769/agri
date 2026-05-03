@@ -30,7 +30,8 @@ import {
   arrayRemove,
   where,
   Timestamp,
-  getDocs
+  getDocs,
+  increment
 } from "firebase/firestore";
 import Loader from "./Loader";
 import "./Community.css";
@@ -109,6 +110,10 @@ const Community = () => {
       });
       setNewPost({ content: "", category: "general" });
       setShowCreateModal(false);
+      
+      // Award points for creating a post
+      const userRef = doc(db, "users", currentUser.uid);
+      await updateDoc(userRef, { reputation: increment(10) });
     } catch (err) {
       console.error("Error creating post:", err);
     }
@@ -123,6 +128,12 @@ const Community = () => {
       await updateDoc(postRef, {
         likes: isLiked ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid)
       });
+
+      // Award points to the author when liked
+      if (!isLiked && post.userId !== currentUser.uid) {
+        const authorRef = doc(db, "users", post.userId);
+        await updateDoc(authorRef, { reputation: increment(10) });
+      }
     } catch (err) {
       console.error("Error liking post:", err);
     }
@@ -170,6 +181,10 @@ const Community = () => {
       setNewComment("");
       // Refresh comments locally for now or use another listener
       openComments(showCommentsModal);
+
+      // Award points for commenting
+      const userRef = doc(db, "users", currentUser.uid);
+      await updateDoc(userRef, { reputation: increment(5) });
     } catch (err) {
       console.error("Error adding comment:", err);
     }
