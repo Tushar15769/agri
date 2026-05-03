@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import CryptoJS from "crypto-js";
 import { Send, Lock, ShieldCheck, X, User } from "lucide-react";
-import { Send, Lock, X } from "lucide-react";
 import { db, auth } from "./lib/firebase";
 import { 
   collection, 
@@ -22,14 +21,10 @@ const P2PChat = ({ recipient, onClose }) => {
   const messagesEndRef = useRef(null);
   const currentUser = auth?.currentUser;
 
-  // Derive a "Shared Secret" for E2EE based on user IDs
-  // In a real app, this would be a DH exchange result
-  const sharedSecret = [currentUser?.uid, recipient.userId].sort().join("_");
-  const messagesEndRef = useRef(null);
-  const currentUser = auth?.currentUser;
-
   const hasValidRecipient = recipient && recipient.userId;
   const effectiveRecipient = hasValidRecipient ? recipient : { userId: "default", userName: "Chat" };
+  
+  // Derive a "Shared Secret" for E2EE based on user IDs
   const sharedSecret = [currentUser?.uid, effectiveRecipient.userId].sort().join("_");
 
   const scrollToBottom = () => {
@@ -37,9 +32,6 @@ const P2PChat = ({ recipient, onClose }) => {
   };
 
   useEffect(() => {
-    if (!currentUser || !recipient.userId) return;
-
-    const chatId = [currentUser.uid, recipient.userId].sort().join("-");
     if (!currentUser || !effectiveRecipient.userId) return;
 
     const chatId = [currentUser.uid, effectiveRecipient.userId].sort().join("-");
@@ -62,7 +54,6 @@ const P2PChat = ({ recipient, onClose }) => {
               ...data,
               content: decryptedText || "[Decryption Failed]"
             };
-          } catch (e) {
           } catch {
             return { id: doc.id, ...data, content: "[Encrypted Message]" };
           }
@@ -83,7 +74,6 @@ const P2PChat = ({ recipient, onClose }) => {
               const bytes = CryptoJS.AES.decrypt(msg.encryptedContent, sharedSecret);
               const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
               return { ...msg, content: decryptedText || "[Decryption Failed]" };
-            } catch (e) {
             } catch {
               return { ...msg, content: "[Encrypted Message]" };
             }
@@ -94,11 +84,6 @@ const P2PChat = ({ recipient, onClose }) => {
       };
 
       loadLocalMessages();
-      // Poll for local changes (simulating real-time)
-      const interval = setInterval(loadLocalMessages, 2000);
-      return () => clearInterval(interval);
-    }
-  }, [recipient.userId, currentUser, sharedSecret]);
       const interval = setInterval(loadLocalMessages, 2000);
       return () => clearInterval(interval);
     }
@@ -108,17 +93,12 @@ const P2PChat = ({ recipient, onClose }) => {
     e.preventDefault();
     if (!newMessage.trim() || !currentUser) return;
 
-    const chatId = [currentUser.uid, recipient.userId].sort().join("-");
     const chatId = [currentUser.uid, effectiveRecipient.userId].sort().join("-");
     const encrypted = CryptoJS.AES.encrypt(newMessage, sharedSecret).toString();
 
     if (isFirebaseConfigured()) {
       try {
         await addDoc(collection(db, "direct_messages"), {
-          chatId: chatId,
-          senderId: currentUser.uid,
-          senderName: currentUser.displayName || currentUser.email.split('@')[0],
-          recipientId: recipient.userId,
           chatId,
           senderId: currentUser.uid,
           senderName: currentUser.displayName || currentUser.email.split('@')[0],
@@ -138,11 +118,7 @@ const P2PChat = ({ recipient, onClose }) => {
         senderId: currentUser.uid,
         senderName: "You",
         encryptedContent: encrypted,
-        createdAt: { toDate: () => new Date() } // Mock firebase timestamp
-      };
-      localStorage.setItem(localKey, JSON.stringify([...existing, newMsg]));
-      // Trigger local UI update
-        createdAt: { toDate: () => new Date() }
+        createdAt: { toDate: () => new Date() } 
       };
       localStorage.setItem(localKey, JSON.stringify([...existing, newMsg]));
       setMessages(prev => [...prev, { ...newMsg, content: newMessage }]);
@@ -156,12 +132,8 @@ const P2PChat = ({ recipient, onClose }) => {
       <div className="p2p-chat-header">
         <div className="recipient-info">
           <div className="user-avatar">
-            {recipient.userName ? recipient.userName[0].toUpperCase() : "U"}
-            {isRecipientVerified && <ShieldCheck className="verified-badge" size={14} />}
-          </div>
-          <div>
-            <h3>{recipient.userName}</h3>
             {effectiveRecipient.userName ? effectiveRecipient.userName[0].toUpperCase() : "U"}
+            {isRecipientVerified && <ShieldCheck className="verified-badge" size={14} />}
           </div>
           <div>
             <h3>{effectiveRecipient.userName}</h3>
@@ -187,7 +159,7 @@ const P2PChat = ({ recipient, onClose }) => {
             <div className="message-content">
               <p>{msg.content}</p>
               <span className="message-time">
-                {msg.createdAt?.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                {msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Recently"}
               </span>
             </div>
           </div>
@@ -212,4 +184,3 @@ const P2PChat = ({ recipient, onClose }) => {
 };
 
 export default P2PChat;
-
