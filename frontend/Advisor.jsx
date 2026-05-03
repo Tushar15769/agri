@@ -29,6 +29,7 @@ import {
   Book,
   CloudSun,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAdvisorStore } from "./stores/advisorStore";
 import { useYieldPrediction } from "./hooks/useYieldPrediction";
 import CropDiseaseDetection from "./CropDiseaseDetection";
@@ -276,6 +277,19 @@ export default function Advisor() {
             </div>
             <h3>Soil Type Guide</h3>
             <p>Explore major soil types in India and find the most suitable crops for your land.</p>
+          </div>
+
+          {/* Smart Crop Recommendation */}
+          <div
+            className="card reveal"
+            style={{ cursor: "pointer" }}
+            onClick={() => setShowSmartCropRecommendation(true)}
+          >
+            <div className="icon">
+              <Leaf size={32} strokeWidth={2} />
+            </div>
+            <h3>Smart Crop Recommender</h3>
+            <p>AI-powered crop recommendations based on weather, soil & season.</p>
           </div>
 
           {/* Crop Disease Detection */}
