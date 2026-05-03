@@ -790,6 +790,7 @@ export default function Advisor() {
           <div className="agri-modal-wrapper" style={{ maxWidth: '1200px' }} onClick={(e) => e.stopPropagation()}>
             <button className="close-btn agri-close-btn" onClick={() => setShowFarmPlanner3D(false)}>✕</button>
             <FarmPlanner3D />
+            <AgriLMS onClose={() => setShowAgriLMS(false)} />
           </div>
         </div>
       )}
