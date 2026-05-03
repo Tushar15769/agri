@@ -55,6 +55,7 @@ import NotFound from "./NotFound";
 import PrivacyPolicy from "./PrivacyPolicy";
 import Terms from "./Terms";
 import SoilAnalysis from "./SoilAnalysis";
+import CropRotation from "./CropRotation";
 import { SkipLink } from "./NavigationManager";
 
 // Libs
@@ -367,6 +368,7 @@ function App() {
           <Route path="/helpline" element={<Helpline />} />
           <Route path="/glossary" element={<Glossary />} />
           <Route path="/risk-index" element={<RiskIndex />} />
+          <Route path="/crop-rotation" element={<CropRotation />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:id" element={<BlogDetail />} />
           <Route path="*" element={<NotFound />} />

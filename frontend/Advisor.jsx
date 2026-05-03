@@ -36,6 +36,8 @@ import { useAdvisorStore } from "./stores/advisorStore";
 import { useYieldPrediction } from "./hooks/useYieldPrediction";
 import CropDiseaseDetection from "./CropDiseaseDetection";
 import PestManagement from "./PestManagement";
+import CropRotation from "./CropRotation";
+import { FaSync } from "react-icons/fa";
 
 export default function Advisor() {
   const navigate = useNavigate();
@@ -80,6 +82,8 @@ export default function Advisor() {
     setShowFarmPlanner3D,
     showFarmDiary,
     setShowFarmDiary,
+    showCropRotation,
+    setShowCropRotation,
   } = useAdvisorStore();
 
   const {
@@ -558,6 +562,14 @@ export default function Advisor() {
             </div>
             <h3><span className="notranslate">Digital Farm Diary</span></h3>
             <p>Log daily farming activities, set task reminders, and export records as PDF reports.</p>
+          </div>
+
+          <div className="card reveal" onClick={() => setShowCropRotation(true)}>
+            <div className="icon">
+              <FaSync size={32} strokeWidth={2} />
+            </div>
+            <h3><span className="notranslate">Crop Rotation Engine</span></h3>
+            <p>AI-driven crop sequence optimization for maintaining soil fertility.</p>
           </div>
 
           <div
@@ -1191,6 +1203,15 @@ export default function Advisor() {
         <div className="weather-overlay" onClick={() => setShowFarmDiary(false)} style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
             <FarmDiary onClose={() => setShowFarmDiary(false)} />
+          </div>
+        </div>
+      )}
+
+      {showCropRotation && (
+        <div className="weather-overlay" onClick={() => setShowCropRotation(false)} style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="agri-modal-wrapper" style={{ maxWidth: '1200px' }} onClick={(e) => e.stopPropagation()}>
+            <button className="close-btn agri-close-btn" onClick={() => setShowCropRotation(false)}>✕</button>
+            <CropRotation />
           </div>
         </div>
       )}
