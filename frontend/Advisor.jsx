@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Advisor.css";
 import WeatherCard from "./weather/WeatherCard";
+import Forecast from "./Forecast";
 import SoilChatbot from "./SoilChatbot";
 import SoilAnalysis from "./SoilAnalysis";
 import SoilGuide from "./SoilGuide";
@@ -14,6 +15,10 @@ import AgriMarketplace from "./AgriMarketplace";
 import AgriLMS from "./AgriLMS";
 import QRTraceability from "./QRTraceability";
 import FarmPlanner3D from "./FarmPlanner3D";
+import FarmDiary from "./FarmDiary";
+import CropDiseaseDetection from "./CropDiseaseDetection";
+import PestManagement from "./PestManagement";
+import CropRotation from "./CropRotation";
 import {
   Sun,
   Droplets,
@@ -30,19 +35,17 @@ import {
   Layers,
   ShoppingCart,
   Book,
+  CloudSun,
 } from "lucide-react";
-import FarmDiary from "./FarmDiary";
+import { FaSync } from "react-icons/fa";
 import { useAdvisorStore } from "./stores/advisorStore";
 import { useYieldPrediction } from "./hooks/useYieldPrediction";
-import CropDiseaseDetection from "./CropDiseaseDetection";
-import PestManagement from "./PestManagement";
-import CropRotation from "./CropRotation";
-import { FaSync } from "react-icons/fa";
 
 export default function Advisor() {
   const navigate = useNavigate();
   const WEATHER_API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY;
   const WEATHER_CACHE_KEY = "advisorWeatherCache";
+  
   const {
     farmers,
     setFarmers,
@@ -84,6 +87,8 @@ export default function Advisor() {
     setShowFarmDiary,
     showCropRotation,
     setShowCropRotation,
+    showForecast,
+    setShowForecast,
   } = useAdvisorStore();
 
   const {
@@ -107,16 +112,16 @@ export default function Advisor() {
   const [locationQuery, setLocationQuery] = useState("");
   const [coords, setCoords] = useState(null);
 
-   /* Animate stats on mount */
-   useEffect(() => {
-     const interval = setInterval(() => {
-       const state = useAdvisorStore.getState();
-       if (state.farmers < 50000) setFarmers(state.farmers + 500);
-       if (state.crops < 120) setCrops(state.crops + 2);
-       if (state.languages < 12) setLanguages(state.languages + 1);
-     }, 50);
-     return () => clearInterval(interval);
-   }, [setFarmers, setCrops, setLanguages]);
+  /* Animate stats on mount */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const state = useAdvisorStore.getState();
+      if (state.farmers < 50000) setFarmers(state.farmers + 500);
+      if (state.crops < 120) setCrops(state.crops + 2);
+      if (state.languages < 12) setLanguages(state.languages + 1);
+    }, 50);
+    return () => clearInterval(interval);
+  }, [setFarmers, setCrops, setLanguages]);
 
   useEffect(() => {
     try {
@@ -324,91 +329,104 @@ export default function Advisor() {
         </button>
       </div>
 
-       <div className="advisor-stats">
-         <div className="stat">
-           <h2><span className="stat-number">{farmers.toLocaleString()}</span>{farmers >= 50000 && <span className="stat-plus">+</span>}</h2>
-           <p><span className="notranslate">Farmers Connected</span></p>
-         </div>
-         <div className="stat">
-           <h2><span className="stat-number">{crops}</span>{crops >= 120 && <span className="stat-plus">+</span>}</h2>
-           <p><span className="notranslate">Crops Analyzed</span></p>
-         </div>
-         <div className="stat">
-           <h2><span className="stat-number">{languages}</span>{languages >= 12 && <span className="stat-plus">+</span>}</h2>
-           <p><span className="notranslate">Languages Available</span></p>
-         </div>
-       </div>
+      <div className="advisor-stats">
+        <div className="stat">
+          <h2><span className="stat-number">{farmers.toLocaleString()}</span>{farmers >= 50000 && <span className="stat-plus">+</span>}</h2>
+          <p><span className="notranslate">Farmers Connected</span></p>
+        </div>
+        <div className="stat">
+          <h2><span className="stat-number">{crops}</span>{crops >= 120 && <span className="stat-plus">+</span>}</h2>
+          <p><span className="notranslate">Crops Analyzed</span></p>
+        </div>
+        <div className="stat">
+          <h2><span className="stat-number">{languages}</span>{languages >= 12 && <span className="stat-plus">+</span>}</h2>
+          <p><span className="notranslate">Languages Available</span></p>
+        </div>
+      </div>
 
       <br />
       <br />
 
-       <div className="advisor-highlights">
-         <h2 className="slide-in">✨ <span className="notranslate">Features</span></h2>
-         <br />
-         <br />
-         <div className="cards">
-           <div
-             className="card reveal"
-             style={{ cursor: "pointer" }}
-             onClick={() => navigate("/crop-planner")}
-           >
-             <div className="icon">
-               <Calendar size={32} strokeWidth={2} />
-             </div>
-             <h3><span className="notranslate">Seasonal Crop Planner</span></h3>
-             <p>Plan your crops throughout the year with seasonal recommendations and crop rotation cycles.</p>
-           </div>
-           <div
-             className="card reveal"
-             style={{ cursor: "pointer" }}
-             onClick={() => setShowWeather(true)}
-           >
-             <div className="icon">
-               <Sun size={32} strokeWidth={2} />
-             </div>
-             <h3><span className="notranslate">Weather Forecasts</span></h3>
-             <p>
-               Accurate daily & weekly weather insights for farming decisions.
-             </p>
-           </div>
+      <div className="advisor-highlights">
+        <h2 className="slide-in">✨ <span className="notranslate">Features</span></h2>
+        <br />
+        <br />
+        <div className="cards">
+          <div
+            className="card reveal"
+            style={{ cursor: "pointer" }}
+            onClick={() => navigate("/crop-planner")}
+          >
+            <div className="icon">
+              <Calendar size={32} strokeWidth={2} />
+            </div>
+            <h3><span className="notranslate">Seasonal Crop Planner</span></h3>
+            <p>Plan your crops throughout the year with seasonal recommendations and crop rotation cycles.</p>
+          </div>
 
-            <div className="card reveal" onClick={() => navigate("/community")}>
-              <div className="icon">
-                <MessageSquare size={32} strokeWidth={2} />
-              </div>
-              <h3><span className="notranslate">Farmer Community</span></h3>
-              <p>
-                Connect, share tips, and learn from other farmers in your region.
-              </p>
+          <div
+            className="card reveal"
+            onClick={() => setShowWeather(true)}
+          >
+            <div className="icon">
+              <Sun size={32} strokeWidth={2} />
             </div>
-             <div className="card reveal" onClick={() => navigate("/helpline")}>
-               <div className="icon">
-                 <Landmark size={32} strokeWidth={2} />
-               </div>
-               <h3><span className="notranslate">Emergency Helpline</span></h3>
-               <p>
-                 Quick access to emergency farming support and expert advice.
-               </p>
-             </div>
-             <div className="card reveal" onClick={() => navigate("/blog")}>
-               <div className="icon">
-                 <Book size={32} strokeWidth={2} />
-               </div>
-               <h3><span className="notranslate">Knowledge Blog</span></h3>
-               <p>
-                 Read articles on crop management, weather, and farming best practices.
-               </p>
-             </div>
-            <div className="card reveal" onClick={() => navigate("/disease-awareness")}>
-              <div className="icon">
-                <Info size={32} strokeWidth={2} />
-              </div>
-              <h3><span className="notranslate">Crop Disease Awareness</span></h3>
-              <p>
-                Learn about crop diseases and remedies for better farming.
-              </p>
+            <h3><span className="notranslate">Weather Intelligence</span></h3>
+            <p>Get hyperlocal weather forecasts, alerts, and crop-specific advisories.</p>
+          </div>
+          
+          <div
+            className="card reveal"
+            onClick={() => setShowForecast(true)}
+          >
+            <div className="icon">
+              <CloudSun size={32} strokeWidth={2} />
             </div>
-            <div className="card reveal" onClick={() => setShowIrrigation(true)}>
+            <h3><span className="notranslate">7-Day Forecast</span></h3>
+            <p>Detailed weekly weather outlook to plan your farming activities.</p>
+          </div>
+
+          <div className="card reveal" onClick={() => navigate("/community")}>
+            <div className="icon">
+              <MessageSquare size={32} strokeWidth={2} />
+            </div>
+            <h3><span className="notranslate">Farmer Community</span></h3>
+            <p>
+              Connect, share tips, and learn from other farmers in your region.
+            </p>
+          </div>
+
+          <div className="card reveal" onClick={() => navigate("/helpline")}>
+            <div className="icon">
+              <Landmark size={32} strokeWidth={2} />
+            </div>
+            <h3><span className="notranslate">Emergency Helpline</span></h3>
+            <p>
+              Quick access to emergency farming support and expert advice.
+            </p>
+          </div>
+
+          <div className="card reveal" onClick={() => navigate("/blog")}>
+            <div className="icon">
+              <Book size={32} strokeWidth={2} />
+            </div>
+            <h3><span className="notranslate">Knowledge Blog</span></h3>
+            <p>
+              Read articles on crop management, weather, and farming best practices.
+            </p>
+          </div>
+
+          <div className="card reveal" onClick={() => navigate("/disease-awareness")}>
+            <div className="icon">
+              <Info size={32} strokeWidth={2} />
+            </div>
+            <h3><span className="notranslate">Crop Disease Awareness</span></h3>
+            <p>
+              Learn about crop diseases and remedies for better farming.
+            </p>
+          </div>
+
+          <div className="card reveal" onClick={() => setShowIrrigation(true)}>
             <div className="icon">
               <Droplets size={32} strokeWidth={2} />
             </div>
@@ -460,7 +478,6 @@ export default function Advisor() {
             <p>Explore major soil types in India and find the most suitable crops for your land.</p>
           </div>
 
-          {/* Crop Disease Detection */}
           <div className="card reveal" onClick={() => setShowCropDiseaseDetection(true)}>
             <div className="icon">🌿</div>
             <h3><span className="notranslate">Crop Disease Detection</span></h3>
@@ -472,6 +489,7 @@ export default function Advisor() {
             <h3><span className="notranslate">Fertilizer Recommendations</span></h3>
             <p>Get a crop-aware fertilizer plan based on soil pH and nutrient status.</p>
           </div>
+
           <div className="card reveal" onClick={() => setShowComingSoon(true)}>
             <div className="icon">
               <WifiOff size={32} strokeWidth={2} />
@@ -479,6 +497,7 @@ export default function Advisor() {
             <h3><span className="notranslate">Offline Access</span></h3>
             <p>Use the app anytime, even without internet connectivity.</p>
           </div>
+
           <div className="card reveal" onClick={() => setShowPestManagement(true)}>
             <div className="icon">🐛</div>
             <h3><span className="notranslate">Pest Management</span></h3>
@@ -541,19 +560,20 @@ export default function Advisor() {
             <p>View your fields, weather data, and crop locations on an interactive map.</p>
           </div>
 
-           <div className="card reveal" onClick={() => navigate("/calendar")}>
+          <div className="card reveal" onClick={() => navigate("/calendar")}>
             <div className="icon">
               <Calendar size={32} strokeWidth={2} />
             </div>
             <h3><span className="notranslate">Activity Calendar</span></h3>
             <p>Schedule sowing, watering, and harvesting with reminders.</p>
           </div>
+
           <div className="card reveal" onClick={() => navigate("/share-feedback")}>
             <div className="icon">
               <MessageSquare size={32} strokeWidth={2} />
             </div>
             <h3><span className="notranslate">Share Feedback</span></h3>
-             <p>Help us improve <span className="notranslate" translate="no">Fasal Saathi</span> with your valuable suggestions.</p>
+            <p>Help us improve <span className="notranslate" translate="no">Fasal Saathi</span> with your valuable suggestions.</p>
           </div>
 
           <div className="card reveal" onClick={() => setShowFarmDiary(true)}>
@@ -571,208 +591,214 @@ export default function Advisor() {
             <h3><span className="notranslate">Crop Rotation Engine</span></h3>
             <p>AI-driven crop sequence optimization for maintaining soil fertility.</p>
           </div>
+        </div>
+
+        <div
+          className="weather-dashboard"
+          style={{
+            marginTop: "36px",
+            padding: "24px",
+            borderRadius: "18px",
+            background: "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(239,253,245,0.98))",
+            boxShadow: "0 18px 45px rgba(15, 23, 42, 0.08)",
+          }}
+        >
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "12px" }}>
+            <h2 style={{ margin: 0 }}>@ 🌦️ Live Weather & Advisories</h2>
+            {weatherLastUpdated && (
+              <LastUpdated timestamp={weatherLastUpdated} />
+            )}
+          </div>
+
+          <p style={{ marginTop: "8px", color: "#0f172a" }}>
+            Get real-time conditions, 7-day forecasts, and actionable crop guidance directly in the advisor view.
+          </p>
 
           <div
-            className="weather-dashboard"
             style={{
-              marginTop: "36px",
-              padding: "24px",
-              borderRadius: "18px",
-              background: "linear-gradient(135deg, rgba(255,255,255,0.96), rgba(239,253,245,0.98))",
-              boxShadow: "0 18px 45px rgba(15, 23, 42, 0.08)",
+              display: "flex",
+              flexWrap: "wrap",
+              gap: "12px",
+              marginTop: "16px",
             }}
           >
-            <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "12px" }}>
-              <h2 style={{ margin: 0 }}>🌦️ Live Weather & Advisories</h2>
-              {weatherLastUpdated && (
-                <LastUpdated timestamp={weatherLastUpdated} />
-              )}
-            </div>
+            <button
+              className="action-btn"
+              type="button"
+              onClick={handleUseMyLocation}
+            >
+              Use My Location
+            </button>
+            <form
+              onSubmit={handleLocationSearch}
+              style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}
+            >
+              <input
+                type="text"
+                value={locationQuery}
+                onChange={(event) => setLocationQuery(event.target.value)}
+                placeholder="Search by city or district"
+                style={{
+                  minWidth: "240px",
+                  padding: "10px 12px",
+                  borderRadius: "10px",
+                  border: "1px solid #cbd5f5",
+                }}
+              />
+              <button className="action-btn secondary" type="submit">
+                Search
+              </button>
+            </form>
+            <button
+              className="action-btn secondary"
+              type="button"
+              onClick={() => {
+                if (coords) {
+                  fetchWeather({
+                    latitude: coords.latitude,
+                    longitude: coords.longitude,
+                    label: weatherLocation,
+                  });
+                }
+              }}
+            >
+              Refresh
+            </button>
+          </div>
 
-            <p style={{ marginTop: "8px", color: "#0f172a" }}>
-              Get real-time conditions, 7-day forecasts, and actionable crop guidance directly in the advisor view.
+          {weatherLocation && (
+            <p style={{ marginTop: "12px" }}>
+              <strong>Location:</strong> {weatherLocation}
             </p>
+          )}
 
+          {weatherStatus === "loading" && (
+            <p style={{ marginTop: "12px" }}>Loading weather data...</p>
+          )}
+
+          {weatherStatus === "error" && (
             <div
               style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: "12px",
+                marginTop: "12px",
+                padding: "12px",
+                borderRadius: "10px",
+                background: "#fef2f2",
+                color: "#b91c1c",
+              }}
+            >
+              {weatherError}
+            </div>
+          )}
+
+          {weatherStatus === "ready" && weatherData?.current && (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: "16px",
                 marginTop: "16px",
               }}
             >
-              <button
-                className="action-btn"
-                type="button"
-                onClick={handleUseMyLocation}
-              >
-                Use My Location
-              </button>
-              <form
-                onSubmit={handleLocationSearch}
-                style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}
-              >
-                <input
-                  type="text"
-                  value={locationQuery}
-                  onChange={(event) => setLocationQuery(event.target.value)}
-                  placeholder="Search by city or district"
-                  style={{
-                    minWidth: "240px",
-                    padding: "10px 12px",
-                    borderRadius: "10px",
-                    border: "1px solid #cbd5f5",
-                  }}
-                />
-                <button className="action-btn secondary" type="submit">
-                  Search
-                </button>
-              </form>
-              <button
-                className="action-btn secondary"
-                type="button"
-                onClick={() => {
-                  if (coords) {
-                    fetchWeather({
-                      latitude: coords.latitude,
-                      longitude: coords.longitude,
-                      label: weatherLocation,
-                    });
-                  }
+              <div
+                style={{
+                  padding: "16px",
+                  borderRadius: "14px",
+                  background: "white",
+                  boxShadow: "0 12px 24px rgba(15, 23, 42, 0.08)",
                 }}
               >
-                Refresh
-              </button>
+                <h3 style={{ marginTop: 0 }}>Now</h3>
+                <p style={{ fontSize: "28px", margin: "8px 0" }}>
+                  {formatTemp(weatherData.current.temp)}
+                </p>
+                <p style={{ margin: 0 }}>
+                  {weatherData.current.weather?.[0]?.description}
+                </p>
+                <p style={{ margin: "8px 0 0" }}>
+                  Humidity: {weatherData.current.humidity}%
+                </p>
+                <p style={{ margin: 0 }}>
+                  Wind: {Math.round(weatherData.current.wind_speed)} m/s
+                </p>
+              </div>
+
+              <div
+                style={{
+                  padding: "16px",
+                  borderRadius: "14px",
+                  background: "white",
+                  boxShadow: "0 12px 24px rgba(15, 23, 42, 0.08)",
+                }}
+              >
+                <h3 style={{ marginTop: 0 }}>Alerts</h3>
+                {advisories.length === 0 ? (
+                  <p style={{ margin: 0 }}>No severe alerts expected this week.</p>
+                ) : (
+                  advisories.map((item) => (
+                    <p key={item.title} style={{ margin: "8px 0" }}>
+                      <strong>{item.title}:</strong> {item.message}
+                    </p>
+                  ))
+                )}
+              </div>
             </div>
+          )}
 
-            {weatherLocation && (
-              <p style={{ marginTop: "12px" }}>
-                <strong>Location:</strong> {weatherLocation}
-              </p>
-            )}
-
-            {weatherStatus === "loading" && (
-              <p style={{ marginTop: "12px" }}>Loading weather data...</p>
-            )}
-
-            {weatherStatus === "error" && (
-              <div
-                style={{
-                  marginTop: "12px",
-                  padding: "12px",
-                  borderRadius: "10px",
-                  background: "#fef2f2",
-                  color: "#b91c1c",
-                }}
-              >
-                {weatherError}
-              </div>
-            )}
-
-            {weatherStatus === "ready" && weatherData?.current && (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                  gap: "16px",
-                  marginTop: "16px",
-                }}
-              >
+          {weatherStatus === "ready" && weatherData?.daily?.length > 0 && (
+            <div
+              style={{
+                marginTop: "18px",
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+                gap: "12px",
+              }}
+            >
+              {weatherData.daily.slice(0, 7).map((day) => (
                 <div
+                  key={day.dt}
                   style={{
-                    padding: "16px",
-                    borderRadius: "14px",
                     background: "white",
-                    boxShadow: "0 12px 24px rgba(15, 23, 42, 0.08)",
+                    borderRadius: "14px",
+                    padding: "12px",
+                    textAlign: "center",
+                    boxShadow: "0 10px 20px rgba(15, 23, 42, 0.06)",
                   }}
                 >
-                  <h3 style={{ marginTop: 0 }}>Now</h3>
-                  <p style={{ fontSize: "28px", margin: "8px 0" }}>
-                    {formatTemp(weatherData.current.temp)}
+                  <p style={{ margin: "0 0 6px" }}>{formatDay(day.dt)}</p>
+                  <p style={{ margin: "0 0 6px", fontSize: "18px" }}>
+                    {formatTemp(day.temp.max)} / {formatTemp(day.temp.min)}
                   </p>
-                  <p style={{ margin: 0 }}>
-                    {weatherData.current.weather?.[0]?.description}
-                  </p>
-                  <p style={{ margin: "8px 0 0" }}>
-                    Humidity: {weatherData.current.humidity}%
-                  </p>
-                  <p style={{ margin: 0 }}>
-                    Wind: {Math.round(weatherData.current.wind_speed)} m/s
+                  <p style={{ margin: 0, fontSize: "12px", color: "#475569" }}>
+                    {day.weather?.[0]?.main} · {Math.round(day.pop * 100)}% rain
                   </p>
                 </div>
-
-                <div
-                  style={{
-                    padding: "16px",
-                    borderRadius: "14px",
-                    background: "white",
-                    boxShadow: "0 12px 24px rgba(15, 23, 42, 0.08)",
-                  }}
-                >
-                  <h3 style={{ marginTop: 0 }}>Alerts</h3>
-                  {advisories.length === 0 ? (
-                    <p style={{ margin: 0 }}>No severe alerts expected this week.</p>
-                  ) : (
-                    advisories.map((item) => (
-                      <p key={item.title} style={{ margin: "8px 0" }}>
-                        <strong>{item.title}:</strong> {item.message}
-                      </p>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
-
-            {weatherStatus === "ready" && weatherData?.daily?.length > 0 && (
-              <div
-                style={{
-                  marginTop: "18px",
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-                  gap: "12px",
-                }}
-              >
-                {weatherData.daily.slice(0, 7).map((day) => (
-                  <div
-                    key={day.dt}
-                    style={{
-                      background: "white",
-                      borderRadius: "14px",
-                      padding: "12px",
-                      textAlign: "center",
-                      boxShadow: "0 10px 20px rgba(15, 23, 42, 0.06)",
-                    }}
-                  >
-                    <p style={{ margin: "0 0 6px" }}>{formatDay(day.dt)}</p>
-                    <p style={{ margin: "0 0 6px", fontSize: "18px" }}>
-                      {formatTemp(day.temp.max)} / {formatTemp(day.temp.min)}
-                    </p>
-                    <p style={{ margin: 0, fontSize: "12px", color: "#475569" }}>
-                      {day.weather?.[0]?.main} · {Math.round(day.pop * 100)}% rain
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-          {showWeather && (
+
+      {/* Modals */}
+      {showWeather && (
         <div className="weather-overlay" onClick={() => setShowWeather(false)}>
-          <div className="weather-popup" onClick={(e)=>{e.stopPropagation()}}>
+          <div className="weather-popup" onClick={(e)=>e.stopPropagation()}>
             <WeatherCard onClose={() => setShowWeather(false)} />
           </div>
-
-
-
         </div>
-
       )}
 
       {showSoilChatbot && (
         <div className="weather-overlay" onClick={() => setShowSoilChatbot(false)}>
-          <div className="chatbot-popup" onClick={(e)=>{e.stopPropagation()}}>
+          <div className="chatbot-popup" onClick={(e)=>e.stopPropagation()}>
             <SoilChatbot onClose={() => setShowSoilChatbot(false)} />
+          </div>
+        </div>
+      )}
+
+      {showForecast && (
+        <div className="weather-overlay" onClick={() => setShowForecast(false)}>
+          <div className="weather-popup" onClick={(e)=>e.stopPropagation()}>
+            <Forecast onClose={() => setShowForecast(false)} />
           </div>
         </div>
       )}
@@ -780,13 +806,7 @@ export default function Advisor() {
       {showSoilAnalysis && (
         <div className="weather-overlay" onClick={() => setShowSoilAnalysis(false)}>
           <div className="soil-analysis-popup" onClick={(e)=>e.stopPropagation()}>
-            <button
-              className="close-btn"
-              onClick={() => setShowSoilAnalysis(false)}
-              style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}
-            >
-              ✕
-            </button>
+            <button className="close-btn" onClick={() => setShowSoilAnalysis(false)} style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>✕</button>
             <SoilAnalysis />
           </div>
         </div>
@@ -795,36 +815,24 @@ export default function Advisor() {
       {showSoilGuide && (
         <div className="weather-overlay" onClick={() => setShowSoilGuide(false)}>
           <div className="soil-analysis-popup" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="close-btn"
-              onClick={() => setShowSoilGuide(false)}
-              style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}
-            >
-              ✕
-            </button>
+            <button className="close-btn" onClick={() => setShowSoilGuide(false)} style={{ position: 'absolute', top: '12px', right: '12px', zIndex: 10 }}>✕</button>
             <SoilGuide />
           </div>
         </div>
       )}
 
       {showIrrigation && (
-        <div className="weather-overlay" onClick={()=>setShowIrrigation(false)}
-         style={{ alignItems: 'center', justifyContent: 'center' }}>
-          <div onClick={(e)=>{e.stopPropagation()}}>
-          <IrrigationGuidance onClose={() => setShowIrrigation(false)} />
-            </div>
+        <div className="weather-overlay" onClick={()=>setShowIrrigation(false)}>
+          <div onClick={(e)=>e.stopPropagation()}>
+            <IrrigationGuidance onClose={() => setShowIrrigation(false)} />
+          </div>
         </div>
       )}
 
       {showYieldPopup && (
-        <div className="weather-overlay" onClick={()=>{closeYieldPopup()}}>
-          <div className="yield-popup" onClick={(e)=>{e.stopPropagation()}}>
-            <button
-              className="close-btn"
-              onClick={closeYieldPopup}
-            >
-              ✕
-            </button>
+        <div className="weather-overlay" onClick={closeYieldPopup}>
+          <div className="yield-popup" onClick={(e)=>e.stopPropagation()}>
+            <button className="close-btn" onClick={closeYieldPopup}>✕</button>
             <h2>📊 Yield Prediction</h2>
             {yieldError && (
               <div style={{ color: '#dc2626', marginBottom: '16px', padding: '12px', background: '#fef2f2', borderRadius: '8px' }}>
@@ -834,19 +842,8 @@ export default function Advisor() {
             {yieldPrediction === null ? (
               <form onSubmit={fetchYield} className="yield-form">
                 <div className="form-group">
-                  <label>
-                    Crop
-                    <span className="tooltip-container">
-                      <Info className="tooltip-icon" size={14} />
-                      <span className="tooltip-text">The crop you want to predict yield for.</span>
-                    </span>
-                  </label>
-                  <select
-                    value={yieldForm.Crop}
-                    onChange={(e) =>
-                      updateYieldFormField("Crop", e.target.value)
-                    }
-                  >
+                  <label>Crop</label>
+                  <select value={yieldForm.Crop} onChange={(e) => updateYieldFormField("Crop", e.target.value)}>
                     <option value="Paddy">Paddy</option>
                     <option value="Cotton">Cotton</option>
                     <option value="Maize">Maize</option>
@@ -857,69 +854,23 @@ export default function Advisor() {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>
-                    Season
-                    <span className="tooltip-container">
-                      <Info className="tooltip-icon" size={14} />
-                      <span className="tooltip-text">The growing season for the crop.</span>
-                    </span>
-                  </label>
-                  <select
-                    value={yieldForm.Season}
-                    onChange={(e) =>
-                      updateYieldFormField("Season", e.target.value)
-                    }
-                  >
+                  <label>Season</label>
+                  <select value={yieldForm.Season} onChange={(e) => updateYieldFormField("Season", e.target.value)}>
                     <option value="Rabi">Rabi</option>
                     <option value="Kharif">Kharif</option>
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>
-                    Covered Area (acres)
-                    <span className="tooltip-container">
-                      <Info className="tooltip-icon" size={14} />
-                      <span className="tooltip-text">Total area planted in acres to gauge production volume.</span>
-                    </span>
-                  </label>
-                  <input
-                    type="number"
-                    value={yieldForm.CropCoveredArea}
-                    onChange={(e) =>
-                      updateYieldFormField("CropCoveredArea", parseFloat(e.target.value))
-                    }
-                  />
+                  <label>Covered Area (acres)</label>
+                  <input type="number" value={yieldForm.CropCoveredArea} onChange={(e) => updateYieldFormField("CropCoveredArea", parseFloat(e.target.value))} />
                 </div>
                 <div className="form-group">
-                  <label>
-                    Crop Height (cm)
-                    <span className="tooltip-container">
-                      <Info className="tooltip-icon" size={14} />
-                      <span className="tooltip-text">Estimated average height of the mature crop in centimeters.</span>
-                    </span>
-                  </label>
-                  <input
-                    type="number"
-                    value={yieldForm.CHeight}
-                    onChange={(e) =>
-                      updateYieldFormField("CHeight", parseInt(e.target.value))
-                    }
-                  />
+                  <label>Crop Height (cm)</label>
+                  <input type="number" value={yieldForm.CHeight} onChange={(e) => updateYieldFormField("CHeight", parseInt(e.target.value))} />
                 </div>
                 <div className="form-group">
-                  <label>
-                    Next Crop
-                    <span className="tooltip-container">
-                      <Info className="tooltip-icon" size={14} />
-                      <span className="tooltip-text">The expected crop to be planted in the following season.</span>
-                    </span>
-                  </label>
-                  <select
-                    value={yieldForm.CNext}
-                    onChange={(e) =>
-                      updateYieldFormField("CNext", e.target.value)
-                    }
-                  >
+                  <label>Next Crop</label>
+                  <select value={yieldForm.CNext} onChange={(e) => updateYieldFormField("CNext", e.target.value)}>
                     <option value="Pea">Pea</option>
                     <option value="Lentil">Lentil</option>
                     <option value="Maize">Maize</option>
@@ -933,19 +884,8 @@ export default function Advisor() {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>
-                    Last Crop
-                    <span className="tooltip-container">
-                      <Info className="tooltip-icon" size={14} />
-                      <span className="tooltip-text">The crop that was planted in the previous season.</span>
-                    </span>
-                  </label>
-                  <select
-                    value={yieldForm.CLast}
-                    onChange={(e) =>
-                      updateYieldFormField("CLast", e.target.value)
-                    }
-                  >
+                  <label>Last Crop</label>
+                  <select value={yieldForm.CLast} onChange={(e) => updateYieldFormField("CLast", e.target.value)}>
                     <option value="Lentil">Lentil</option>
                     <option value="Pea">Pea</option>
                     <option value="Maize">Maize</option>
@@ -959,19 +899,8 @@ export default function Advisor() {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>
-                    Transplanting Method
-                    <span className="tooltip-container">
-                      <Info className="tooltip-icon" size={14} />
-                      <span className="tooltip-text">The method used to plant the crop (e.g. Drilling).</span>
-                    </span>
-                  </label>
-                  <select
-                    value={yieldForm.CTransp}
-                    onChange={(e) =>
-                      updateYieldFormField("CTransp", e.target.value)
-                    }
-                  >
+                  <label>Transplanting Method</label>
+                  <select value={yieldForm.CTransp} onChange={(e) => updateYieldFormField("CTransp", e.target.value)}>
                     <option value="Transplanting">Transplanting</option>
                     <option value="Drilling">Drilling</option>
                     <option value="Broadcasting">Broadcasting</option>
@@ -979,19 +908,8 @@ export default function Advisor() {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>
-                    Irrigation Type
-                    <span className="tooltip-container">
-                      <Info className="tooltip-icon" size={14} />
-                      <span className="tooltip-text">The technique for distributing water in the field.</span>
-                    </span>
-                  </label>
-                  <select
-                    value={yieldForm.IrriType}
-                    onChange={(e) =>
-                      updateYieldFormField("IrriType", e.target.value)
-                    }
-                  >
+                  <label>Irrigation Type</label>
+                  <select value={yieldForm.IrriType} onChange={(e) => updateYieldFormField("IrriType", e.target.value)}>
                     <option value="Flood">Flood</option>
                     <option value="Sprinkler">Sprinkler</option>
                     <option value="Drip">Drip</option>
@@ -999,19 +917,8 @@ export default function Advisor() {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>
-                    Irrigation Source
-                    <span className="tooltip-container">
-                      <Info className="tooltip-icon" size={14} />
-                      <span className="tooltip-text">The origin of the water used for irrigation.</span>
-                    </span>
-                  </label>
-                  <select
-                    value={yieldForm.IrriSource}
-                    onChange={(e) =>
-                      updateYieldFormField("IrriSource", e.target.value)
-                    }
-                  >
+                  <label>Irrigation Source</label>
+                  <select value={yieldForm.IrriSource} onChange={(e) => updateYieldFormField("IrriSource", e.target.value)}>
                     <option value="Groundwater">Groundwater</option>
                     <option value="Canal">Canal</option>
                     <option value="Rainfed">Rainfed</option>
@@ -1020,74 +927,25 @@ export default function Advisor() {
                   </select>
                 </div>
                 <div className="form-group">
-                  <label>
-                    Irrigation Count
-                    <span className="tooltip-container">
-                      <Info className="tooltip-icon" size={14} />
-                      <span className="tooltip-text">Number of times the crop is irrigated per season.</span>
-                    </span>
-                  </label>
-                  <input
-                    type="number"
-                    value={yieldForm.IrriCount}
-                    onChange={(e) =>
-                      updateYieldFormField("IrriCount", parseInt(e.target.value))
-                    }
-                  />
+                  <label>Irrigation Count</label>
+                  <input type="number" value={yieldForm.IrriCount} onChange={(e) => updateYieldFormField("IrriCount", parseInt(e.target.value))} />
                 </div>
                 <div className="form-group">
-                  <label>
-                    Water Coverage (%)
-                    <span className="tooltip-container">
-                      <Info className="tooltip-icon" size={14} />
-                      <span className="tooltip-text">Percentage of field area receiving adequate water.</span>
-                    </span>
-                  </label>
-                  <input
-                    type="number"
-                    max="100"
-                    value={yieldForm.WaterCov}
-                    onChange={(e) =>
-                      updateYieldFormField("WaterCov", parseInt(e.target.value))
-                    }
-                  />
+                  <label>Water Coverage (%)</label>
+                  <input type="number" max="100" value={yieldForm.WaterCov} onChange={(e) => updateYieldFormField("WaterCov", parseInt(e.target.value))} />
                 </div>
                 <div className="form-group full-width form-actions">
-                  <button
-                    type="submit"
-                    className="action-btn"
-                    disabled={yieldLoading}
-                  >
+                  <button type="submit" className="action-btn" disabled={yieldLoading}>
                     {yieldLoading ? "Predicting..." : "Predict Yield"}
                   </button>
-                  <button
-                    type="button"
-                    className="action-btn secondary"
-                    onClick={closeYieldPopup}
-                  >
-                    Cancel
-                  </button>
+                  <button type="button" className="action-btn secondary" onClick={closeYieldPopup}>Cancel</button>
                 </div>
               </form>
             ) : (
               <>
-                <p className="yield-result">
-                  Predicted Yield: <strong>{yieldPrediction.toFixed(2)}</strong>{" "}
-                  quintals/acre
-                </p>
-                {yieldLastUpdated && (
-                  <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}>
-                    <LastUpdated timestamp={yieldLastUpdated} />
-                  </div>
-                )}
-                <button
-                  className="action-btn"
-                  onClick={() => {
-                    closeYieldPopup();
-                  }}
-                >
-                  Predict Another
-                </button>
+                <p className="yield-result">Predicted Yield: <strong>{yieldPrediction.toFixed(2)}</strong> quintals/acre</p>
+                {yieldLastUpdated && <div style={{ marginBottom: '16px', display: 'flex', justifyContent: 'center' }}><LastUpdated timestamp={yieldLastUpdated} /></div>}
+                <button className="action-btn" onClick={closeYieldPopup}>Predict Another</button>
               </>
             )}
           </div>
@@ -1095,15 +953,10 @@ export default function Advisor() {
       )}
 
       {showProfitCalculator && (
-        <div className="weather-overlay" onClick={()=>{setShowProfitCalculator(false)}}>
+        <div className="weather-overlay" onClick={()=>setShowProfitCalculator(false)}>
           <div className="weather-popup profit-popup" onClick={(e)=>e.stopPropagation()}>
             <CropProfitCalculator />
-            <button
-              className="close-btn"
-              onClick={() => setShowProfitCalculator(false)}
-            >
-              Close
-            </button>
+            <button className="close-btn" onClick={() => setShowProfitCalculator(false)}>Close</button>
           </div>
         </div>
       )}
@@ -1119,12 +972,7 @@ export default function Advisor() {
       {showFarmingMap && (
         <div className="farming-map-overlay" onClick={() => setShowFarmingMap(false)}>
           <div className="farming-map-popup" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="close-btn"
-              onClick={() => setShowFarmingMap(false)}
-            >
-              Close
-            </button>
+            <button className="close-btn" onClick={() => setShowFarmingMap(false)}>Close</button>
             <FarmingMap />
           </div>
         </div>
@@ -1183,32 +1031,26 @@ export default function Advisor() {
       )}
 
       {showComingSoon && (
-        <div className="weather-overlay" onClick={()=>{setShowComingSoon(false)}}>
+        <div className="weather-overlay" onClick={()=>setShowComingSoon(false)}>
           <div className="weather-popup coming-soon" onClick={(e)=>e.stopPropagation()}>
             <h2>🚧 Coming Soon</h2>
             <p>This feature is under development. Stay tuned!</p>
-            <button
-              className="close-btn"
-              onClick={() => setShowComingSoon(false)}
-            >
-              Close
-            </button>
+            <button className="close-btn" onClick={() => setShowComingSoon(false)}>Close</button>
           </div>
         </div>
       )}
 
-      {/* AgriMarketplace Modal removed duplication */}
-
       {showFarmDiary && (
-        <div className="weather-overlay" onClick={() => setShowFarmDiary(false)} style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <div className="weather-overlay" onClick={() => setShowFarmDiary(false)}>
+          <div className="agri-modal-wrapper" style={{ maxWidth: '1200px' }} onClick={(e) => e.stopPropagation()}>
+            <button className="close-btn agri-close-btn" onClick={() => setShowFarmDiary(false)}>✕</button>
             <FarmDiary onClose={() => setShowFarmDiary(false)} />
           </div>
         </div>
       )}
 
       {showCropRotation && (
-        <div className="weather-overlay" onClick={() => setShowCropRotation(false)} style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="weather-overlay" onClick={() => setShowCropRotation(false)}>
           <div className="agri-modal-wrapper" style={{ maxWidth: '1200px' }} onClick={(e) => e.stopPropagation()}>
             <button className="close-btn agri-close-btn" onClick={() => setShowCropRotation(false)}>✕</button>
             <CropRotation />

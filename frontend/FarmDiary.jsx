@@ -15,9 +15,11 @@ import {
   Droplets,
   Sprout,
   Tractor,
-  Activity
+  Activity,
+  MessageCircle
 } from 'lucide-react';
 import './FarmDiary.css';
+import SoilChatbot from './SoilChatbot';
 
 const ACTIVITY_TYPES = ['Sowing', 'Irrigation', 'Fertilizer', 'Harvest', 'Pesticide', 'Other'];
 
@@ -33,6 +35,7 @@ export default function FarmDiary({ onClose }) {
     reminderDate: '',
     isCompleted: true
   });
+  const [showAdvisor, setShowAdvisor] = useState(false);
 
   // Load entries from localStorage on mount
   useEffect(() => {
@@ -182,8 +185,6 @@ export default function FarmDiary({ onClose }) {
 
   // Separate upcoming reminders
   const today = new Date().toISOString().split('T')[0];
-  const upcomingReminders = entries.filter(e => !e.isCompleted && e.reminderDate && e.reminderDate >= today);
-
   const getActivityIcon = (type) => {
     switch(type) {
       case 'Sowing': return <Sprout size={16} />;
@@ -356,6 +357,18 @@ export default function FarmDiary({ onClose }) {
               </div>
             );
           })}
+        </div>
+      )}
+      
+      {/* Advisor Button and Modal */}
+      <button className="advisor-fab" onClick={() => setShowAdvisor(true)} aria-label="Open AI Advisor">
+        <MessageCircle size={24} />
+      </button>
+      {showAdvisor && (
+        <div className="advisor-overlay" onClick={() => setShowAdvisor(false)}>
+          <div className="advisor-modal" onClick={e => e.stopPropagation()}>
+            <SoilChatbot onClose={() => setShowAdvisor(false)} />
+          </div>
         </div>
       )}
     </div>
