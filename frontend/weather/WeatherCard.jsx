@@ -32,6 +32,10 @@ const getWeatherIcon = (summary = "") => {
   return "🌤️";
 };
 
+function formatSeverity(severity) {
+  return severity.charAt(0).toUpperCase() + severity.slice(1);
+}
+
 export default function WeatherCard({
   onClose,
   embedded = false,
@@ -67,6 +71,13 @@ export default function WeatherCard({
     const temp = snapshot.current?.temperature_2m;
     const humidity = snapshot.current?.relative_humidity_2m;
     const wind = snapshot.current?.wind_speed_10m;
+
+    if (temp > 35) advice.push("🌡️ Heat stress: Water crops early morning/evening.");
+    if (humidity > 80) advice.push("💧 High humidity: Watch for fungal infections.");
+    if (wind > 25) advice.push("🌬️ Strong winds: Avoid spraying pesticides.");
+    if (snapshot.alerts?.some(a => a.type === "rain"))
+      advice.push("🌧️ Rain alert: Delay irrigation & fertilizer use.");
+
 
     if (temp > 35) advice.push("🌡️ Heat stress: Water crops early morning/evening.");
     if (humidity > 80) advice.push("💧 High humidity: Watch for fungal infections.");
@@ -273,6 +284,19 @@ export default function WeatherCard({
               )) : (
                 <p>No crop risk detected</p>
               )}
+            </section>
+
+            {/* SMART ADVICE */}
+            <section className="weather-panel">
+              <h3>🧠 Smart Farming Advice</h3>
+
+              {getFarmingAdvice().map((tip, i) => (
+                <div key={i} className="alert-item severity-info">
+                  <p>{tip}</p>
+                </div>
+              ))}
+            </section>
+
             </section>
 
             {/* SMART ADVICE */}

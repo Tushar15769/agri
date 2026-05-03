@@ -1,3 +1,12 @@
+import React, { useEffect, useState } from "react";
+import { Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
+
+import { ToastContainer } from "react-toastify";
+
+import React, { useState, useRef, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
+import React, { useState, useRef, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
 import "./App.css";
@@ -643,6 +652,42 @@ function App() {
           </button>
           <button onClick={handleLogout} className="btn-logout-simple">Sign Out</button>
         </div>
+      )}
+
+       {!loading && user && user.emailVerified && !profileCompleted && location.pathname !== "/profile-setup" && (
+         <Navigate to="/profile-setup" />
+       )}
+
+      <Routes>
+        <Route path="/" element={<Home user={user} />} />
+       <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/advisor" element={<Advisor />} />
+        <Route path="/how-it-works" element={<How />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/crop-guide" element={<CropGuide />} />
+        <Route path="/schemes" element={<Schemes />} />
+        <Route path="/resources" element={<Resources />} />
+        <Route path="/login" element={<Auth />} />
+        <Route path="/profile-setup" element={<ProfileSetup user={user} profileCompleted={profileCompleted} />} />
+        <Route path="/calendar" element={<Calendar />} />
+        <Route path="/share-feedback" element={<Feedback />} />
+        <Route path="/admin/feedback" element={<AdminFeedback />} />
+        <Route path="/market-prices" element={<MarketPrices />} />
+        <Route path="/farming-map" element={<FarmingMap />} />
+        <Route path="/profit-calculator" element={<CropProfitCalculator />} />
+        <Route path="/community" element={<Community />} />
+        <Route path="/soil-analysis" element={<SoilAnalysis />} />
+        <Route path="/faq" element={<FAQ />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy-policy" element={<Privacy />} />
+      </Routes>
+
+      {/* Floating Chat Button */}
+      <Link to="/advisor" className="floating-chat-btn" aria-label="Chat Support">
+        <FaComments size={28} />
+      </Link>
+
       </div>
     )}
 
