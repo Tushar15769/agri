@@ -41,6 +41,7 @@ export default function Dashboard() {
   const [selectedCrop, setSelectedCrop] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("");
   const [selectedSeason, setSelectedSeason] = useState("");
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 60000);
     return () => clearInterval(timer);
@@ -322,6 +323,7 @@ export default function Dashboard() {
               Get AI Advice <FaArrowRight />
             </Link>
           </div>
+
 
           <div className="dashboard-section-card whatsapp-settings-card">
             <div className="section-card-header">

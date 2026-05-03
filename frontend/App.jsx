@@ -114,6 +114,7 @@ function App() {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
+        localStorage.setItem("userId", currentUser.uid);
         const unsubscribeDoc = onSnapshot(
           doc(db, "users", currentUser.uid),
           (userDoc) => {

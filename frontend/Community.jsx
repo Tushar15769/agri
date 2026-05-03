@@ -30,7 +30,8 @@ import {
   arrayRemove,
   where,
   Timestamp,
-  getDocs
+  getDocs,
+  increment
 } from "firebase/firestore";
 import Loader from "./Loader";
 import "./Community.css";
@@ -56,6 +57,40 @@ const Community = () => {
   const [postComments, setPostComments] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [showP2PChat, setShowP2PChat] = useState(null); // stores the recipient object
+  const [authorsData, setAuthorsData] = useState({});
+  
+  // Fetch author data (reputation, badges) for posts and comments
+  useEffect(() => {
+    const fetchAuthors = async () => {
+      const authorIds = new Set([
+        ...posts.map(p => p.userId),
+        ...postComments.map(c => c.userId)
+      ].filter(Boolean));
+
+      const newAuthorsData = { ...authorsData };
+      let changed = false;
+
+      for (const id of authorIds) {
+        if (!newAuthorsData[id]) {
+          try {
+            const userDoc = await getDocs(query(collection(db, "users"), where("uid", "==", id)));
+            if (!userDoc.empty) {
+              newAuthorsData[id] = userDoc.docs[0].data();
+              changed = true;
+            }
+          } catch (err) {
+            console.error("Error fetching author data:", err);
+          }
+        }
+      }
+
+      if (changed) setAuthorsData(newAuthorsData);
+    };
+
+    if (posts.length > 0 || postComments.length > 0) {
+      fetchAuthors();
+    }
+  }, [posts, postComments]);
   
   // Mock verification check for demo
   const isVerified = (userId) => {
@@ -107,6 +142,12 @@ const Community = () => {
         commentsCount: 0,
         createdAt: Timestamp.now()
       });
+
+      // Award +10 reputation for starting a discussion
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        reputation: increment(10)
+      });
+
       setNewPost({ content: "", category: "general" });
       setShowCreateModal(false);
     } catch (err) {
@@ -123,6 +164,15 @@ const Community = () => {
       await updateDoc(postRef, {
         likes: isLiked ? arrayRemove(currentUser.uid) : arrayUnion(currentUser.uid)
       });
+
+      // Update post author's reputation (+10 for like, -10 if unliked)
+      if (post.userId !== currentUser.uid) {
+        // We use the author's userId from the post
+        const authorRef = doc(db, "users", post.userId);
+        await updateDoc(authorRef, {
+          reputation: increment(isLiked ? -10 : 10)
+        });
+      }
     } catch (err) {
       console.error("Error liking post:", err);
     }
@@ -158,13 +208,20 @@ const Community = () => {
         userId: currentUser.uid,
         userName: currentUser.displayName || currentUser.email.split('@')[0],
         text: newComment,
+        upvotes: [],
+        downvotes: [],
         createdAt: Timestamp.now()
+      });
+
+      // Award +5 reputation for posting a comment
+      await updateDoc(doc(db, "users", currentUser.uid), {
+        reputation: increment(5)
       });
 
       // Update post comment count
       const postRef = doc(db, "posts", postId);
       await updateDoc(postRef, {
-        commentsCount: (showCommentsModal.commentsCount || 0) + 1
+        commentsCount: increment(1)
       });
 
       setNewComment("");
@@ -173,6 +230,73 @@ const Community = () => {
     } catch (err) {
       console.error("Error adding comment:", err);
     }
+  };
+
+  const handleVoteComment = async (comment, voteType) => {
+    if (!isFirebaseConfigured() || !currentUser) return;
+    
+    const commentRef = doc(db, "comments", comment.id);
+    const hasUpvoted = comment.upvotes?.includes(currentUser.uid);
+    const hasDownvoted = comment.downvotes?.includes(currentUser.uid);
+    
+    let reputationChange = 0;
+    let updates = {};
+
+    if (voteType === 'up') {
+      if (hasUpvoted) {
+        updates.upvotes = arrayRemove(currentUser.uid);
+        reputationChange = -10;
+      } else {
+        updates.upvotes = arrayUnion(currentUser.uid);
+        reputationChange = 10;
+        if (hasDownvoted) {
+          updates.downvotes = arrayRemove(currentUser.uid);
+          reputationChange += 2; // recover the -2 from downvote
+        }
+      }
+    } else {
+      if (hasDownvoted) {
+        updates.downvotes = arrayRemove(currentUser.uid);
+        reputationChange = 2;
+      } else {
+        updates.downvotes = arrayUnion(currentUser.uid);
+        reputationChange = -2;
+        if (hasUpvoted) {
+          updates.upvotes = arrayRemove(currentUser.uid);
+          reputationChange -= 10; // remove the +10 from upvote
+        }
+      }
+    }
+
+    try {
+      await updateDoc(commentRef, updates);
+      
+      // Update comment author's reputation
+      if (comment.userId !== currentUser.uid) {
+        await updateDoc(doc(db, "users", comment.userId), {
+          reputation: increment(reputationChange)
+        });
+      }
+      
+      // Refresh comments
+      openComments(showCommentsModal);
+    } catch (err) {
+      console.error("Error voting on comment:", err);
+    }
+  };
+
+  const getBadgeIcon = (reputation) => {
+    if (reputation >= 500) return "🥇";
+    if (reputation >= 200) return "🥈";
+    if (reputation >= 50) return "🥉";
+    return null;
+  };
+
+  const getBadgeTitle = (reputation) => {
+    if (reputation >= 500) return "Master Agriculturist";
+    if (reputation >= 200) return "Farming Expert";
+    if (reputation >= 50) return "Active Contributor";
+    return "";
   };
 
   const filteredPosts = posts.filter(post => 
@@ -242,7 +366,14 @@ const Community = () => {
                       {isVerified(post.userId) && <ShieldCheck className="verified-badge-community" size={14} />}
                     </div>
                     <div>
-                      <h3>{post.userName}</h3>
+                      <div className="user-name-wrapper">
+                        <h3>{post.userName}</h3>
+                        {authorsData[post.userId]?.reputation >= 50 && (
+                          <span className="expert-badge" title={getBadgeTitle(authorsData[post.userId]?.reputation)}>
+                            {getBadgeIcon(authorsData[post.userId]?.reputation)}
+                          </span>
+                        )}
+                      </div>
                       <div className="post-meta">
                         <span><MapPin size={12} /> {post.region || "All India"}</span>
                         <span><Clock size={12} /> {post.createdAt?.toDate ? post.createdAt.toDate().toLocaleDateString() : "Recent"}</span>
@@ -357,10 +488,34 @@ const Community = () => {
                 postComments.map(comment => (
                   <div key={comment.id} className="comment-item">
                     <div className="comment-header">
-                      <strong>{comment.userName}</strong>
+                      <div className="comment-user-info">
+                        <strong>{comment.userName}</strong>
+                        {authorsData[comment.userId]?.reputation >= 50 && (
+                          <span className="expert-badge-mini" title={getBadgeTitle(authorsData[comment.userId]?.reputation)}>
+                            {getBadgeIcon(authorsData[comment.userId]?.reputation)}
+                          </span>
+                        )}
+                        <span className="reputation-text">{authorsData[comment.userId]?.reputation || 0} pts</span>
+                      </div>
                       <span>{comment.createdAt?.toDate ? comment.createdAt.toDate().toLocaleDateString() : "Recent"}</span>
                     </div>
                     <p>{comment.text}</p>
+                    <div className="comment-votes">
+                      <button 
+                        className={`vote-btn up ${comment.upvotes?.includes(currentUser?.uid) ? 'active' : ''}`}
+                        onClick={() => handleVoteComment(comment, 'up')}
+                      >
+                        <ThumbsUp size={14} fill={comment.upvotes?.includes(currentUser?.uid) ? "currentColor" : "none"} />
+                        {comment.upvotes?.length || 0}
+                      </button>
+                      <button 
+                        className={`vote-btn down ${comment.downvotes?.includes(currentUser?.uid) ? 'active' : ''}`}
+                        onClick={() => handleVoteComment(comment, 'down')}
+                      >
+                        <ThumbsUp size={14} style={{ transform: 'rotate(180deg)' }} fill={comment.downvotes?.includes(currentUser?.uid) ? "currentColor" : "none"} />
+                        {comment.downvotes?.length || 0}
+                      </button>
+                    </div>
                   </div>
                 ))
               )}

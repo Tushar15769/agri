@@ -40,6 +40,14 @@ import {
 import { FaSync } from "react-icons/fa";
 import { useAdvisorStore } from "./stores/advisorStore";
 import { useYieldPrediction } from "./hooks/useYieldPrediction";
+import { auth, db } from "./lib/firebase";
+import { doc, onSnapshot } from "firebase/firestore";
+import { 
+  Award, 
+  Star, 
+  ThumbsUp,
+  X
+} from "lucide-react";
 
 export default function Advisor() {
   const navigate = useNavigate();
@@ -89,6 +97,8 @@ export default function Advisor() {
     setShowCropRotation,
     showForecast,
     setShowForecast,
+    showExpertStatus,
+    setShowExpertStatus,
   } = useAdvisorStore();
 
   const {
@@ -111,6 +121,21 @@ export default function Advisor() {
   const [weatherLastUpdated, setWeatherLastUpdated] = useState(null);
   const [locationQuery, setLocationQuery] = useState("");
   const [coords, setCoords] = useState(null);
+  const [userProfile, setUserProfile] = useState(null);
+
+  useEffect(() => {
+    // Priority: auth.currentUser, then fallback to localStorage
+    const uid = auth?.currentUser?.uid || localStorage.getItem("userId");
+    
+    if (uid) {
+      const unsubscribe = onSnapshot(doc(db, "users", uid), (doc) => {
+        if (doc.exists()) {
+          setUserProfile(doc.data());
+        }
+      });
+      return () => unsubscribe();
+    }
+  }, [auth?.currentUser]);
 
   /* Animate stats on mount */
   useEffect(() => {
@@ -304,6 +329,17 @@ export default function Advisor() {
       day: "numeric",
       month: "short",
     });
+
+  const getNextBadgeThreshold = (points) => {
+    if (points < 50) return { threshold: 50, name: "Active Contributor", icon: "🥉" };
+    if (points < 200) return { threshold: 200, name: "Farming Expert", icon: "🥈" };
+    if (points < 500) return { threshold: 500, name: "Master Agriculturist", icon: "🥇" };
+    return { threshold: points, name: "Maximum Rank", icon: "💎" };
+  };
+
+  const currentReputation = userProfile?.reputation || 0;
+  const nextBadge = getNextBadgeThreshold(currentReputation);
+  const progressPercent = Math.min((currentReputation / nextBadge.threshold) * 100, 100);
 
   return (
     <section className="advisor">
@@ -591,6 +627,17 @@ export default function Advisor() {
             <h3><span className="notranslate">Crop Rotation Engine</span></h3>
             <p>AI-driven crop sequence optimization for maintaining soil fertility.</p>
           </div>
+
+          <div className="card reveal expert-card" onClick={() => setShowExpertStatus(true)}>
+            <div className="icon">
+              <Award size={32} strokeWidth={2} />
+            </div>
+            <h3><span className="notranslate">Expert Reputation</span></h3>
+            <p>Track your community points and earn expert badges for your contributions.</p>
+            <div className="mini-badge-info">
+              {currentReputation} pts · {currentReputation >= 500 ? "🥇" : currentReputation >= 200 ? "🥈" : currentReputation >= 50 ? "🥉" : "🌱"}
+            </div>
+          </div>
         </div>
 
         <div
@@ -799,6 +846,76 @@ export default function Advisor() {
         <div className="weather-overlay" onClick={() => setShowForecast(false)}>
           <div className="weather-popup" onClick={(e)=>e.stopPropagation()}>
             <Forecast onClose={() => setShowForecast(false)} />
+          </div>
+        </div>
+      )}
+
+      {showExpertStatus && (
+        <div className="weather-overlay" onClick={() => setShowExpertStatus(false)}>
+          <div className="expert-status-modal" onClick={(e)=>e.stopPropagation()}>
+            <div className="modal-header">
+              <h2><Award className="header-icon" /> Expert Status</h2>
+              <button className="close-btn" onClick={() => setShowExpertStatus(false)}><X /></button>
+            </div>
+            
+            <div className="expert-status-content">
+              <div className="reputation-hero">
+                <div className="rep-main">
+                  <span className="rep-value">{currentReputation}</span>
+                  <span className="rep-label">Reputation Points</span>
+                </div>
+                <div className="badge-display">
+                  <span className="badge-icon-large">
+                    {currentReputation >= 500 ? "🥇" : currentReputation >= 200 ? "🥈" : currentReputation >= 50 ? "🥉" : "🌱"}
+                  </span>
+                  <span className="badge-title">
+                    {currentReputation >= 500 ? "Master Agriculturist" : 
+                     currentReputation >= 200 ? "Farming Expert" : 
+                     currentReputation >= 50 ? "Active Contributor" : "Rising Star"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="progress-section">
+                <div className="progress-labels">
+                  <span>Next: {nextBadge.name}</span>
+                  <span>{currentReputation} / {nextBadge.threshold}</span>
+                </div>
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: `${progressPercent}%` }}></div>
+                </div>
+                <p className="progress-note">
+                  Earn {nextBadge.threshold - currentReputation} more points to reach {nextBadge.icon} {nextBadge.name}
+                </p>
+              </div>
+
+              <div className="earning-guide">
+                <h3>How to earn points:</h3>
+                <div className="guide-grid">
+                  <div className="guide-card">
+                    <Star className="guide-icon" />
+                    <div>
+                      <h4>Start Discussions</h4>
+                      <p>+10 points for starting a new topic in the community.</p>
+                    </div>
+                  </div>
+                  <div className="guide-card">
+                    <Star className="guide-icon" />
+                    <div>
+                      <h4>Post Answers</h4>
+                      <p>+5 points for every helpful comment in the community.</p>
+                    </div>
+                  </div>
+                  <div className="guide-card">
+                    <ThumbsUp className="guide-icon" />
+                    <div>
+                      <h4>Get Upvotes</h4>
+                      <p>+10 points when other farmers upvote your contributions.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

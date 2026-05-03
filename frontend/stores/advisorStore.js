@@ -102,6 +102,9 @@ export const useAdvisorStore = create((set) => ({
    showForecast: false,
    setShowForecast: (show) => set({ showForecast: show }),
 
+   showExpertStatus: false,
+   setShowExpertStatus: (show) => set({ showExpertStatus: show }),
+
    // Reset all modals to closed
    resetAdvisorStore: () =>
      set({
