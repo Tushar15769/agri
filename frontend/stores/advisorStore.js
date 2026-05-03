@@ -63,47 +63,14 @@ export const useAdvisorStore = create((set) => ({
   showCropRotation: false,
   setShowCropRotation: (show) => set({ showCropRotation: show }),
 
-  // Reset all modals to closed
-  resetAdvisorStore: () =>
-    set({
-      farmers: 0,
-      crops: 0,
-      languages: 0,
-      showWeather: false,
-      showSoilChatbot: false,
-      showSoilAnalysis: false,
-      showSoilGuide: false,
-      showIrrigation: false,
-      showProfitCalculator: false,
-      showFertilizerPopup: false,
-      showFarmingMap: false,
-      showCropDiseaseDetection: false,
-      showPestManagement: false,
-      showComingSoon: false,
-      showAgriMarketplace: false,
-      showAgriLMS: false,
-      showQRTraceability: false,
-      showFarmPlanner3D: false,
-      showFarmDiary: false,
-      showCropRotation: false,
-    }),
-   showQRTraceability: false,
-   setShowQRTraceability: (show) => set({ showQRTraceability: show }),
-
-   showFarmPlanner3D: false,
-   setShowFarmPlanner3D: (show) => set({ showFarmPlanner3D: show }),
-
-   showFarmDiary: false,
-   setShowFarmDiary: (show) => set({ showFarmDiary: show }),
-
-   showAgriLMS: false,
-   setShowAgriLMS: (show) => set({ showAgriLMS: show }),
-
    showForecast: false,
    setShowForecast: (show) => set({ showForecast: show }),
 
    showExpertStatus: false,
    setShowExpertStatus: (show) => set({ showExpertStatus: show }),
+
+   showBankReport: false,
+   setShowBankReport: (show) => set({ showBankReport: show }),
 
    // Reset all modals to closed
    resetAdvisorStore: () =>
@@ -128,5 +95,8 @@ export const useAdvisorStore = create((set) => ({
        showFarmDiary: false,
        showAgriLMS: false,
        showForecast: false,
+       showExpertStatus: false,
+       showBankReport: false,
+       showCropRotation: false,
      }),
 }));

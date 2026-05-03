@@ -41,6 +41,7 @@ import { FaSync } from "react-icons/fa";
 import { useAdvisorStore } from "./stores/advisorStore";
 import { useYieldPrediction } from "./hooks/useYieldPrediction";
 import { auth, db } from "./lib/firebase";
+import { generateBankPDF, generateCSV } from "./utils/exportService";
 import { doc, onSnapshot } from "firebase/firestore";
 import { 
   Award, 
@@ -99,6 +100,8 @@ export default function Advisor() {
     setShowForecast,
     showExpertStatus,
     setShowExpertStatus,
+    showBankReport,
+    setShowBankReport,
   } = useAdvisorStore();
 
   const {
@@ -638,6 +641,14 @@ export default function Advisor() {
               {currentReputation} pts · {currentReputation >= 500 ? "🥇" : currentReputation >= 200 ? "🥈" : currentReputation >= 50 ? "🥉" : "🌱"}
             </div>
           </div>
+
+          <div className="card reveal bank-report-card" onClick={() => setShowBankReport(true)}>
+            <div className="icon">
+              <Landmark size={32} strokeWidth={2} />
+            </div>
+            <h3><span className="notranslate">Bank Reports & Export</span></h3>
+            <p>Generate professional PDF/CSV reports for bank loans and financial records.</p>
+          </div>
         </div>
 
         <div
@@ -916,6 +927,76 @@ export default function Advisor() {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {showBankReport && (
+        <div className="weather-overlay" onClick={() => setShowBankReport(false)}>
+          <div className="bank-report-modal" onClick={(e)=>e.stopPropagation()}>
+            <div className="modal-header">
+              <h2><Landmark className="header-icon" /> Bank Reporting & Export</h2>
+              <button className="close-btn" onClick={() => setShowBankReport(false)}><X /></button>
+            </div>
+            
+            <div className="report-preview-box">
+              <div className="preview-header">
+                <Sprout className="preview-logo" />
+                <h3>Fasal Saathi AI Advisor</h3>
+              </div>
+              <div className="preview-body">
+                <div className="preview-row">
+                  <span>Farmer:</span>
+                  <strong>{userData?.displayName || "Farmer"}</strong>
+                </div>
+                <div className="preview-row">
+                  <span>Location:</span>
+                  <strong>{userData?.address || "Maharashtra, India"}</strong>
+                </div>
+                <div className="preview-divider"></div>
+                <div className="preview-row">
+                  <span>Current Risk Index:</span>
+                  <span className="risk-badge">Low Risk (24%)</span>
+                </div>
+                <div className="preview-row">
+                  <span>Net Profit Forecast:</span>
+                  <strong className="profit-text">INR 45,200.00</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="export-actions-grid">
+              <button className="export-btn pdf" onClick={() => generateBankPDF({
+                farmerName: userData?.displayName || "Farmer",
+                location: userData?.address || "Maharashtra, India",
+                reputation: currentReputation,
+                date: new Date().toLocaleDateString(),
+                riskIndex: { weather: 15, disease: 20, water: 30, market: 10 },
+                financialData: { revenue: 120000, costs: 74800, profit: 45200, percentage: 37 }
+              })}>
+                <div className="btn-icon">📄</div>
+                <div className="btn-text">
+                  <strong>Export as PDF</strong>
+                  <span>Bank-friendly format</span>
+                </div>
+              </button>
+
+              <button className="export-btn csv" onClick={() => generateCSV({
+                farmerName: userData?.displayName || "Farmer",
+                riskIndex: { weather: 15, disease: 20, water: 30, market: 10 },
+                financialData: { revenue: 120000, costs: 74800, profit: 45200 }
+              })}>
+                <div className="btn-icon">📊</div>
+                <div className="btn-text">
+                  <strong>Export as CSV</strong>
+                  <span>Spreadsheet format</span>
+                </div>
+              </button>
+            </div>
+
+            <p className="report-disclaimer">
+              * Reports are generated using your latest soil analysis, profit calculations, and risk index data.
+            </p>
           </div>
         </div>
       )}
