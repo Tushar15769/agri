@@ -12,6 +12,7 @@ import FertilizerRecommendation from "./FertilizerRecommendation";
 import LastUpdated from "./LastUpdated";
 import AgriMarketplace from "./AgriMarketplace";
 import AgriLMS from "./AgriLMS";
+import QRTraceability from "./QRTraceability";
 import {
   Sun,
   Droplets,
@@ -70,6 +71,8 @@ export default function Advisor() {
     setShowAgriMarketplace,
     showAgriLMS,
     setShowAgriLMS,
+    showQRTraceability,
+    setShowQRTraceability,
     showFarmDiary,
     setShowFarmDiary,
   } = useAdvisorStore();
@@ -307,6 +310,12 @@ export default function Advisor() {
             <div className="icon">🎓</div>
             <h3><span className="notranslate">Agri-LMS Academy</span></h3>
             <p>Access video tutorials on modern farming and earn completion certificates.</p>
+          </div>
+
+          <div className="card reveal" onClick={() => setShowQRTraceability(true)}>
+            <div className="icon">🔍</div>
+            <h3><span className="notranslate">QR-Farm Traceability</span></h3>
+            <p>Generate QR codes for your produce. Let customers trace their food from farm to table.</p>
           </div>
 
           <div className="card reveal" onClick={() => setShowProfitCalculator(true)}>
@@ -753,6 +762,16 @@ export default function Advisor() {
         <div className="weather-overlay" onClick={() => setShowAgriLMS(false)}>
           <div className="agri-modal-wrapper" style={{ maxWidth: '1200px' }} onClick={(e) => e.stopPropagation()}>
             <button className="close-btn agri-close-btn" onClick={() => setShowAgriLMS(false)}>✕</button>
+            <AgriLMS />
+          </div>
+        </div>
+      )}
+
+      {showQRTraceability && (
+        <div className="weather-overlay" onClick={() => setShowQRTraceability(false)}>
+          <div className="agri-modal-wrapper" style={{ maxWidth: '1200px' }} onClick={(e) => e.stopPropagation()}>
+            <button className="close-btn agri-close-btn" onClick={() => setShowQRTraceability(false)}>✕</button>
+            <QRTraceability />
             <AgriLMS onClose={() => setShowAgriLMS(false)} />
           </div>
         </div>

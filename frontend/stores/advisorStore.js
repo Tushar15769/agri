@@ -54,6 +54,9 @@ export const useAdvisorStore = create((set) => ({
   showAgriLMS: false,
   setShowAgriLMS: (show) => set({ showAgriLMS: show }),
 
+  showQRTraceability: false,
+  setShowQRTraceability: (show) => set({ showQRTraceability: show }),
+
   // Reset all modals to closed
   resetAdvisorStore: () =>
     set({
@@ -73,6 +76,7 @@ export const useAdvisorStore = create((set) => ({
       showComingSoon: false,
       showAgriMarketplace: false,
       showAgriLMS: false,
+      showQRTraceability: false,
       showFarmDiary: false,
     }),
 }));
