@@ -5,6 +5,7 @@ import { QrCode, Sprout, MapPin, Calendar, CheckCircle, ShieldCheck, ArrowRight,
 import './QRTraceability.css';
 import SoilChatbot from './SoilChatbot';
 
+
 const MOCK_BATCHES = [
   {
     id: 'BATCH-2026-001',
