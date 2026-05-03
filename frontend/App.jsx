@@ -30,7 +30,6 @@ import Dashboard from "./Dashboard";
 import Feedback from "./Feedback";
 import FarmingMap from "./FarmingMap";
 import Schemes from "./GovernmentSchemes";
-import GovernmentSchemes from "./GovernmentSchemes";
 import How from "./How";
 import Home from "./Home";
 import MarketPrices from "./MarketPrices";
@@ -56,6 +55,7 @@ import NotFound from "./NotFound";
 import PrivacyPolicy from "./PrivacyPolicy";
 import Terms from "./Terms";
 import SoilAnalysis from "./SoilAnalysis";
+import CropRotation from "./CropRotation";
 import { SkipLink } from "./NavigationManager";
 
 // Libs
@@ -114,7 +114,6 @@ function App() {
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        localStorage.setItem("userId", currentUser.uid);
         const unsubscribeDoc = onSnapshot(
           doc(db, "users", currentUser.uid),
           (userDoc) => {
@@ -369,6 +368,7 @@ function App() {
           <Route path="/helpline" element={<Helpline />} />
           <Route path="/glossary" element={<Glossary />} />
           <Route path="/risk-index" element={<RiskIndex />} />
+          <Route path="/crop-rotation" element={<CropRotation />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:id" element={<BlogDetail />} />
           <Route path="*" element={<NotFound />} />
