@@ -1,6 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { auth, db } from "./lib/firebase";
+import { onSnapshot, doc } from "firebase/firestore";
+import { generateBankPDF, generateCSV } from "./utils/exportService";
 import "./Advisor.css";
+
+// Components
 import WeatherCard from "./weather/WeatherCard";
 import Forecast from "./Forecast";
 import SoilChatbot from "./SoilChatbot";
@@ -36,6 +41,12 @@ import {
   ShoppingCart,
   Book,
   CloudSun,
+  ShieldCheck,
+  Download,
+  FileText,
+  TrendingUp,
+  BarChart3,
+  Award,
 } from "lucide-react";
 import { FaSync } from "react-icons/fa";
 import { useAdvisorStore } from "./stores/advisorStore";
@@ -89,6 +100,10 @@ export default function Advisor() {
     setShowCropRotation,
     showForecast,
     setShowForecast,
+    showExpertStatus,
+    setShowExpertStatus,
+    showBankReport,
+    setShowBankReport,
   } = useAdvisorStore();
 
   const {
@@ -431,9 +446,7 @@ export default function Advisor() {
               <Droplets size={32} strokeWidth={2} />
             </div>
             <h3><span className="notranslate">Irrigation Guidance</span></h3>
-            <p>
-              Water-saving tips and irrigation schedules tailored to your crops.
-            </p>
+            <p>Water-saving tips and irrigation schedules tailored to your crops.</p>
           </div>
 
           <div className="card reveal" onClick={() => navigate("/market-prices")}>
@@ -441,24 +454,10 @@ export default function Advisor() {
               <IndianRupee size={32} strokeWidth={2} />
             </div>
             <h3><span className="notranslate">Market Price Guidance</span></h3>
-            <p>
-              Market trends and price alerts to help you sell at the best time.
-            </p>
+            <p>Market trends and price alerts to help you sell at the best time.</p>
           </div>
 
-          <div className="card reveal" onClick={() => setShowSoilChatbot(true)}>
-            <div className="icon">
-              <Sprout size={32} strokeWidth={2} />
-            </div>
-            <h3><span className="notranslate">Soil Health</span></h3>
-            <p>Get soil analysis & recommendations via AI chatbot.</p>
-          </div>
-
-          <div
-            className="card reveal"
-            style={{ cursor: "pointer" }}
-            onClick={() => setShowSoilAnalysis(true)}
-          >
+          <div className="card reveal" onClick={() => setShowSoilAnalysis(true)}>
             <div className="icon">
               <FlaskConical size={32} strokeWidth={2} />
             </div>
@@ -466,11 +465,7 @@ export default function Advisor() {
             <p>Analyze NPK nutrients and get personalized crop & fertilizer recommendations.</p>
           </div>
 
-          <div
-            className="card reveal"
-            style={{ cursor: "pointer" }}
-            onClick={() => setShowSoilGuide(true)}
-          >
+          <div className="card reveal" onClick={() => setShowSoilGuide(true)}>
             <div className="icon">
               <Layers size={32} strokeWidth={2} />
             </div>
@@ -480,13 +475,13 @@ export default function Advisor() {
 
           <div className="card reveal" onClick={() => setShowCropDiseaseDetection(true)}>
             <div className="icon">🌿</div>
-            <h3><span className="notranslate">Crop Disease Detection</span></h3>
-            <p>Upload plant images to detect diseases and get remedies.</p>
+            <h3><span className="notranslate">Disease Detection</span></h3>
+            <p>Upload plant images to detect diseases and get remedies using AI.</p>
           </div>
 
           <div className="card reveal" onClick={() => setShowFertilizerPopup(true)}>
             <div className="icon">🌾</div>
-            <h3><span className="notranslate">Fertilizer Recommendations</span></h3>
+            <h3><span className="notranslate">Fertilizer Plan</span></h3>
             <p>Get a crop-aware fertilizer plan based on soil pH and nutrient status.</p>
           </div>
 
@@ -508,14 +503,6 @@ export default function Advisor() {
             <div className="icon">📊</div>
             <h3><span className="notranslate">Yield Prediction</span></h3>
             <p>AI predicts crop yield based on soil & weather data.</p>
-          </div>
-
-          <div className="card reveal" onClick={() => navigate("/schemes")}>
-            <div className="icon">
-              <Landmark size={32} strokeWidth={2} />
-            </div>
-            <h3><span className="notranslate">Govt Schemes</span></h3>
-            <p>Direct subsidies, insurance, and financial benefits for farmers.</p>
           </div>
 
           <div className="card reveal" onClick={() => setShowAgriMarketplace(true)}>
@@ -957,6 +944,9 @@ export default function Advisor() {
           <div className="weather-popup profit-popup" onClick={(e)=>e.stopPropagation()}>
             <CropProfitCalculator />
             <button className="close-btn" onClick={() => setShowProfitCalculator(false)}>Close</button>
+        <div className="weather-overlay" onClick={() => setShowProfitCalculator(false)}>
+          <div className="weather-popup profit-popup" onClick={(e) => e.stopPropagation()}>
+            <CropProfitCalculator onClose={() => setShowProfitCalculator(false)} />
           </div>
         </div>
       )}
@@ -980,7 +970,7 @@ export default function Advisor() {
 
       {showCropDiseaseDetection && (
         <div className="weather-overlay" onClick={() => setShowCropDiseaseDetection(false)}>
-          <div className="weather-popup" onClick={(e) => e.stopPropagation()}>
+          <div className="chatbot-popup" onClick={(e) => e.stopPropagation()}>
             <CropDiseaseDetection onClose={() => setShowCropDiseaseDetection(false)} />
           </div>
         </div>
@@ -988,7 +978,7 @@ export default function Advisor() {
 
       {showPestManagement && (
         <div className="weather-overlay" onClick={() => setShowPestManagement(false)}>
-          <div className="weather-popup" onClick={(e) => e.stopPropagation()} style={{ padding: 0, background: 'transparent', boxShadow: 'none' }}>
+          <div className="chatbot-popup" onClick={(e) => e.stopPropagation()}>
             <PestManagement onClose={() => setShowPestManagement(false)} />
           </div>
         </div>
@@ -997,8 +987,8 @@ export default function Advisor() {
       {showAgriMarketplace && (
         <div className="weather-overlay" onClick={() => setShowAgriMarketplace(false)}>
           <div className="agri-modal-wrapper" onClick={(e) => e.stopPropagation()}>
-            <button className="close-btn agri-close-btn" onClick={() => setShowAgriMarketplace(false)}>✕</button>
-            <AgriMarketplace onClose={() => setShowAgriMarketplace(false)} />
+            <button className="close-btn" onClick={() => setShowAgriMarketplace(false)}>×</button>
+            <AgriMarketplace />
           </div>
         </div>
       )}
@@ -1007,6 +997,8 @@ export default function Advisor() {
         <div className="weather-overlay" onClick={() => setShowAgriLMS(false)}>
           <div className="agri-modal-wrapper" style={{ maxWidth: '1200px' }} onClick={(e) => e.stopPropagation()}>
             <button className="close-btn agri-close-btn" onClick={() => setShowAgriLMS(false)}>✕</button>
+          <div className="agri-modal-wrapper" onClick={(e) => e.stopPropagation()}>
+            <button className="close-btn" onClick={() => setShowAgriLMS(false)}>×</button>
             <AgriLMS />
           </div>
         </div>
@@ -1058,8 +1050,44 @@ export default function Advisor() {
         </div>
       )}
 
-      <br />
-      <br />
+      {showBankReport && (
+        <div className="weather-overlay" onClick={() => setShowBankReport(false)}>
+          <div className="bank-report-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header-bank">
+              <Landmark size={40} color="#2563eb" />
+              <h2>Bank Loan & Risk Reporting</h2>
+              <button className="close-btn" onClick={() => setShowBankReport(false)}>×</button>
+            </div>
+            <div className="report-preview-section">
+              <div className="preview-card">
+                <h4>Report Summary</h4>
+                <div className="preview-grid">
+                  <div className="preview-item"><span>Risk Index:</span> <strong className="status-low">LOW</strong></div>
+                  <div className="preview-item"><span>Credit Score:</span> <strong>780/900</strong></div>
+                  <div className="preview-item"><span>Reputation:</span> <strong>{reputation}</strong></div>
+                </div>
+              </div>
+              <div className="report-options">
+                <h3>Export Format</h3>
+                <div className="export-btns">
+                  <button className="export-btn pdf" onClick={handleDownloadPDF}><Download size={20} /> Export Bank PDF</button>
+                  <button className="export-btn csv" onClick={handleDownloadCSV}><Download size={20} /> Export Financial CSV</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showComingSoon && (
+        <div className="modal" onClick={() => setShowComingSoon(false)}>
+          <div className="modal-content">
+            <h3>🚀 Coming Soon!</h3>
+            <p>We are working hard to bring this feature to you. Stay tuned!</p>
+            <button className="get-started" onClick={() => setShowComingSoon(false)}>Okay</button>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
