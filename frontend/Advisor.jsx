@@ -18,7 +18,7 @@ import FarmPlanner3D from "./FarmPlanner3D";
 import FarmDiary from "./FarmDiary";
 import CropDiseaseDetection from "./CropDiseaseDetection";
 import PestManagement from "./PestManagement";
-import CropRotation from "./CropRotation";
+
 import {
   Sun,
   Droplets,
@@ -623,9 +623,9 @@ export default function Advisor() {
             <p>Log daily farming activities, set task reminders, and export records as PDF reports.</p>
           </div>
 
-          <div className="card reveal" onClick={() => setShowCropRotation(true)}>
+          <div className="card reveal" onClick={() => navigate("/crop-planner")}>
             <div className="icon">
-              <FaSync size={32} strokeWidth={2} />
+              <FaSync size={32} />
             </div>
             <h3><span className="notranslate">Crop Rotation Engine</span></h3>
             <p>AI-driven crop sequence optimization for maintaining soil fertility.</p>
@@ -947,32 +947,36 @@ export default function Advisor() {
               <div className="preview-body">
                 <div className="preview-row">
                   <span>Farmer:</span>
-                  <strong>{userData?.displayName || "Farmer"}</strong>
+                  <strong>{userProfile?.displayName || "Farmer"}</strong>
+                </div>
+                <div className="preview-row">
+                  <span>Primary Crop:</span>
+                  <strong>{userProfile?.cropType || "Not set"}</strong>
                 </div>
                 <div className="preview-row">
                   <span>Location:</span>
-                  <strong>{userData?.address || "Maharashtra, India"}</strong>
+                  <strong>{userProfile?.address || userProfile?.location || "India"}</strong>
                 </div>
                 <div className="preview-divider"></div>
                 <div className="preview-row">
-                  <span>Current Risk Index:</span>
-                  <span className="risk-badge">Low Risk (24%)</span>
-                </div>
-                <div className="preview-row">
-                  <span>Net Profit Forecast:</span>
-                  <strong className="profit-text">INR 45,200.00</strong>
+                  <span>Reputation Points:</span>
+                  <span className="risk-badge">{currentReputation} pts</span>
                 </div>
               </div>
             </div>
 
             <div className="export-actions-grid">
               <button className="export-btn pdf" onClick={() => generateBankPDF({
-                farmerName: userData?.displayName || "Farmer",
-                location: userData?.address || "Maharashtra, India",
-                reputation: currentReputation,
-                date: new Date().toLocaleDateString(),
-                riskIndex: { weather: 15, disease: 20, water: 30, market: 10 },
-                financialData: { revenue: 120000, costs: 74800, profit: 45200, percentage: 37 }
+                farmerName: userProfile?.displayName || "Farmer",
+                cropType: userProfile?.cropType || "N/A",
+                landArea: userProfile?.landArea || "N/A",
+                season: userProfile?.season || "N/A",
+                location: userProfile?.address || userProfile?.location || "India",
+                estimatedRevenue: userProfile?.estimatedRevenue || 0,
+                estimatedCost: userProfile?.estimatedCost || 0,
+                netProfit: userProfile?.netProfit || 0,
+                riskLevel: userProfile?.riskLevel || "Moderate",
+                date: new Date().toLocaleDateString("en-IN"),
               })}>
                 <div className="btn-icon">📄</div>
                 <div className="btn-text">
@@ -982,9 +986,16 @@ export default function Advisor() {
               </button>
 
               <button className="export-btn csv" onClick={() => generateCSV({
-                farmerName: userData?.displayName || "Farmer",
-                riskIndex: { weather: 15, disease: 20, water: 30, market: 10 },
-                financialData: { revenue: 120000, costs: 74800, profit: 45200 }
+                farmerName: userProfile?.displayName || "Farmer",
+                cropType: userProfile?.cropType || "N/A",
+                landArea: userProfile?.landArea || "N/A",
+                season: userProfile?.season || "N/A",
+                location: userProfile?.address || userProfile?.location || "India",
+                estimatedRevenue: userProfile?.estimatedRevenue || 0,
+                estimatedCost: userProfile?.estimatedCost || 0,
+                netProfit: userProfile?.netProfit || 0,
+                riskLevel: userProfile?.riskLevel || "Moderate",
+                date: new Date().toLocaleDateString("en-IN"),
               })}>
                 <div className="btn-icon">📊</div>
                 <div className="btn-text">
