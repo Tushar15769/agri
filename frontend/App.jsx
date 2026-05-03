@@ -1,9 +1,14 @@
-import React, { useState, useRef, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation } from "react-router-dom";
 import "./App.css";
 import Advisor from "./Advisor";
 import How from "./How";
 import Home from "./Home";
+import FAQ from "./FAQ";
+import Terms from "./Terms";
+import Privacy from "./Privacy";
+import Resources from "./Resources";
+import CropGuide from "./CropGuide";
 import FAQ from "./pages/FAQ";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
@@ -279,6 +284,43 @@ function App() {
            </div>
 
         <ul className={`nav-center ${isOpen ? "active" : ""}`}>
+          <li><Link to="/" onClick={() => setIsOpen(false)}>Home</Link></li>
+          <li><Link to="/how-it-works" onClick={() => setIsOpen(false)}>Works</Link></li>
+          <li><Link to="/crop-guide" onClick={() => setIsOpen(false)}>Guide</Link></li>
+          <li><Link to="/resources" onClick={() => setIsOpen(false)}>Resources</Link></li>
+        </ul>
+
+        <div className="nav-right">
+          <button onClick={handleThemeToggle} className="theme-toggle" aria-label="Toggle Theme">
+            {isDarkTheme ? "☀️" : "🌙"}
+          </button>
+
+          <button onClick={() => setShowMoreMenu(!showMoreMenu)} className="more-menu-toggle" aria-label="More Options">
+            <FaBars />
+          </button>
+
+          {showMoreMenu && (
+            <div className="more-dropdown" onClick={(e) => e.stopPropagation()}>
+              <div className="dropdown-section">
+                <label>Language</label>
+                <select
+                  className="lang-select-dropdown notranslate"
+                  value={preferredLang}
+                  onChange={handleLangChange}
+                >
+                  {LANGUAGE_OPTIONS.map((l) => (
+                    <option key={l.value} value={l.value}>
+                      {l.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="dropdown-links">
+                <Link to="/dashboard" onClick={() => setShowMoreMenu(false)}><FaTachometerAlt /> Dashboard</Link>
+                <Link to="/community" onClick={() => setShowMoreMenu(false)}><FaComments /> Community</Link>
+              </div>
+            </div>
+          )}
           <li>
             <Link
               to="/"
@@ -565,6 +607,59 @@ function App() {
         </button>
       </nav>
 
+    {!loading && user && !user.emailVerified && !showScorecard && location.pathname !== "/login" && (
+      <div className="verification-overlay">
+        <div className="verification-card">
+          <div className="verify-icon">✉️</div>
+          <h2>Verify Your Email</h2>
+          <p>We've sent a link to <b>{user.email}</b>.<br /> Please verify your email to unlock all features.</p>
+          <button
+             onClick={() => {
+               auth?.currentUser?.reload().then(() => window.location.reload()).catch(() => window.location.reload());
+             }}
+             className="btn-refresh"
+          >
+            I've Verified My Email
+          </button>
+          <button onClick={handleLogout} className="btn-logout-simple">Sign Out</button>
+        </div>
+      </div>
+    )}
+
+     {!loading && user && user.emailVerified && !profileCompleted && location.pathname !== "/profile-setup" && (
+       <Navigate to="/profile-setup" />
+     )}
+
+     <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/advisor" element={<Advisor />} />
+      <Route path="/how-it-works" element={<How />} />
+      <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/crop-guide" element={<CropGuide />} />
+      <Route path="/schemes" element={<Schemes />} />
+      <Route path="/resources" element={<Resources />} />
+      <Route path="/login" element={<Auth />} />
+      <Route path="/profile-setup" element={<ProfileSetup user={user} profileCompleted={profileCompleted} />} />
+      <Route path="/calendar" element={<Calendar />} />
+      <Route path="/share-feedback" element={<Feedback />} />
+      <Route path="/admin/feedback" element={<AdminFeedback />} />
+      <Route path="/market-prices" element={<MarketPrices />} />
+      <Route path="/farming-map" element={<FarmingMap />} />
+      <Route path="/profit-calculator" element={<CropProfitCalculator />} />
+      <Route path="/community" element={<Community />} />
+      <Route path="/soil-analysis" element={<SoilAnalysis />} />
+      <Route path="/faq" element={<FAQ />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy-policy" element={<Privacy />} />
+    </Routes>
+
+    {/* Floating Chat Button */}
+    <Link to="/advisor" className="floating-chat-btn" aria-label="Chat Support">
+      <FaComments size={28} />
+    </Link>
+
+    <ToastContainer position="bottom-right" />
+  </div>
         {!loading && user && !user.emailVerified && !showScorecard && window.location.pathname !== "/login" && (
           <div className="verification-overlay">
             <div className="verification-card">
