@@ -30,6 +30,7 @@ import Dashboard from "./Dashboard";
 import Feedback from "./Feedback";
 import FarmingMap from "./FarmingMap";
 import Schemes from "./GovernmentSchemes";
+import GovernmentSchemes from "./GovernmentSchemes";
 import How from "./How";
 import Home from "./Home";
 import MarketPrices from "./MarketPrices";
