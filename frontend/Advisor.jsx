@@ -19,6 +19,9 @@ import FarmDiary from "./FarmDiary";
 import CropDiseaseDetection from "./CropDiseaseDetection";
 import PestManagement from "./PestManagement";
 
+import CropRotation from "./CropRotation";
+import P2PChat from "./P2PChat";
+import SmartCropRecommendation from "./SmartCropRecommendation";
 import {
   Sun,
   Droplets,
@@ -102,6 +105,10 @@ export default function Advisor() {
     setShowExpertStatus,
     showBankReport,
     setShowBankReport,
+    showP2PChat,
+    setShowP2PChat,
+    showSmartCropRecommendation,
+    setShowSmartCropRecommendation,
   } = useAdvisorStore();
 
   const {
@@ -648,12 +655,28 @@ export default function Advisor() {
             <p>Log daily farming activities, set task reminders, and export records as PDF reports.</p>
           </div>
 
-          <div className="card reveal" role="button" tabIndex={0} onClick={() => navigate("/crop-planner")} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigate("/crop-planner"); }} aria-label="Crop Rotation Engine: Soil fertility optimization">
+          <div className="card reveal" role="button" tabIndex={0} onClick={() => setShowCropRotation(true)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowCropRotation(true); }} aria-label="Crop Rotation: Soil health optimization">
             <div className="icon" aria-hidden="true">
-              <FaSync size={32} />
+              <Layers size={32} strokeWidth={2} />
             </div>
-            <h3><span className="notranslate">Crop Rotation Engine</span></h3>
-            <p>AI-driven crop sequence optimization for maintaining soil fertility.</p>
+            <h3><span className="notranslate">Crop Rotation</span></h3>
+            <p>Optimize your soil health with intelligent crop rotation planning.</p>
+          </div>
+
+          <div className="card reveal" role="button" tabIndex={0} onClick={() => setShowP2PChat(true)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowP2PChat(true); }} aria-label="P2P Farmer Chat: Connect with others">
+            <div className="icon" aria-hidden="true">
+              <MessageSquare size={32} strokeWidth={2} />
+            </div>
+            <h3><span className="notranslate">P2P Farmer Chat</span></h3>
+            <p>Connect directly with fellow farmers for real-time advice and support.</p>
+          </div>
+
+          <div className="card reveal" role="button" tabIndex={0} onClick={() => setShowSmartCropRecommendation(true)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowSmartCropRecommendation(true); }} aria-label="Smart Crop Recommendation: AI-powered suggestions">
+            <div className="icon" aria-hidden="true">
+              <Sprout size={32} strokeWidth={2} />
+            </div>
+            <h3><span className="notranslate">Smart Crop Recommendation</span></h3>
+            <p>Get AI-powered crop suggestions based on your soil and climate.</p>
           </div>
 
           <div className="card reveal expert-card" role="button" tabIndex={0} onClick={() => setShowExpertStatus(true)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowExpertStatus(true); }} aria-label="Expert Reputation: View badges">
@@ -1289,6 +1312,31 @@ export default function Advisor() {
           <div className="agri-modal-wrapper" style={{ maxWidth: '1200px' }} onClick={(e) => e.stopPropagation()}>
             <button className="close-btn agri-close-btn" onClick={() => setShowCropRotation(false)}>✕</button>
             <CropRotation />
+          </div>
+        </div>
+      )}
+
+      {showP2PChat && (
+        <div className="weather-overlay" onClick={() => setShowP2PChat(false)}>
+          <div className="weather-popup" onClick={(e) => e.stopPropagation()}>
+            <P2PChat 
+              recipient={{ userId: "advisor", userName: "AI Farming Advisor" }} 
+              onClose={() => setShowP2PChat(false)} 
+            />
+          </div>
+        </div>
+      )}
+
+      {showSmartCropRecommendation && (
+        <div className="weather-overlay" onClick={() => setShowSmartCropRecommendation(false)}>
+          <div className="weather-popup" onClick={(e) => e.stopPropagation()}>
+            <SmartCropRecommendation />
+            <button
+              className="close-btn"
+              onClick={() => setShowSmartCropRecommendation(false)}
+            >
+              Close
+            </button>
           </div>
         </div>
       )}

@@ -45,6 +45,7 @@ import Resources from "./Resources";
 import SeasonalCropPlanner from "./SeasonalCropPlanner";
 import SoilGuide from "./SoilGuide";
 import CropDiseaseAwareness from "./CropDiseaseAwareness";
+import CropRotation from "./CropRotation";
 import Helpline from "./Helpline";
 import Glossary from "./Glossary";
 import RiskIndex from "./RiskIndex";
@@ -55,7 +56,6 @@ import NotFound from "./NotFound";
 import PrivacyPolicy from "./PrivacyPolicy";
 import Terms from "./Terms";
 import SoilAnalysis from "./SoilAnalysis";
-import CropRotation from "./CropRotation";
 import { SkipLink } from "./NavigationManager";
 
 // Libs
