@@ -471,7 +471,7 @@
   gap: 10px;
   transition: all 0.3s;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 .about-team-card::before {
   content: "";
@@ -516,21 +516,31 @@
 .team-socials a:hover { border-color: #10b981; color: #10b981; background: rgba(16,185,129,0.08); transform: translateY(-2px); }
 /* Founder badge */
 .founder-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: linear-gradient(135deg, #10b981, #059669);
+  position: absolute;
+  top: 12px;
+  right: -8px;
+  background: linear-gradient(135deg, #ffb700, #ff9500);
   color: white;
-  font-size: 12px;
+  font-size: 10px;
   font-weight: 700;
-  padding: 4px 12px;
-  border-radius: 20px;
-  margin-top: 8px;
-  box-shadow: 0 2px 8px rgba(16,185,129,0.3);
+  padding: 5px 30px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(255, 183, 0, 0.4);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  transform: rotate(45deg);
+  transform-origin: center;
 }
 .founder-badge:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(16,185,129,0.4);
+  transform: rotate(45deg) scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 183, 0, 0.5);
+}
+.founder-badge:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 183, 0, 0.5);
 }
 
 /* CTA */
