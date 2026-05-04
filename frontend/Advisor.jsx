@@ -41,6 +41,10 @@ import {
   Book,
   CloudSun,
   QrCode,
+  Award, 
+  Star, 
+  ThumbsUp,
+  X
 } from "lucide-react";
 import { FaSync } from "react-icons/fa";
 import { useAdvisorStore } from "./stores/advisorStore";
@@ -48,12 +52,6 @@ import { useYieldPrediction } from "./hooks/useYieldPrediction";
 import { auth, db } from "./lib/firebase";
 import { generateBankPDF, generateCSV } from "./utils/exportService";
 import { doc, onSnapshot } from "firebase/firestore";
-import { 
-  Award, 
-  Star, 
-  ThumbsUp,
-  X
-} from "lucide-react";
 
 export default function Advisor() {
   const navigate = useNavigate();

@@ -54,7 +54,7 @@ const P2PChat = ({ recipient, onClose }) => {
               ...data,
               content: decryptedText || "[Decryption Failed]"
             };
-          } catch {
+          } catch (e) {
             return { id: doc.id, ...data, content: "[Encrypted Message]" };
           }
         });
@@ -74,7 +74,7 @@ const P2PChat = ({ recipient, onClose }) => {
               const bytes = CryptoJS.AES.decrypt(msg.encryptedContent, sharedSecret);
               const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
               return { ...msg, content: decryptedText || "[Decryption Failed]" };
-            } catch {
+            } catch (e) {
               return { ...msg, content: "[Encrypted Message]" };
             }
           });
@@ -84,6 +84,7 @@ const P2PChat = ({ recipient, onClose }) => {
       };
 
       loadLocalMessages();
+      // Poll for local changes (simulating real-time)
       const interval = setInterval(loadLocalMessages, 2000);
       return () => clearInterval(interval);
     }
@@ -118,7 +119,7 @@ const P2PChat = ({ recipient, onClose }) => {
         senderId: currentUser.uid,
         senderName: "You",
         encryptedContent: encrypted,
-        createdAt: { toDate: () => new Date() } 
+        createdAt: { toDate: () => new Date() } // Mock firebase timestamp
       };
       localStorage.setItem(localKey, JSON.stringify([...existing, newMsg]));
       setMessages(prev => [...prev, { ...newMsg, content: newMessage }]);
@@ -184,3 +185,4 @@ const P2PChat = ({ recipient, onClose }) => {
 };
 
 export default P2PChat;
+
