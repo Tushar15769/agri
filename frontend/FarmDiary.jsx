@@ -1,27 +1,32 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { toast } from 'react-toastify';
-import {
-  Book, Plus, Download, Trash2, Edit2,
-  Calendar, Clock, Check, X,
-  Droplets, Sprout, Tractor, Activity, MessageCircle
+import { 
+  Book, 
+  Plus, 
+  Download, 
+  Trash2, 
+  Edit2, 
+  Calendar, 
+  Clock, 
+  Check, 
+  X,
+  Droplets,
+  Sprout,
+  Tractor,
+  Activity
 } from 'lucide-react';
 import './FarmDiary.css';
-import SoilChatbot from './SoilChatbot';
 
 const ACTIVITY_TYPES = ['Sowing', 'Irrigation', 'Fertilizer', 'Harvest', 'Pesticide', 'Other'];
-
-const todayStr = () => new Date().toISOString().split('T')[0];
 
 export default function FarmDiary({ onClose }) {
   const [entries, setEntries] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [showAdvisor, setShowAdvisor] = useState(false);
-
   const [formData, setFormData] = useState({
-    date: todayStr(),
+    date: new Date().toISOString().split('T')[0],
     activityType: 'Sowing',
     notes: '',
     cost: '',
@@ -29,37 +34,85 @@ export default function FarmDiary({ onClose }) {
     isCompleted: true
   });
 
-  // Load once
+  // Load entries from localStorage on mount
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('fasalSaathiDiary');
-      if (saved) setEntries(JSON.parse(saved));
-    } catch (err) {
-      console.error('Load error:', err);
+    const saved = localStorage.getItem('fasalSaathiDiary');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Sort by date descending
+        parsed.sort((a, b) => new Date(b.date) - new Date(a.date));
+        setEntries(parsed);
+      } catch (e) {
+        console.error('Error loading diary entries', e);
+      }
     }
   }, []);
 
-  // Save whenever entries change
+  // Save to localStorage whenever entries change
   useEffect(() => {
     localStorage.setItem('fasalSaathiDiary', JSON.stringify(entries));
   }, [entries]);
 
-  // Memoized sorted entries
-  const sortedEntries = useMemo(() => {
-    return [...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
-  }, [entries]);
-
-  const handleInputChange = ({ target }) => {
-    const { name, value, type, checked } = target;
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!formData.date || !formData.notes || !formData.activityType) {
+      toast.error('Please fill in required fields (Date, Type, Notes)');
+      return;
+    }
+
+    if (editingId) {
+      setEntries(entries.map(entry => 
+        entry.id === editingId ? { ...formData, id: editingId } : entry
+      ));
+      toast.success('Entry updated successfully!');
+    } else {
+      const newEntry = {
+        ...formData,
+        id: Date.now().toString(),
+      };
+      setEntries([newEntry, ...entries].sort((a, b) => new Date(b.date) - new Date(a.date)));
+      toast.success('New activity logged!');
+    }
+    
+    resetForm();
+  };
+
+  const handleEdit = (entry) => {
+    setFormData(entry);
+    setEditingId(entry.id);
+    setShowForm(true);
+  };
+
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this log?')) {
+      setEntries(entries.filter(e => e.id !== id));
+      toast.success('Entry deleted');
+    }
+  };
+
+  const toggleStatus = (id) => {
+    setEntries(entries.map(e => {
+      if (e.id === id) {
+        const isNowCompleted = !e.isCompleted;
+        toast.info(isNowCompleted ? 'Task marked as completed' : 'Task marked as pending');
+        return { ...e, isCompleted: isNowCompleted };
+      }
+      return e;
+    }));
+  };
+
   const resetForm = () => {
     setFormData({
-      date: todayStr(),
+      date: new Date().toISOString().split('T')[0],
       activityType: 'Sowing',
       notes: '',
       cost: '',
@@ -70,52 +123,68 @@ export default function FarmDiary({ onClose }) {
     setShowForm(false);
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!formData.date || !formData.notes || !formData.activityType) {
-      return toast.error('Please fill required fields');
+  const generatePDF = () => {
+    if (entries.length === 0) {
+      toast.warning('No entries to export');
+      return;
     }
 
-    setEntries(prev => {
-      if (editingId) {
-        toast.success('Entry updated');
-        return prev.map(e =>
-          e.id === editingId ? { ...formData, id: editingId } : e
-        );
-      }
+    try {
+      const doc = new jsPDF();
+      
+      // Header
+      doc.setFontSize(20);
+      doc.setTextColor(46, 204, 113);
+      doc.text('Fasal Saathi - Farm Diary Report', 14, 22);
+      
+      doc.setFontSize(11);
+      doc.setTextColor(100);
+      doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
+      doc.text(`Total Entries: ${entries.length}`, 14, 36);
 
-      const newEntry = {
-        ...formData,
-        id: Date.now().toString()
-      };
+      // Total Cost calculation
+      const totalCost = entries.reduce((sum, entry) => sum + (parseFloat(entry.cost) || 0), 0);
+      doc.text(`Total Expense: ₹${totalCost.toFixed(2)}`, 14, 42);
 
-      toast.success('Entry added');
-      return [newEntry, ...prev];
-    });
+      // Table Data
+      const tableColumn = ["Date", "Activity", "Status", "Notes", "Cost (₹)", "Reminder"];
 
-    resetForm();
+      entries.forEach(entry => {
+        const entryData = [
+          entry.date,
+          entry.activityType,
+          entry.isCompleted ? 'Completed' : 'Pending',
+          entry.notes,
+          entry.cost ? entry.cost : '-',
+          entry.reminderDate ? entry.reminderDate : '-'
+        ];
+        tableRows.push(entryData);
+      });
+
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 50,
+        theme: 'grid',
+        styles: { fontSize: 9, cellPadding: 3 },
+        headStyles: { fillColor: [46, 204, 113], textColor: 255 },
+        alternateRowStyles: { fillColor: [245, 255, 245] }
+      });
+
+      doc.save(`Farm_Diary_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success('PDF Report downloaded successfully!');
+    } catch (error) {
+      console.error("PDF Export Error: ", error);
+      toast.error('Failed to generate PDF. Please try again.');
+    }
   };
 
-  const handleDelete = (id) => {
-    if (!window.confirm('Delete this entry?')) return;
-    setEntries(prev => prev.filter(e => e.id !== id));
-    toast.success('Deleted');
-  };
+  // Separate upcoming reminders
+  const today = new Date().toISOString().split('T')[0];
+  const upcomingReminders = entries.filter(e => !e.isCompleted && e.reminderDate && e.reminderDate >= today);
 
-  const toggleStatus = (id) => {
-    setEntries(prev =>
-      prev.map(e => {
-        if (e.id !== id) return e;
-        const updated = { ...e, isCompleted: !e.isCompleted };
-        toast.info(updated.isCompleted ? 'Completed' : 'Marked pending');
-        return updated;
-      })
-    );
-  };
-
-  const getIcon = (type) => {
-    switch (type) {
+  const getActivityIcon = (type) => {
+    switch(type) {
       case 'Sowing': return <Sprout size={16} />;
       case 'Irrigation': return <Droplets size={16} />;
       case 'Harvest': return <Tractor size={16} />;
@@ -123,173 +192,171 @@ export default function FarmDiary({ onClose }) {
     }
   };
 
-  const generatePDF = () => {
-    if (!entries.length) return toast.warning('No data');
-
-    const doc = new jsPDF();
-
-    const totalCost = entries.reduce(
-      (sum, e) => sum + (parseFloat(e.cost) || 0),
-      0
-    );
-
-    doc.setFontSize(18);
-    doc.text('Farm Diary Report', 14, 20);
-
-    doc.setFontSize(11);
-    doc.text(`Entries: ${entries.length}`, 14, 30);
-    doc.text(`Total Cost: ₹${totalCost.toFixed(2)}`, 14, 36);
-
-    const rows = entries.map(e => [
-      e.date,
-      e.activityType,
-      e.isCompleted ? 'Done' : 'Pending',
-      e.notes,
-      e.cost || '-',
-      e.reminderDate || '-'
-    ]);
-
-    autoTable(doc, {
-      head: [['Date', 'Activity', 'Status', 'Notes', 'Cost', 'Reminder']],
-      body: rows,
-      startY: 45
-    });
-
-    doc.save(`farm-diary-${todayStr()}.pdf`);
-    toast.success('PDF generated');
-  };
-
   return (
     <div className="diary-container">
-
-      {/* Header */}
       <div className="diary-header">
-        <h2><Book size={26} /> Farm Diary</h2>
-
+        <h2><Book size={28} /> Digital Farm Diary</h2>
         <div className="diary-header-actions">
-          <button onClick={() => setShowForm(s => !s)} className="diary-btn primary">
-            {showForm ? <X size={16} /> : <Plus size={16} />}
-            {showForm ? 'Cancel' : 'Add'}
+          <button onClick={() => setShowForm(!showForm)} className="diary-btn primary">
+            {showForm ? <X size={18} /> : <Plus size={18} />} 
+            {showForm ? 'Cancel' : 'Add Entry'}
           </button>
-
           <button onClick={generatePDF} className="diary-btn secondary">
-            <Download size={16} /> Export
+            <Download size={18} /> Export PDF
           </button>
-
-          <button onClick={onClose} className="diary-btn close-modal-btn">
-            <X size={18} />
+          <button onClick={onClose} className="diary-btn close-modal-btn" aria-label="Close Diary" title="Close Diary">
+            <X size={20} />
           </button>
         </div>
       </div>
 
-      {/* Form */}
       {showForm && (
         <form onSubmit={handleSubmit} className="diary-form">
-          <input type="date" name="date" value={formData.date} onChange={handleInputChange} />
-          
-          <select name="activityType" value={formData.activityType} onChange={handleInputChange}>
-            {ACTIVITY_TYPES.map(t => <option key={t}>{t}</option>)}
-          </select>
+          <div className="form-grid">
+            <div className="form-group">
+              <label>Date *</label>
+              <input 
+                type="date" 
+                name="date" 
+                value={formData.date} 
+                onChange={handleInputChange}
+                className="diary-input"
+                required
+              />
+            </div>
+            
+            <div className="form-group">
+              <label>Activity Type *</label>
+              <select 
+                name="activityType" 
+                value={formData.activityType} 
+                onChange={handleInputChange}
+                className="diary-input"
+                required
+              >
+                {ACTIVITY_TYPES.map(type => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            </div>
 
-          <textarea
-            name="notes"
-            value={formData.notes}
-            onChange={handleInputChange}
-            placeholder="Notes..."
-          />
+            <div className="form-group full-width">
+              <label>Activity Details / Notes *</label>
+              <textarea 
+                name="notes" 
+                value={formData.notes} 
+                onChange={handleInputChange}
+                className="diary-input"
+                placeholder="E.g., Applied 50kg Urea in Field A..."
+                required
+              />
+            </div>
 
-          <input type="number" name="cost" value={formData.cost} onChange={handleInputChange} />
+            <div className="form-group">
+              <label>Cost / Expense (₹)</label>
+              <input 
+                type="number" 
+                name="cost" 
+                value={formData.cost} 
+                onChange={handleInputChange}
+                className="diary-input"
+                placeholder="0.00"
+                min="0"
+              />
+            </div>
 
-          <input type="date" name="reminderDate" value={formData.reminderDate} onChange={handleInputChange} />
+            <div className="form-group">
+              <label>Set Reminder Date (Optional)</label>
+              <input 
+                type="date" 
+                name="reminderDate" 
+                value={formData.reminderDate} 
+                onChange={handleInputChange}
+                className="diary-input"
+              />
+            </div>Expand commentComment on lines R217 to R278Resolved
+          </div>
 
-          <label>
-            <input
-              type="checkbox"
-              name="isCompleted"
-              checked={formData.isCompleted}
-              onChange={handleInputChange}
-            />
-            Completed
-          </label>
-
-          <button type="submit" className="diary-btn primary">
-            {editingId ? 'Update' : 'Save'}
-          </button>
+          <div className="form-actions">
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginRight: 'auto', color: '#e0e0e0', cursor: 'pointer' }}>
+              <input 
+                type="checkbox" 
+                name="isCompleted" 
+                checked={formData.isCompleted} 
+                onChange={handleInputChange}
+                style={{ width: '18px', height: '18px', accentColor: '#2ecc71' }}
+              />
+              Mark as Completed
+            </label>
+            <button type="button" onClick={resetForm} className="diary-btn secondary">Cancel</button>
+            <button type="submit" className="diary-btn primary">
+              {editingId ? 'Update Entry' : 'Save Entry'}
+            </button>
+          </div>
         </form>
       )}
 
-      {/* List */}
-      {sortedEntries.length === 0 ? (
+      {entries.length === 0 && !showForm ? (
         <div className="empty-state">
-          <Book />
-          <p>No entries yet</p>
+          <Book className="icon" />
+          <h3>No records found</h3>
+          <p>Start logging your daily farm activities to keep track of your progress.</p>
         </div>
       ) : (
         <div className="diary-timeline-container">
-          {sortedEntries.map(entry => {
-            const isUpcoming =
-              !entry.isCompleted &&
-              entry.reminderDate &&
-              new Date(entry.reminderDate) >= new Date(todayStr());
-
+          {entries.map((entry) => {
+            const isUpcoming = !entry.isCompleted && entry.reminderDate && entry.reminderDate >= today;
+            
             return (
               <div key={entry.id} className={`timeline-entry ${isUpcoming ? 'reminder' : ''}`}>
+                <div className="diary-timeline-dot"></div>
                 <div className="timeline-content">
-
                   <div className="timeline-header">
-                    <span className="entry-type-badge">
-                      {getIcon(entry.activityType)}
+                    <span className={`entry-type-badge ${entry.activityType}`}>
+                      {getActivityIcon(entry.activityType)}
                       {entry.activityType}
                     </span>
-
-                    <span>
-                      <Calendar size={14} />
-                      {new Date(entry.date).toLocaleDateString()}
-                    </span>
+                    <div className="entry-date">
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Calendar size={14} /> {new Date(entry.date).toLocaleDateString()}
+                      </span>
+                      {entry.reminderDate && (
+                        <span className="reminder-tag">
+                          <Clock size={12} /> Due: {new Date(entry.reminderDate).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
                   </div>
-
-                  <p>{entry.notes}</p>
-
+                  
+                  <p className="timeline-notes">{entry.notes}</p>
+                  
                   <div className="timeline-footer">
-                    <span>₹{entry.cost}</span>
-
+                    <div>
+                      {entry.cost && <span className="entry-cost">₹{entry.cost}</span>}
+                    </div>
                     <div className="entry-actions">
-                      <button onClick={() => toggleStatus(entry.id)}>
-                        <Check size={16} />
+                      <button 
+                        onClick={() => toggleStatus(entry.id)} 
+                        className="entry-action-btn"
+                        title={entry.isCompleted ? "Mark Pending" : "Mark Completed"}
+                        style={{ color: entry.isCompleted ? '#2ecc71' : '#a0a0a0' }}
+                      >
+                        <Check size={18} />
                       </button>
-                      <button onClick={() => {
-                        setFormData(entry);
-                        setEditingId(entry.id);
-                        setShowForm(true);
-                      }}>
-                        <Edit2 size={16} />
+                      <button onClick={() => handleEdit(entry)} className="entry-action-btn" title="Edit">
+                        <Edit2 size={18} />
                       </button>
-                      <button onClick={() => handleDelete(entry.id)}>
-                        <Trash2 size={16} />
+                      <button onClick={() => handleDelete(entry.id)} className="entry-action-btn delete" title="Delete">
+                        <Trash2 size={18} />
                       </button>
                     </div>
                   </div>
-
                 </div>
               </div>
             );
           })}
         </div>
       )}
-
-      {/* AI Advisor */}
-      <button className="advisor-fab" onClick={() => setShowAdvisor(true)}>
-        <MessageCircle />
-      </button>
-
-      {showAdvisor && (
-        <div className="advisor-overlay" onClick={() => setShowAdvisor(false)}>
-          <div onClick={e => e.stopPropagation()}>
-            <SoilChatbot onClose={() => setShowAdvisor(false)} />
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }
