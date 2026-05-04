@@ -81,6 +81,9 @@ export const useAdvisorStore = create((set) => ({
    showSmartCropRecommendation: false,
    setShowSmartCropRecommendation: (show) => set({ showSmartCropRecommendation: show }),
 
+   showSeedVerifier: false,
+   setShowSeedVerifier: (show) => set({ showSeedVerifier: show }),
+
    // Reset all modals to closed
    resetAdvisorStore: () =>
      set({
@@ -110,5 +113,6 @@ export const useAdvisorStore = create((set) => ({
        showCropRotation: false,
        showP2PChat: false,
        showSmartCropRecommendation: false,
+       showSeedVerifier: false,
      }),
 }));
