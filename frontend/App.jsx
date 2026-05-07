@@ -99,7 +99,7 @@ const GuestBanner = ({ onSignUp }) => (
     <div className="guest-banner-content">
       <FaUserSecret className="banner-icon" />
       <span>
-        <strong>Guest Session Active:</strong> Explore the platform freely! 
+        <strong>Guest Session Active:</strong> Explore the platform freely!
         <Link to="/auth" className="banner-link"> Sign Up</Link> to save your progress permanently.
       </span>
     </div>
@@ -118,7 +118,7 @@ function App() {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  
+
   const { liteMode, setLiteMode, detectAndSetLiteMode } = usePerformanceStore();
 
   useEffect(() => {
@@ -134,7 +134,15 @@ function App() {
       setLoading(false);
       return;
     }
+
+    // Safety timeout — if Firebase auth never responds (revoked key, network issue),
+    // force loading=false so the app doesn't hang forever on the spinner.
+    const safetyTimer = setTimeout(() => {
+      setLoading(false);
+    }, 5000);
+
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      clearTimeout(safetyTimer);
       setUser(currentUser);
       if (currentUser) {
         localStorage.setItem("userId", currentUser.uid);
@@ -167,7 +175,7 @@ function App() {
         setLoading(false);
       }
     });
-    return () => unsubscribeAuth();
+    return () => { clearTimeout(safetyTimer); unsubscribeAuth(); };
   }, []);
 
   // E2EE Key Generation Sync
@@ -178,7 +186,7 @@ function App() {
       try {
         let privateJwk = localStorage.getItem(`ecdh_private_${user.uid}`);
         let publicJwk = localStorage.getItem(`ecdh_public_${user.uid}`);
-        
+
         // Generate globally if it doesn't exist
         if (!privateJwk || !publicJwk) {
           const { cryptoService } = await import("./utils/cryptoService");
@@ -274,9 +282,9 @@ function App() {
     <div className={`app ${isDarkTheme ? "theme-dark" : ""} ${liteMode ? "lite-mode" : ""}`}>
       <SkipLink />
       {user?.isAnonymous && <GuestBanner />}
-      
+
       {loading && <Loader fullPage={true} message={<span className="notranslate">Initializing Fasal Saathi...</span>} />}
-      
+
       {isOffline && (
         <div className="offline-banner" role="alert">
           You are currently offline. Running in offline mode using local data.
@@ -304,9 +312,9 @@ function App() {
             {isDarkTheme ? "☀️" : "🌙"}
           </button>
 
-          <button 
-            onClick={(e) => { e.stopPropagation(); setShowMoreMenu(!showMoreMenu); }} 
-            className={`more-menu-toggle ${showMoreMenu ? 'active' : ''}`} 
+          <button
+            onClick={(e) => { e.stopPropagation(); setShowMoreMenu(!showMoreMenu); }}
+            className={`more-menu-toggle ${showMoreMenu ? 'active' : ''}`}
             aria-label="More Options"
           >
             <span className="notranslate">More</span>
@@ -318,7 +326,7 @@ function App() {
               <div className="dropdown-links">
                 <div className="language-selector-section">
                   <label className="language-label">Language:</label>
-                  <LanguageDropdown 
+                  <LanguageDropdown
                     options={LANGUAGE_OPTIONS}
                     value={settings.language}
                     onChange={(lang) => {
@@ -329,7 +337,7 @@ function App() {
                   />
                 </div>
                 <div className="performance-toggle-section">
-                  <button 
+                  <button
                     className={`lite-mode-toggle ${liteMode ? 'active' : ''}`}
                     onClick={() => setLiteMode(!liteMode)}
                     role="menuitem"
@@ -461,10 +469,10 @@ function App() {
         <FaComments size={28} aria-hidden="true" />
       </Link>
 
-      <a 
-        href="https://wa.me/14155238886?text=I%20want%20to%20start%20the%20conversation" 
-        target="_blank" 
-        rel="noopener noreferrer" 
+      <a
+        href="https://wa.me/14155238886?text=I%20want%20to%20start%20the%20conversation"
+        target="_blank"
+        rel="noopener noreferrer"
         className="whatsapp-float"
         title="Chat with WhatsApp Bot"
       >
