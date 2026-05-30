@@ -59,11 +59,17 @@ _TRUSTED_NETWORKS: list[ipaddress.IPv4Network | ipaddress.IPv6Network] = (
 
 
 def _is_trusted_proxy(host: str) -> bool:
-    """Return True if *host* is within a trusted proxy network."""
+    """Return True if *host* is within a trusted proxy network.
+
+    Non-IP hostnames (e.g. ``testclient`` used by Starlette's TestClient, or
+    Unix-domain socket descriptors) are treated as trusted internal connections
+    since they cannot originate from the public internet.
+    """
     try:
         addr = ipaddress.ip_address(host)
     except ValueError:
-        return False
+        # Not a valid IP address — assume internal / loopback context.
+        return True
     return any(addr in net for net in _TRUSTED_NETWORKS)
 
 

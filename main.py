@@ -542,7 +542,7 @@ _E164_RE = re.compile(r"^\+[1-9]\d{6,14}$")
 
 class WhatsAppSubscribeRequest(BaseModel):
     phone_number: str
-    name: str
+    name: str = Field(..., min_length=1, max_length=100)
     region_id: Optional[str] = Field(default=None, max_length=100)
     # user_id is accepted for backward compatibility but is IGNORED by the
     # endpoint -- the authoritative user identity is always derived from the
