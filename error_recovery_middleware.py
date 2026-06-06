@@ -4,6 +4,7 @@ Provides structured error handling and recovery for async operations
 """
 
 import logging
+import threading
 import time
 import uuid
 from fastapi import Request, Response
@@ -39,6 +40,7 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
         self._failure_timestamps: dict[str, list[float]] = {}
         self._circuit_state: dict[str, str] = {}
         self._circuit_open_since: dict[str, float] = {}
+        self._lock = threading.Lock()
 
     async def dispatch(self, request: Request, call_next) -> Response:
         """Handle request with error recovery"""
@@ -52,26 +54,27 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
         endpoint = f"{request.method} {request.url.path}"
 
         # ---- Pre-request: check if a probe (half-open) should be allowed ----
-        state = self._circuit_state.get(endpoint)
-        if state == self._OPEN:
-            opened_at = self._circuit_open_since.get(endpoint, 0.0)
-            if time.time() - opened_at >= self._RESET_TIMEOUT:
-                self._circuit_state[endpoint] = self._HALF_OPEN
-                logger.info("Circuit breaker half-open for %s — allowing probe", endpoint)
-            else:
-                return JSONResponse(
-                    status_code=503,
-                    content={
-                        "success": False,
-                        "request_id": request_id,
-                        "error": {
-                            "message": "Service temporarily unavailable",
-                            "status_code": 503,
-                            "category": "service_error",
-                            "recoverable": True,
+        with self._lock:
+            state = self._circuit_state.get(endpoint)
+            if state == self._OPEN:
+                opened_at = self._circuit_open_since.get(endpoint, 0.0)
+                if time.time() - opened_at >= self._RESET_TIMEOUT:
+                    self._circuit_state[endpoint] = self._HALF_OPEN
+                    logger.info("Circuit breaker half-open for %s — allowing probe", endpoint)
+                else:
+                    return JSONResponse(
+                        status_code=503,
+                        content={
+                            "success": False,
+                            "request_id": request_id,
+                            "error": {
+                                "message": "Service temporarily unavailable",
+                                "status_code": 503,
+                                "category": "service_error",
+                                "recoverable": True,
+                            },
                         },
-                    },
-                )
+                    )
 
         try:
             # Call the endpoint
@@ -84,14 +87,15 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
                 f"Duration: {duration:.2f}s"
             )
 
-            # Half-open → closed on success; otherwise retain failure
-            # timestamps so the rolling window can track instability.
-            if self._circuit_state.get(endpoint) == self._HALF_OPEN:
-                logger.info("Circuit breaker closed for %s — probe succeeded", endpoint)
-                self._failure_timestamps.pop(endpoint, None)
-                self._circuit_open_since.pop(endpoint, None)
+            with self._lock:
+                # Half-open → closed on success; otherwise retain failure
+                # timestamps so the rolling window can track instability.
+                if self._circuit_state.get(endpoint) == self._HALF_OPEN:
+                    logger.info("Circuit breaker closed for %s — probe succeeded", endpoint)
+                    self._failure_timestamps.pop(endpoint, None)
+                    self._circuit_open_since.pop(endpoint, None)
 
-            self._circuit_state[endpoint] = self._CLOSED
+                self._circuit_state[endpoint] = self._CLOSED
 
             # Add request ID to response headers
             response.headers["X-Request-ID"] = request_id
@@ -219,36 +223,37 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
 
     def _record_failure(self, endpoint: str) -> None:
         """Record a failure timestamp and transition to OPEN if threshold met."""
-        now = time.time()
+        with self._lock:
+            now = time.time()
 
-        # Prune timestamps outside the rolling 60 s window
-        ts_list = self._failure_timestamps.setdefault(endpoint, [])
-        self._failure_timestamps[endpoint] = [t for t in ts_list if now - t < self._RESET_TIMEOUT]
+            # Prune timestamps outside the rolling 60 s window
+            ts_list = self._failure_timestamps.setdefault(endpoint, [])
+            self._failure_timestamps[endpoint] = [t for t in ts_list if now - t < self._RESET_TIMEOUT]
 
-        # Append this failure
-        self._failure_timestamps[endpoint].append(now)
+            # Append this failure
+            self._failure_timestamps[endpoint].append(now)
 
-        # Half-open → open on the first probe failure (one strike, not five)
-        if self._circuit_state.get(endpoint) == self._HALF_OPEN:
-            self._circuit_state[endpoint] = self._OPEN
-            self._circuit_open_since[endpoint] = now
-            logger.warning(
-                "Circuit breaker re-opened for %s — probe failed",
-                endpoint,
-            )
-            return
-
-        # Open the circuit if threshold reached within the rolling window
-        if len(self._failure_timestamps[endpoint]) >= self._FAILURE_THRESHOLD:
-            if self._circuit_state.get(endpoint) != self._OPEN:
+            # Half-open → open on the first probe failure (one strike, not five)
+            if self._circuit_state.get(endpoint) == self._HALF_OPEN:
                 self._circuit_state[endpoint] = self._OPEN
                 self._circuit_open_since[endpoint] = now
                 logger.warning(
-                    "Circuit breaker opened for %s: %d failures in rolling %.0fs window",
+                    "Circuit breaker re-opened for %s — probe failed",
                     endpoint,
-                    self._FAILURE_THRESHOLD,
-                    self._RESET_TIMEOUT,
                 )
+                return
+
+            # Open the circuit if threshold reached within the rolling window
+            if len(self._failure_timestamps[endpoint]) >= self._FAILURE_THRESHOLD:
+                if self._circuit_state.get(endpoint) != self._OPEN:
+                    self._circuit_state[endpoint] = self._OPEN
+                    self._circuit_open_since[endpoint] = now
+                    logger.warning(
+                        "Circuit breaker opened for %s: %d failures in rolling %.0fs window",
+                        endpoint,
+                        self._FAILURE_THRESHOLD,
+                        self._RESET_TIMEOUT,
+                    )
 
     def _categorize_error(self, status_code: int) -> str:
         """Categorize HTTP error"""
@@ -267,16 +272,17 @@ class ErrorRecoveryMiddleware(BaseHTTPMiddleware):
 
     def get_error_stats(self) -> dict:
         """Get error statistics"""
-        now = time.time()
-        pruned = {
-            ep: [t for t in ts if now - t < self._RESET_TIMEOUT]
-            for ep, ts in self._failure_timestamps.items()
-        }
-        return {
-            "circuit_states": dict(self._circuit_state),
-            "failure_counts": {k: len(v) for k, v in pruned.items()},
-            "failure_timestamps": {k: v for k, v in pruned.items()},
-        }
+        with self._lock:
+            now = time.time()
+            pruned = {
+                ep: [t for t in ts if now - t < self._RESET_TIMEOUT]
+                for ep, ts in self._failure_timestamps.items()
+            }
+            return {
+                "circuit_states": dict(self._circuit_state),
+                "failure_counts": {k: len(v) for k, v in pruned.items()},
+                "failure_timestamps": {k: v for k, v in pruned.items()},
+            }
 
 
 class RequestIDMiddleware(BaseHTTPMiddleware):
