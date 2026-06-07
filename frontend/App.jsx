@@ -243,6 +243,14 @@ function App() {
   }, [detectAndSetLiteMode]);
 
   useEffect(() => {
+    const handleLanguageChanged = (e) => {
+      setPreferredLang(e.detail);
+    };
+    window.addEventListener("languageChanged", handleLanguageChanged);
+    return () => window.removeEventListener("languageChanged", handleLanguageChanged);
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
 
     const hydrateOfflineState = async () => {

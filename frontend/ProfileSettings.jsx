@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import i18n from "./lib/i18n";
 import { auth, db, isFirebaseConfigured } from "./lib/firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
@@ -476,7 +477,13 @@ const ProfileSettings = ({ user, userData }) => {
             <label><FaGlobe /> Preferred Language</label>
             <div className="setup-input-wrapper">
               <FaGlobe className="setup-icon" />
-              <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+              <select value={language} onChange={(e) => {
+                const lang = e.target.value;
+                setLanguage(lang);
+                i18n.changeLanguage(lang);
+                localStorage.setItem("agri:preferredLanguage", lang);
+                window.dispatchEvent(new CustomEvent("languageChanged", { detail: lang }));
+              }}>
                 {LANGUAGE_OPTIONS.map((lang) => (
                   <option key={lang.value} value={lang.value}>{lang.label}</option>
                 ))}

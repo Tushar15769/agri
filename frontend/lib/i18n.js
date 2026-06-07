@@ -16,7 +16,11 @@ import orTranslations from '../locales/or/translation.json';
 import asTranslations from '../locales/as/translation.json';
 
 const getInitialLanguage = () => {
-  return 'en';
+  try {
+    return localStorage.getItem('agri:preferredLanguage') || 'en';
+  } catch {
+    return 'en';
+  }
 };
 
 i18n
