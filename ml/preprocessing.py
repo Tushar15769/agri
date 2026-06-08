@@ -88,7 +88,7 @@ class FeaturePreprocessor:
             "IrriType", "IrriSource", "Season",
         ]
 
-    def preprocess(self, input_data: dict) -> pd.DataFrame:
+    def preprocess(self, input_data: dict, feature_cols: List[str] = None) -> pd.DataFrame:
         """
         Convert a raw input dictionary to a validated, encoded DataFrame.
 
@@ -96,11 +96,15 @@ class FeaturePreprocessor:
         ----------
         input_data : dict
             Raw feature dictionary from the API request.
+        feature_cols : list of str, optional
+            Expected feature columns for this specific request.
+            If provided, takes precedence over ``self.feature_cols``
+            and avoids mutating shared instance state.
 
         Returns
         -------
         pd.DataFrame
-            A single-row DataFrame with columns matching ``self.feature_cols``.
+            A single-row DataFrame with columns matching the active feature schema.
 
         Raises
         ------
@@ -127,8 +131,9 @@ class FeaturePreprocessor:
         df = pd.get_dummies(df, columns=categorical_cols_present, drop_first=False)
 
         # --- Validate and align to expected feature schema ---
-        if self.feature_cols:
-            missing = [col for col in self.feature_cols if col not in df.columns]
+        cols = feature_cols if feature_cols is not None else self.feature_cols
+        if cols:
+            missing = [col for col in cols if col not in df.columns]
 
             if missing:
                 # Classify each missing column: unknown category vs truly absent.
@@ -145,7 +150,7 @@ class FeaturePreprocessor:
                         # The base categorical column was provided but its value
                         # produced no encoded column → unknown category.
                         expected_for_group = [
-                            c for c in self.feature_cols
+                            c for c in cols
                             if c.startswith(f"{base_col}_")
                         ]
                         # Check whether ANY column for this group was produced.
@@ -178,7 +183,7 @@ class FeaturePreprocessor:
 
                 # Fill any remaining baseline/dropped columns with 0.
                 still_missing = [
-                    col for col in self.feature_cols if col not in df.columns
+                    col for col in cols if col not in df.columns
                 ]
                 numeric_missing = [
                     col for col in still_missing
@@ -192,7 +197,7 @@ class FeaturePreprocessor:
                     df[col] = 0
 
             # Reorder columns to exactly match model expectations and drop extras.
-            df = df[self.feature_cols]
+            df = df[cols]
 
         return df
 
