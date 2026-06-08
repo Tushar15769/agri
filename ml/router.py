@@ -89,11 +89,10 @@ class ModelRouter:
                 "not registered. Check that init_ml_pipeline() completed successfully."
             )
 
-        # Bind the preprocessor to this model's expected feature schema.
-        # Each model adapter exposes the exact column list it was trained on.
-        if hasattr(model, "feature_names") and model.feature_names:
-            self.preprocessor.feature_cols = model.feature_names
-        else:
+        # Resolve this model's expected feature schema without mutating
+        # the shared preprocessor — prevents cross-request contamination.
+        model_cols = model.feature_names if hasattr(model, "feature_names") and model.feature_names else None
+        if model_cols is None:
             logger.warning(
                 "Model '%s' does not expose feature_names. "
                 "Preprocessing will not validate column alignment.",
@@ -102,7 +101,7 @@ class ModelRouter:
 
         # Raises UnknownCategoryError or MissingFeatureError on bad input —
         # never silently fills missing columns with 0.
-        processed_df = self.preprocessor.preprocess(input_data)
+        processed_df = self.preprocessor.preprocess(input_data, feature_cols=model_cols)
 
         logger.info(
             "[ML Router] Routing to model: %s (%s)", active_name, model.model_type
