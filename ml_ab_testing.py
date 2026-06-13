@@ -215,11 +215,26 @@ class ABTest:
 
 class ABTestManager:
     """Manages A/B tests for model comparison"""
-    
+
     def __init__(self):
         self.active_tests: Dict[str, ABTest] = {}
         self.completed_tests: List[ABTest] = []
-    
+        # Append-only audit log — each entry: {timestamp, action, test_id,
+        # actor, details, before_state, after_state}
+        self.audit_log: List[Dict] = []
+
+    def _audit(self, action: str, test_id: str, actor: str = "system",
+               details: str = "", before: Any = None, after: Any = None):
+        self.audit_log.append({
+            "timestamp": datetime.now().isoformat(),
+            "action": action,
+            "test_id": test_id,
+            "actor": actor,
+            "details": details,
+            "before_state": before,
+            "after_state": after,
+        })
+
     def create_test(
         self,
         test_name: str,
@@ -241,6 +256,8 @@ class ABTestManager:
         )
         
         self.active_tests[test.test_id] = test
+        self._audit("create_test", test.test_id, actor="system",
+                    details=f"test_name={test_name}, model={model_name}")
         logger.info(f"Created A/B test: {test_name} (ID: {test.test_id})")
         
         return test
@@ -249,30 +266,46 @@ class ABTestManager:
         """Get A/B test by ID"""
         return self.active_tests.get(test_id)
     
-    def start_test(self, test_id: str) -> bool:
+    def start_test(self, test_id: str, actor: str = "system") -> bool:
         """Start an A/B test"""
         test = self.get_test(test_id)
         if not test:
             return False
         
+        before = {"status": test.status.value}
         test.start()
+        self._audit("start_test", test_id, actor=actor,
+                    details="test started",
+                    before=before, after={"status": test.status.value})
         return True
     
-    def select_arm(self, test_id: str) -> Optional[Arm]:
+    def select_arm(self, test_id: str, actor: str = "system") -> Optional[Arm]:
         """Select arm for a request"""
         test = self.get_test(test_id)
         if not test or test.status != TestStatus.RUNNING:
             return None
         
-        return test.select_arm()
+        allocation_before = dict(test.current_allocation)
+        arm = test.select_arm()
+        self._audit("select_arm", test_id, actor=actor,
+                    details=f"selected arm={arm.name}" if arm else "no_arm_available",
+                    before={"allocation": allocation_before},
+                    after={"allocation": dict(test.current_allocation)})
+        return arm
     
-    def record_outcome(self, test_id: str, arm_id: str, success: bool, metrics: Dict) -> bool:
+    def record_outcome(self, test_id: str, arm_id: str, success: bool, metrics: Dict,
+                       actor: str = "system") -> bool:
         """Record outcome for arm"""
         test = self.get_test(test_id)
         if not test:
             return False
         
+        allocation_before = dict(test.current_allocation)
         test.record_arm_outcome(arm_id, success, metrics)
+        self._audit("record_outcome", test_id, actor=actor,
+                    details=f"arm={arm_id}, success={success}, metrics={metrics}",
+                    before={"allocation": allocation_before},
+                    after={"allocation": dict(test.current_allocation)})
         
         # Check if test is complete
         winner = test.get_winner()
@@ -280,6 +313,8 @@ class ABTestManager:
             test.end()
             self.active_tests.pop(test_id, None)
             self.completed_tests.append(test)
+            self._audit("test_completed", test_id, actor=actor,
+                        details=f"winner={winner.name}")
             logger.info(f"A/B test {test_id} completed. Winner: {winner.name}")
         
         return True

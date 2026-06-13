@@ -54,9 +54,22 @@ CACHE_TTL_SECONDS = 300
 _exp_cache: Dict[str, Dict] = {}
 _exp_cache_at: float = 0.0
 
+# Append-only assignment audit trail
+_assignment_audit: List[Dict] = []
+
 
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _log_assignment_audit(entry: Dict):
+    """Append to the immutable assignment audit trail."""
+    _assignment_audit.append(entry)
+
+
+def get_assignment_audit_log() -> List[Dict]:
+    """Return a copy of the assignment audit log (read-only snapshot)."""
+    return list(_assignment_audit)
 
 
 # ── Deterministic assignment ───────────────────────────────────────────────────
@@ -173,6 +186,13 @@ def create_experiment(data: Dict) -> Dict:
             _fs_client.collection(EXP_COLLECTION).document(exp_id).set(exp)
         except Exception as e:
             logger.error("Failed to persist experiment: %s", e)
+    _log_assignment_audit({
+        "timestamp": _now_iso(),
+        "action": "create_experiment",
+        "experiment_id": exp_id,
+        "variants": exp.get("variants"),
+        "status": exp.get("status"),
+    })
     return exp
 
 
@@ -215,14 +235,25 @@ def assign_user(user_id: str, experiment_id: str) -> Dict:
         except Exception as e:
             logger.warning("Could not persist assignment: %s", e)
 
+    _log_assignment_audit({
+        "timestamp": _now_iso(),
+        "action": "assign_user",
+        "user_id": user_id,
+        "experiment_id": experiment_id,
+        "variant": variant_id,
+        "status": exp.get("status") if exp else "unknown",
+        "salt": exp.get("salt") if exp else None,
+    })
+
     return assignment
 
 
-def update_experiment_status(exp_id: str, status: str) -> Optional[Dict]:
+def update_experiment_status(exp_id: str, status: str, actor: str = "system") -> Optional[Dict]:
     """Update experiment status: draft | running | paused | completed"""
     _ensure_exp_cache()
     if exp_id not in _exp_cache:
         return None
+    previous_status = _exp_cache[exp_id].get("status")
     _exp_cache[exp_id]["status"] = status
     _exp_cache[exp_id]["updated_at"] = _now_iso()
     if _FIRESTORE_AVAILABLE:
@@ -232,4 +263,12 @@ def update_experiment_status(exp_id: str, status: str) -> Optional[Dict]:
             )
         except Exception as e:
             logger.error("Failed to update experiment status: %s", e)
+    _log_assignment_audit({
+        "timestamp": _now_iso(),
+        "action": "update_experiment_status",
+        "experiment_id": exp_id,
+        "actor": actor,
+        "previous_status": previous_status,
+        "new_status": status,
+    })
     return _exp_cache[exp_id]
